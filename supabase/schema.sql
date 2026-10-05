@@ -236,7 +236,10 @@ begin
   insert into public.tickets (token, requester_name, facility, requester_email, device, urgency, question)
   values (p_token, v_name, v_facility, v_email, v_device, v_urgency, v_question);
 
-  if v_email is not null then
+  -- Anyone can type any email address here, so we never send one address more than 3 emails a day.
+  -- (The question is still saved; only the confirmation email is skipped.)
+  if v_email is not null
+     and (select count(*) from public.outbox where lower(to_email) = lower(v_email) and created_at > now() - interval '1 day') < 3 then
     select coalesce(value #>> '{}', '') into v_site from public.settings where key = 'site_url';
     insert into public.outbox (kind, to_email, subject, body_text)
     values (
@@ -309,12 +312,15 @@ begin
   insert into public.contact_requests (contact_name, facility, role, email, phone, learner_count, devices, preferred_times, message)
   values (v_name, v_facility, v_role, v_email, v_phone, v_learners, v_devices, v_times, v_message);
 
+  -- Same limit as tickets: never more than 3 emails a day to one address.
+  if (select count(*) from public.outbox where lower(to_email) = lower(v_email) and created_at > now() - interval '1 day') < 3 then
   insert into public.outbox (kind, to_email, subject, body_text)
   values (
     'contact_received', v_email, 'Thank you for reaching out to Byte-Sized Buddies',
     format(E'Hello %s,\n\nThank you for getting in touch. We got your request to visit %s and will write back within two days. Please don''t send passwords or personal details.\n\nByte-Sized Buddies\nLearn it. Try it. Keep it.',
            v_name, v_facility)
   );
+  end if;
 end;
 $$;
 revoke all on function public.submit_contact_request(text,text,text,text,text,text,text[],text,text,text) from public, anon, authenticated;

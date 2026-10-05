@@ -57,6 +57,7 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 | Private tokens | Made in the browser with `crypto.getRandomValues` (64 hex characters). The answer page is `noindex` |
 | Draft answers stay private | `get_ticket` returns the answer only after the ticket has been answered |
 | Spam | A hidden `website` field, and no more than 20 new tickets or requests per hour |
+| Email misuse | Anyone can type any email address into a form. The database queues at most 3 emails a day to one address, so the forms cannot be used to flood a stranger |
 
 ## Safe habits
 
