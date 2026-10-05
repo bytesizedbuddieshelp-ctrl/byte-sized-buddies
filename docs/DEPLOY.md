@@ -49,6 +49,8 @@ Anyone on the internet could otherwise create an account. We want exactly one ac
 3. Type your email and a **long, unique password**. Save the password in a password manager.
 4. If you see **Auto Confirm User**, tick it. Click **Create user**.
 
+> **About copying SQL:** only paste the SQL itself. If you ever see lines that start with three backticks (` ``` `), leave those lines out, because they only mark the code block in this guide. If the editor says `syntax error at or near "```"`, that is what happened. The SQL in Steps 4 to 6 is also saved as plain files in the `supabase/` folder, which have no such lines.
+
 ### Step 4: Build the database
 
 1. In the left menu click **SQL Editor**, then **New query**.
@@ -59,27 +61,18 @@ Anyone on the internet could otherwise create an account. We want exactly one ac
 
 ### Step 5: Tell the database that you are the owner
 
-1. In a new query, paste this. Change `YOUR-EMAIL-HERE` to the email from Step 3. Keep the quote marks.
-
-   ```sql
-   insert into public.owners (user_id)
-   select id from auth.users where email = 'YOUR-EMAIL-HERE'
-   on conflict do nothing;
-   ```
-
-2. Click **Run**. Then run `select * from public.owners;`. You should see **one row**. If you see none, the email did not match. Check the spelling.
+1. Open the file `supabase/step5-make-me-owner.sql` on your computer.
+2. Change `YOUR-EMAIL-HERE` to the email from Step 3. Keep the quote marks.
+3. Select everything, copy it, and paste it into a new query in the SQL Editor. Click **Run**.
+4. At the bottom you should see **one row**. If you see none, the email did not match. Check the spelling.
 
 ### Step 6: Save your site address
 
-The emails we send contain a link to your site, so the database needs to know the address. In a new query, change the address and run:
+The emails we send contain a link to your site, so the database needs to know the address.
 
-```sql
-update public.settings
-set value = '"https://YOUR-SITE-ADDRESS"'::jsonb
-where key = 'site_url';
-```
-
-Keep the quote marks inside the single quotes. Use your real address, such as the `workers.dev` address from Cloudflare, with no slash at the end.
+1. Open the file `supabase/step6-site-address.sql`.
+2. Change `https://YOUR-SITE-ADDRESS` to your real address, such as the `workers.dev` address from Cloudflare, with no slash at the end. Keep all the quote marks.
+3. Copy everything into a new query and click **Run**. The last line shows your address.
 
 ### Step 7: Find your project address and key
 
