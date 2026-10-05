@@ -114,11 +114,19 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
       drawing.current = null;
       if (stroke) setStrokes((list) => [...list, { ...stroke, at: Date.now() }]);
     };
+    // Dragging on the pad draws. It never selects, drags, or scrolls anything.
+    const block = (e: Event) => e.preventDefault();
     el.addEventListener('pointerdown', down);
     el.addEventListener('pointermove', move);
     el.addEventListener('pointerup', up);
     el.addEventListener('pointercancel', up);
+    el.addEventListener('dragstart', block);
+    el.addEventListener('wheel', block, { passive: false });
+    el.addEventListener('touchmove', block, { passive: false });
     return () => {
+      el.removeEventListener('dragstart', block);
+      el.removeEventListener('wheel', block);
+      el.removeEventListener('touchmove', block);
       el.removeEventListener('pointerdown', down);
       el.removeEventListener('pointermove', move);
       el.removeEventListener('pointerup', up);
@@ -152,7 +160,11 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     const win = await api.requestWindow({ width: 720, height: 560 });
     copyStyles(win.document);
     win.document.title = t.heading;
+    // The floating window must never scroll or select text, or the picture would slide while drawing.
+    win.document.documentElement.classList.add('draw-pip-root');
     win.document.body.classList.add('draw-pip');
+    win.document.addEventListener('selectstart', (e) => e.preventDefault());
+    win.document.addEventListener('dragstart', (e) => e.preventDefault());
     const root = win.document.createElement('div');
     win.document.body.appendChild(root);
     // When the floating window closes, bring the picture home first, then the pad.
@@ -207,8 +219,9 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
         </label>
       </div>
       <div class="draw-holder" ref={holder} />
+      {/* One fixed line, so the picture above never moves when this text changes. */}
       <p class="caption draw-keys">
-        {t.keys} <span role="status">{t.count(strokes.length)}</span>
+        <span class="draw-keys-text">{t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
       </p>
     </div>
   );
