@@ -175,6 +175,23 @@ No backend server of our own. No serverless functions of our own. All security i
 
 Environment variables (public, safe in the browser): `PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_ANON_KEY`, `PUBLIC_SITE_URL`. **Never** put the Supabase `service_role` key anywhere in this project, in any file, or in the browser.
 
+### 3.2 Approved Claude Code plugins
+The owner approved exactly these plugins from the official marketplace:
+frontend-design, security-guidance, context7, and playwright. Do not install
+any other plugin, MCP server, or marketplace without asking me first.
+- frontend-design: use it for layout, spacing, and component craft. The brand
+  folder overrides every style choice (palette, fonts, logo, radius, flat
+  shadows, no gradients). If the skill suggests anything that conflicts with
+  brand/README.md, follow the brand.
+- security-guidance: leave it on. Also create .claude/claude-security-guidance.md
+  describing the threat model from section 11.
+- context7: use it to check current Astro, Preact, Supabase, and Cloudflare
+  docs before using an API from memory.
+- playwright: after each page or component, open it at 320px, 768px, and
+  1280px wide, take screenshots, and check them against the brand rules
+  (colors, type sizes, spacing, 48px tap targets). Fix differences before
+  telling me it's done. Also use it for the accessibility checks.
+
 ---
 
 ## 4. Site map and page specs
