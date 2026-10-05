@@ -83,7 +83,9 @@ describe('validateKit', () => {
 
   it('needs a slide image to be in the images list and the files', () => {
     expect(validateKit(kit({ images: [] }), goodFiles()).errors.join()).toContain('"contacts.png", but it isn\'t in the kit\'s "images" list');
-    expect(validateKit(kit(), [pdf('w.pdf'), pdf('h.pdf')]).errors.join()).toContain('lists the image "contacts.png"');
+    const missing = validateKit(kit(), [pdf('w.pdf'), pdf('h.pdf')]).errors;
+    expect(missing.join()).toContain('lists the image "contacts.png"');
+    expect(missing.join()).not.toContain("isn't in the kit's");
   });
 
   it('turns slide problems into errors that name the slide', () => {

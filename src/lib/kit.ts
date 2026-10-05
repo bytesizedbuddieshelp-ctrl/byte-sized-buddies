@@ -203,8 +203,10 @@ export function validateKit(kit: unknown, droppedFiles: KitFileInfo[]): KitResul
   }
 
   if (slideResult.deck) {
+    // Compare with what the kit says, not with what was found, so one missing file is reported once.
+    const named = Array.isArray(listedImages) ? (listedImages as unknown[]) : [];
     for (const used of imageFilesIn(slideResult.deck)) {
-      if (!images.includes(used)) errors.push(`A slide uses the image "${used}", but it isn't in the kit's "images" list.`);
+      if (!named.includes(used)) errors.push(`A slide uses the image "${used}", but it isn't in the kit's "images" list.`);
     }
     for (const listed of images) {
       if (!imageFilesIn(slideResult.deck).includes(listed)) warnings.push(`The image "${listed}" is in the kit, but no slide uses it.`);

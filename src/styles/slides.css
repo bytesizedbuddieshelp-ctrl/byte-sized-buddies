@@ -373,8 +373,12 @@
     background: var(--paper);
   }
 
+  /* Shrink with zoom, not transform. A transform leaves the layout at 1920 x 1080, and the print engine would cut
+     the slide off at the page height. Zoom makes the slide really 1280 x 720, exactly one landscape page. */
   .print-page .slide-scale {
-    transform: scale(0.666667);
+    position: static;
+    transform: none;
+    zoom: 0.666667;
   }
 
   .print-page .slide,

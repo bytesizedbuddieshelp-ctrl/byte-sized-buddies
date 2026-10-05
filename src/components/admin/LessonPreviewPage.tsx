@@ -7,7 +7,7 @@ import { adminCopy as a } from '../../content/adminCopy';
 
 export default function LessonPreviewPage() {
   return (
-    <AdminShell current="lessons" title="Lesson preview">
+    <AdminShell current="lessons" title={a.lessonEdit.titlePreview}>
       {(supabase) => <Preview supabase={supabase} />}
     </AdminShell>
   );

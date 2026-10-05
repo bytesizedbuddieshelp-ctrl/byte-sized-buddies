@@ -13,7 +13,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
   // Inside the admin shell the page already has an h1, so the lesson title becomes an h2.
   const Title = embedded ? 'h2' : 'h1';
   const downloads = downloadsFor(lesson.files);
-  const guideHtml = useMemo(() => (lesson.teacher_guide_md ? renderMarkdown(lesson.teacher_guide_md, { allowImages: true }) : ''), [lesson.teacher_guide_md]);
+  const guideHtml = useMemo(() => (lesson.teacher_guide_md ? renderMarkdown(lesson.teacher_guide_md, { allowImages: true, demoteHeadings: true }) : ''), [lesson.teacher_guide_md]);
   const imageUrl = (file: string) => imageUrlFor(lesson, file);
   const slides = lesson.slides?.slides ?? [];
   const videos = lesson.video_ids ?? [];
@@ -66,7 +66,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
                 </a>
               ))}
               {slides.length > 0 && (
-                <button type="button" class="button button-secondary" onClick={printSlides}>
+                <button type="button" class="button button-secondary" onClick={() => void printSlides()}>
                   <Icon name="download" size={24} /> {copy.viewer.print}
                 </button>
               )}

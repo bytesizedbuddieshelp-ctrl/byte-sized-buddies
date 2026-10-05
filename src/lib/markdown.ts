@@ -9,7 +9,7 @@ let hooked = false;
 // Pictures are allowed only when they come from our own lesson-files storage, never from other websites.
 const ownImages = () => `${supabaseUrl}/storage/v1/object/public/lesson-files/`;
 
-export function renderMarkdown(markdown: string, options: { allowImages?: boolean } = {}): string {
+export function renderMarkdown(markdown: string, options: { allowImages?: boolean; demoteHeadings?: boolean } = {}): string {
   if (!hooked) {
     // Links open safely and never pass on where the reader came from.
     DOMPurify.addHook('afterSanitizeAttributes', (node) => {
@@ -31,8 +31,10 @@ export function renderMarkdown(markdown: string, options: { allowImages?: boolea
   // No forms or other embedded things either: nothing in an answer should be able to ask for a password
   // or load another page. Videos are added separately by youtube.ts.
   const blocked = ['style', 'form', 'input', 'button', 'select', 'textarea', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'svg', 'math'];
-  return DOMPurify.sanitize(html, {
+  const clean = DOMPurify.sanitize(html, {
     FORBID_TAGS: options.allowImages ? [...blocked, 'picture', 'source'] : [...blocked, 'img', 'picture', 'source'],
     FORBID_ATTR: ['style', 'srcset', 'sizes'],
   });
+  // Text inside a page should not start a new top-level heading: h1 becomes h2, h2 becomes h3, and so on.
+  return options.demoteHeadings ? clean.replace(/<(\/?)h([1-5])(?=[\s>])/g, (_, slash, n) => `<${slash}h${Number(n) + 1}`) : clean;
 }

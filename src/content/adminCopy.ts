@@ -162,6 +162,7 @@ export const adminCopy = {
   lessonEdit: {
     titleNew: 'New lesson',
     titleEdit: 'Edit lesson',
+    titlePreview: 'Lesson preview',
     back: 'Back to lessons',
     loading: 'Loading the lesson.',
     notFound: "We can't find that lesson.",

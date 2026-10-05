@@ -186,7 +186,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
   }, []);
 
   const deck = useMemo(() => parseDeckText(form.deckText), [form.deckText]);
-  const guideHtml = useMemo(() => renderMarkdown(form.guide, { allowImages: true }), [form.guide]);
+  const guideHtml = useMemo(() => renderMarkdown(form.guide, { allowImages: true, demoteHeadings: true }), [form.guide]);
   const scriptHtml = useMemo(() => renderMarkdown(form.script), [form.script]);
   const previewUrls = useMemo(() => Object.fromEntries(newImages.map((file) => [file.name, URL.createObjectURL(file)])), [newImages]);
 

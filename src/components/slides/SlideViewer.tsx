@@ -191,13 +191,21 @@ export function PrintSlides({ slides, lessonName, imageUrl }: Omit<ViewerProps, 
   );
 }
 
-/** Opens the print window with only the slides showing, then puts the page back. */
-export function printSlides() {
+/**
+ * Opens the print window with only the slides showing, then puts the page back.
+ * It waits until every picture is ready first, or a picture could be missing from the PDF.
+ */
+export async function printSlides() {
   const done = () => {
     document.body.classList.remove('print-slides-only');
     window.removeEventListener('afterprint', done);
   };
   document.body.classList.add('print-slides-only');
   window.addEventListener('afterprint', done);
+  const pictures = Array.from(document.querySelectorAll<HTMLImageElement>('.print-slides img'));
+  const ready = Promise.all(pictures.map((picture) => picture.decode().catch(() => undefined)));
+  const giveUp = new Promise((resolve) => window.setTimeout(resolve, 4000)); // a slow connection should not block printing forever
+  await Promise.race([ready, giveUp]);
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   window.print();
 }
