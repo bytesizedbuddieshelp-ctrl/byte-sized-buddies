@@ -188,6 +188,7 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
   }
 
   const left = state ? clockNow(state.clock, seenAt, now) : null;
+  const tryLeft = state?.tryTimer ? Math.max(0, clockNow(state.tryTimer, seenAt, now)) : null;
   const mood = left === null ? 'fine' : clockMood(left);
 
   return (
@@ -221,6 +222,11 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
               {mood === 'over' && ` (${a.present.clockOver})`}
             </p>
           )}
+          {state.tryTimer && tryLeft !== null && (
+            <p class="remote-clock">
+              <span class="label">{t.practiceLeft}:</span> {formatClock(tryLeft)}
+            </p>
+          )}
           <h3>{t.notes}</h3>
           <p class="remote-notes">{state.notes || t.noNotes}</p>
           <p class="caption">{state.next ? `${t.upNext}: ${state.next}` : a.present.endOfLesson}</p>
@@ -228,6 +234,16 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
       )}
 
       <div class="remote-bar">
+        {state?.tryTimer && (
+          <button
+            type="button"
+            class="button button-primary remote-practice"
+            disabled={!live || (tryLeft ?? 0) <= 0}
+            onClick={() => press(state.tryTimer?.running ? EVENTS.tryPause : EVENTS.tryStart)}
+          >
+            {state.tryTimer.running ? t.practicePause : t.practiceStart(state.tryTimer.minutes)}
+          </button>
+        )}
         <div class="remote-small">
           <button type="button" class="button button-secondary" disabled={!live} onClick={() => press(EVENTS.blank)}>
             {state?.blank ? t.unblank : t.blank}

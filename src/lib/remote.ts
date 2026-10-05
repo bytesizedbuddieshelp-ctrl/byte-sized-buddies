@@ -32,6 +32,7 @@ export type Command =
   | { t: 'prev' }
   | { t: 'blank' }
   | { t: 'timer'; run: boolean }
+  | { t: 'trytimer'; run: boolean }
   | { t: 'goto'; n: number };
 
 export const EVENTS = {
@@ -40,6 +41,8 @@ export const EVENTS = {
   blank: 'blank',
   timerStart: 'timer:start',
   timerPause: 'timer:pause',
+  tryStart: 'trytimer:start',
+  tryPause: 'trytimer:pause',
   goto: 'goto',
   hello: 'hello',
   state: 'state',
@@ -59,6 +62,10 @@ export function parseCommand(event: string, payload: unknown, slideCount: number
       return { t: 'timer', run: true };
     case EVENTS.timerPause:
       return { t: 'timer', run: false };
+    case EVENTS.tryStart:
+      return { t: 'trytimer', run: true };
+    case EVENTS.tryPause:
+      return { t: 'trytimer', run: false };
     case EVENTS.goto: {
       const n = typeof payload === 'object' && payload !== null ? (payload as { n?: unknown }).n : undefined;
       return typeof n === 'number' && Number.isInteger(n) && n >= 0 && n < slideCount ? { t: 'goto', n } : null;
@@ -74,6 +81,13 @@ export interface Clock {
   running: boolean;
 }
 
+/** The practice timer on a "Try it" slide. */
+export interface TryTimer {
+  minutes: number;
+  remaining: number;
+  running: boolean;
+}
+
 /** What the presenter tells the phone. */
 export interface RemoteState {
   index: number;
@@ -83,6 +97,8 @@ export interface RemoteState {
   notes: string;
   blank: boolean;
   clock: Clock;
+  /** Only when the current slide has a practice timer. */
+  tryTimer: TryTimer | null;
 }
 
 const whole = (value: unknown): value is number => typeof value === 'number' && Number.isInteger(value);
@@ -94,6 +110,9 @@ export function parseState(payload: unknown): RemoteState | null {
   const clock = p.clock as Record<string, unknown> | undefined;
   if (!whole(p.index) || !whole(p.total) || p.total < 1 || p.index < 0 || p.index >= p.total || typeof p.blank !== 'boolean') return null;
   if (!clock || !whole(clock.total) || !whole(clock.remaining) || typeof clock.running !== 'boolean') return null;
+  const tt = p.tryTimer as Record<string, unknown> | null | undefined;
+  const tryTimer: TryTimer | null =
+    tt && whole(tt.minutes) && whole(tt.remaining) && typeof tt.running === 'boolean' ? { minutes: tt.minutes, remaining: tt.remaining, running: tt.running } : null;
   return {
     index: p.index,
     total: p.total,
@@ -102,6 +121,7 @@ export function parseState(payload: unknown): RemoteState | null {
     notes: clip(p.notes, 2000),
     blank: p.blank,
     clock: { total: clock.total, remaining: clock.remaining, running: clock.running },
+    tryTimer,
   };
 }
 

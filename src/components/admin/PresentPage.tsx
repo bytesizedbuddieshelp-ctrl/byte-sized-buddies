@@ -145,8 +145,8 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
   const imageUrl = (file: string) => images[file] ?? '';
 
   // The newest values, for messages that arrive later (a phone press, a key in the audience window).
-  const live = useRef({ index, blank, remaining, running, tryText });
-  live.current = { index, blank, remaining, running, tryText };
+  const live = useRef({ index, blank, remaining, running, tryText, tryRemaining, tryRunning, tryMinutes });
+  live.current = { index, blank, remaining, running, tryText, tryRemaining, tryRunning, tryMinutes };
   const bc = useRef<BroadcastChannel | null>(null);
   const remote = useRef<RemoteLink | null>(null);
   const audienceWindow = useRef<Window | null>(null);
@@ -161,6 +161,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
       case 'goto': setIndex(Math.min(Math.max(command.n, 0), total - 1)); setBlank(false); break;
       case 'blank': setBlank((b) => !b); break;
       case 'timer': setRunning(command.run); break;
+      case 'trytimer': setTryRunning(command.run); break;
     }
   }
 
@@ -175,6 +176,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
       notes: current.notes ?? '',
       blank: now.blank,
       clock: { total: clockTotal, remaining: now.remaining, running: now.running },
+      tryTimer: now.tryMinutes && now.tryRemaining !== null ? { minutes: now.tryMinutes, remaining: now.tryRemaining, running: now.tryRunning } : null,
     };
   }
   const sendStateToPhone = () => remote.current?.send(EVENTS.state, stateForPhone() as unknown as Record<string, unknown>);
@@ -225,7 +227,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
   }, [index, blank, tryText]);
   useEffect(() => {
     sendStateToPhone();
-  }, [index, blank, running, link]);
+  }, [index, blank, running, link, tryRunning, tryMinutes]);
 
   // ---- Clocks
   useEffect(() => {

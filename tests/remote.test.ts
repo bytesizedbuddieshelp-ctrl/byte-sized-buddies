@@ -41,6 +41,8 @@ describe('parseCommand', () => {
     expect(parseCommand('blank', null, 5)).toEqual({ t: 'blank' });
     expect(parseCommand('timer:start', {}, 5)).toEqual({ t: 'timer', run: true });
     expect(parseCommand('timer:pause', {}, 5)).toEqual({ t: 'timer', run: false });
+    expect(parseCommand('trytimer:start', {}, 5)).toEqual({ t: 'trytimer', run: true });
+    expect(parseCommand('trytimer:pause', {}, 5)).toEqual({ t: 'trytimer', run: false });
     expect(parseCommand('goto', { n: 2 }, 5)).toEqual({ t: 'goto', n: 2 });
   });
   it('ignores anything strange', () => {
@@ -51,8 +53,14 @@ describe('parseCommand', () => {
 });
 
 describe('parseState', () => {
-  const good = { index: 1, total: 5, title: 'Tap Contacts', next: 'Try it', notes: 'Go slowly.', blank: false, clock: { total: 2700, remaining: 2650, running: true } };
+  const good = { index: 1, total: 5, title: 'Tap Contacts', next: 'Try it', notes: 'Go slowly.', blank: false, clock: { total: 2700, remaining: 2650, running: true }, tryTimer: null };
   it('accepts a good state', () => expect(parseState(good)).toEqual(good));
+  it('reads a practice timer, and ignores a broken one', () => {
+    const tryTimer = { minutes: 5, remaining: 290, running: true };
+    expect(parseState({ ...good, tryTimer })!.tryTimer).toEqual(tryTimer);
+    expect(parseState({ ...good, tryTimer: { minutes: '5' } })!.tryTimer).toBeNull();
+    expect(parseState({ ...good, tryTimer: undefined })!.tryTimer).toBeNull();
+  });
   it('cuts long text', () => {
     const state = parseState({ ...good, title: 'x'.repeat(500), notes: 'y'.repeat(5000) })!;
     expect(state.title).toHaveLength(120);
