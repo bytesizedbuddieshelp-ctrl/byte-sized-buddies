@@ -7,6 +7,8 @@ interface Counts {
   newTickets: number;
   inProgress: number;
   newRequests: number;
+  unreadEmails: number;
+  failedEmails: number;
 }
 
 export default function DashboardPage() {
@@ -24,16 +26,20 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
   useEffect(() => {
     (async () => {
       const head = { count: 'exact' as const, head: true };
-      const [newTickets, inProgress, newRequests] = await Promise.all([
+      const [newTickets, inProgress, newRequests, unreadEmails, failedEmails] = await Promise.all([
         supabase.from('tickets').select('id', head).eq('status', 'new'),
         supabase.from('tickets').select('id', head).eq('status', 'in_progress'),
         supabase.from('contact_requests').select('id', head).eq('status', 'new'),
+        supabase.from('inbox_messages').select('id', head).eq('is_read', false),
+        supabase.from('outbox').select('id', head).eq('status', 'error'),
       ]);
-      if (newTickets.error || inProgress.error || newRequests.error) return setFailed(true);
+      if (newTickets.error || inProgress.error || newRequests.error || unreadEmails.error || failedEmails.error) return setFailed(true);
       setCounts({
         newTickets: newTickets.count ?? 0,
         inProgress: inProgress.count ?? 0,
         newRequests: newRequests.count ?? 0,
+        unreadEmails: unreadEmails.count ?? 0,
+        failedEmails: failedEmails.count ?? 0,
       });
     })().catch(() => setFailed(true));
   }, []);
@@ -41,7 +47,7 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
   if (failed) return <p class="admin-message is-error" role="alert">{a.dashboard.error}</p>;
   if (!counts) return <p role="status">{a.dashboard.loading}</p>;
 
-  const waiting = counts.newTickets > 0 || counts.newRequests > 0;
+  const waiting = counts.newTickets > 0 || counts.newRequests > 0 || counts.unreadEmails > 0 || counts.failedEmails > 0;
   return (
     <div>
       <div class="counter-grid">
@@ -54,6 +60,7 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
         </section>
         <section class="admin-box" aria-label={a.nav.inbox}>
           <p class="counter">{a.dashboard.newRequests(counts.newRequests)}</p>
+          <p>{a.dashboard.unreadEmails(counts.unreadEmails)}</p>
           <a class="button button-secondary" href="/admin/inbox">
             {a.dashboard.open} {a.nav.inbox.toLowerCase()}
           </a>
@@ -70,7 +77,17 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
             )}
             {counts.newRequests > 0 && (
               <li>
-                <a href="/admin/inbox">{a.dashboard.nextRequests}</a>
+                <a href="/admin/inbox#requests">{a.dashboard.nextRequests}</a>
+              </li>
+            )}
+            {counts.unreadEmails > 0 && (
+              <li>
+                <a href="/admin/inbox#emails">{a.dashboard.nextEmails}</a>
+              </li>
+            )}
+            {counts.failedEmails > 0 && (
+              <li>
+                <a href="/admin/inbox#emails">{a.dashboard.nextFailed(counts.failedEmails)}</a>
               </li>
             )}
           </ul>

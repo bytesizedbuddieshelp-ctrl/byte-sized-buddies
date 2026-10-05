@@ -694,3 +694,60 @@
   width: 100%;
   margin-bottom: var(--space-3);
 }
+
+/* Contact exchange: emails and replies */
+.status-pill.is-error {
+  background: var(--paper);
+  border: 2px solid var(--brick);
+  color: var(--brick);
+}
+
+.status-pill.is-unread {
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+.admin-row.is-unread {
+  border-left: 8px solid var(--sunshine);
+}
+
+.email-body {
+  margin: 0 0 var(--space-5);
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.reply-history {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.reply-history li {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--rule);
+}
+
+.reply-history .meta {
+  margin: 0 0 var(--space-2);
+  font-size: 18px;
+  line-height: 26px;
+  color: var(--ink-muted);
+}
+
+.reply-reason {
+  margin: 0 0 var(--space-2);
+  color: var(--brick);
+  font-weight: 700;
+}
+
+.reply-body {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

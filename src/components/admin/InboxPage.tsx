@@ -3,8 +3,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { AdminShell } from './AdminShell';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Notices } from './Notices';
+import { InboxEmails } from './InboxEmails';
+import { ReplyComposer } from './ReplyComposer';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
+import { replySubject } from '../../lib/validators';
 
 type Status = 'new' | 'replied' | 'scheduled' | 'closed';
 const statuses: Status[] = ['new', 'replied', 'scheduled', 'closed'];
@@ -27,16 +30,62 @@ interface Request {
 
 const t = a.inbox;
 
-// "Contact exchange". Phase 2 shows requests from senior homes. Gmail messages join them in Phase 5.
+type View = 'emails' | 'requests';
+
+// "Contact exchange": emails from the owner's Gmail (through the bridge) and requests from senior homes.
 export default function InboxPage() {
   return (
     <AdminShell current="inbox" title={t.title}>
-      {(supabase) => <Requests supabase={supabase} />}
+      {(supabase) => <Exchange supabase={supabase} />}
     </AdminShell>
   );
 }
 
-function Requests({ supabase }: { supabase: SupabaseClient }) {
+function Exchange({ supabase }: { supabase: SupabaseClient }) {
+  const [view, setView] = useState<View>(() => (location.hash === '#requests' ? 'requests' : 'emails'));
+  const [unread, setUnread] = useState(0);
+  const [newRequests, setNewRequests] = useState(0);
+
+  async function loadCounts() {
+    const head = { count: 'exact' as const, head: true };
+    const [emails, requests] = await Promise.all([
+      supabase.from('inbox_messages').select('id', head).eq('is_read', false),
+      supabase.from('contact_requests').select('id', head).eq('status', 'new'),
+    ]);
+    setUnread(emails.count ?? 0);
+    setNewRequests(requests.count ?? 0);
+  }
+
+  useEffect(() => {
+    loadCounts().catch(() => {});
+  }, [view]);
+
+  function choose(next: View) {
+    setView(next);
+    history.replaceState(null, '', next === 'requests' ? '#requests' : '#emails');
+  }
+
+  return (
+    <div>
+      <fieldset class="chips">
+        <legend>{t.viewLabel}</legend>
+        <button type="button" class="chip" aria-pressed={view === 'emails'} onClick={() => choose('emails')}>
+          {t.viewEmails(unread)}
+        </button>
+        <button type="button" class="chip" aria-pressed={view === 'requests'} onClick={() => choose('requests')}>
+          {t.viewRequests(newRequests)}
+        </button>
+      </fieldset>
+      {view === 'emails' ? (
+        <InboxEmails supabase={supabase} onChange={() => loadCounts().catch(() => {})} />
+      ) : (
+        <Requests supabase={supabase} onChange={() => loadCounts().catch(() => {})} />
+      )}
+    </div>
+  );
+}
+
+function Requests({ supabase, onChange }: { supabase: SupabaseClient; onChange: () => void }) {
   const [filter, setFilter] = useState<Status>('new');
   const [rows, setRows] = useState<Request[] | null>(null);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -71,6 +120,7 @@ function Requests({ supabase }: { supabase: SupabaseClient }) {
           setOpenId(null);
           setNote(msg ?? '');
           load().catch(() => setFailed(true));
+          onChange();
         }}
       />
     );
@@ -78,7 +128,6 @@ function Requests({ supabase }: { supabase: SupabaseClient }) {
 
   return (
     <div>
-      <p class="caption">{t.gmailNote}</p>
       <Notices ok={note} problem="" />
       <h2>{t.requestsHeading}</h2>
       <fieldset class="chips">
@@ -163,7 +212,13 @@ function RequestDetail({
     onBack(t.deleted);
   }
 
-  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(current.email)}&su=${encodeURIComponent(t.replySubject)}`;
+  const subject = replySubject(t.replySubject, t.replyFallbackSubject);
+  const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(current.email)}&su=${encodeURIComponent(subject)}`;
+
+  // The first reply to a new request marks it Replied.
+  async function afterReply(): Promise<string | void> {
+    if (current.status === 'new' && (await update({ status: 'replied' }))) return a.inbox.reply.queuedReplied;
+  }
   const devices = current.devices.length ? current.devices.map((d) => a.words.device[d] ?? d).join(', ') : a.words.none;
 
   return (
@@ -199,13 +254,10 @@ function RequestDetail({
         </dd>
       </dl>
 
-      <section class="admin-box" aria-labelledby="reply-title">
-        <h2 id="reply-title">{a.nav.inbox}</h2>
-        <a class="button button-primary" href={gmail} target="_blank" rel="noopener noreferrer">
-          {t.replyGmail}
-        </a>
-        <p class="caption">{t.replyNote}</p>
-      </section>
+      <ReplyComposer supabase={supabase} toEmail={current.email} subject={subject} threadId={null} onQueued={afterReply} />
+      <p>
+        <a href={gmail} target="_blank" rel="noopener noreferrer">{t.replyGmail}</a> <span class="caption">{t.replyNote}</span>
+      </p>
 
       <fieldset class="chips">
         <legend>{t.statusHeading}</legend>
