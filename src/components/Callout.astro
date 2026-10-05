@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import type { IconName } from './Icon.astro';
+import type { IconName } from '../lib/icons';
 
 // "Remember" (forest tint), "Try it" (sunshine soft), or "Careful" (brick, with icon and words).
 interface Props {
@@ -56,6 +56,10 @@ const { kind = 'remember', title, class: className } = Astro.props;
     font-size: 22px;
     line-height: 30px;
     font-weight: 700;
+  }
+
+  .callout-title svg {
+    flex: none;
   }
 
   .callout-remember .callout-title {

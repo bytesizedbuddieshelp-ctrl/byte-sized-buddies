@@ -1,4 +1,5 @@
 @import '../../brand/tokens.css';
+@import './forms.css';
 
 /* Base ----------------------------------------------------------------- */
 *,
@@ -133,8 +134,105 @@ a:hover {
   max-width: 44rem;
 }
 
+/* Sections sit 72px apart (--space-7). */
 .section {
-  padding-block: var(--space-7);
+  padding-top: var(--space-7);
+}
+
+main {
+  padding-bottom: var(--space-7);
+}
+
+.panel {
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--forest-tint);
+}
+
+@media (min-width: 700px) {
+  .panel {
+    padding: var(--space-6);
+  }
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+}
+
+.clean-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--sunshine);
+  color: var(--ink);
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.check-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+}
+
+.check-list li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin-bottom: var(--space-2);
+}
+
+.check-list svg {
+  flex: none;
+  margin-top: 1px;
+  color: var(--forest);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+
+[id] {
+  scroll-margin-top: var(--space-4);
+}
+
+/* Text from markdown files (src/content/*.md) */
+.prose h2 {
+  margin-top: var(--space-6);
+}
+
+.prose h3 {
+  margin-top: var(--space-5);
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 var(--space-3);
+  padding-left: var(--space-5);
+}
+
+.prose li {
+  margin-bottom: var(--space-2);
+}
+
+.prose li::marker {
+  color: var(--forest);
+  font-weight: 700;
 }
 
 .stack > * + * {
