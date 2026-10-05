@@ -5,8 +5,10 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "node scripts/check-copy.mjs && astro build",
-    "check:copy": "node scripts/check-copy.mjs"
+    "check": "node scripts/check-copy.mjs && vitest run && astro build",
+    "check:copy": "node scripts/check-copy.mjs",
+    "test": "vitest run",
+    "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs"
   },
   "repository": {
     "type": "git",
@@ -15,12 +17,16 @@
   "type": "module",
   "dependencies": {
     "@astrojs/preact": "6.0.5",
+    "@supabase/supabase-js": "2.117.2",
     "astro": "7.3.5",
+    "dompurify": "3.4.16",
+    "marked": "18.0.14",
     "preact": "10.29.8",
     "typescript": "7.0.2"
   },
   "private": "true",
   "devDependencies": {
-    "axe-core": "4.13.0"
+    "axe-core": "4.13.0",
+    "vitest": "5.0.3"
   }
 }
