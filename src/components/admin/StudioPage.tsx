@@ -4,6 +4,8 @@ import { AdminShell } from './AdminShell';
 import { ConfirmDialog } from './ConfirmDialog';
 import { Notices } from './Notices';
 import { Teleprompter } from './studio/Teleprompter';
+import { BackgroundControls } from './studio/BackgroundControls';
+import { CameraKeyer } from '../../lib/cameraKeyer';
 import { PublishVideo, type StudioLesson } from './studio/PublishVideo';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
@@ -125,7 +127,10 @@ function Studio({ supabase }: { supabase: SupabaseClient }) {
 }
 
 function Recorder({ name, canShare, standards }: { name: string; canShare: boolean; standards: Record<'opener' | 'closer', string | null> }) {
+  // camera is the processed camera (with the wall replaced when that is on). rig holds the raw camera behind it.
   const [camera, setCamera] = useState<MediaStream | null>(null);
+  const [keyer, setKeyer] = useState<CameraKeyer | null>(null);
+  const rig = useRef<{ raw: MediaStream; keyer: CameraKeyer } | null>(null);
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [mics, setMics] = useState<MediaDeviceInfo[]>([]);
   const [cameraId, setCameraId] = useState('');
@@ -169,7 +174,13 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
     };
   }, []);
 
-  useEffect(() => () => stopStream(camera), [camera]);
+  function closeRig() {
+    rig.current?.keyer.stop();
+    stopStream(rig.current?.raw);
+    rig.current = null;
+  }
+
+  useEffect(() => () => closeRig(), []);
 
   // The clock while recording. It follows the real time, so it stays right even if the tab is in the background.
   useEffect(() => {
@@ -191,25 +202,30 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
 
   async function turnOn(nextCamera = cameraId, nextMic = micId) {
     say('');
-    stopStream(camera);
+    closeRig();
     try {
-      const stream = await openCamera(nextCamera, nextMic);
-      setCamera(stream);
+      const raw = await openCamera(nextCamera, nextMic);
+      const processed = new CameraKeyer(raw);
+      rig.current = { raw, keyer: processed };
+      setKeyer(processed);
+      setCamera(processed.stream);
       const found = await listDevices();
       setCameras(found.cameras);
       setMics(found.mics);
-      setCameraId(stream.getVideoTracks()[0]?.getSettings().deviceId ?? nextCamera);
-      setMicId(stream.getAudioTracks()[0]?.getSettings().deviceId ?? nextMic);
+      setCameraId(raw.getVideoTracks()[0]?.getSettings().deviceId ?? nextCamera);
+      setMicId(raw.getAudioTracks()[0]?.getSettings().deviceId ?? nextMic);
     } catch (error) {
       setCamera(null);
+      setKeyer(null);
       const kind = mediaProblem(error);
       say(kind === 'denied' ? t.denied : kind === 'missing' ? t.noDevice : t.deviceBusy, true);
     }
   }
 
   function turnOff() {
-    stopStream(camera);
+    closeRig();
     setCamera(null);
+    setKeyer(null);
     setLevel(0);
   }
 
@@ -355,6 +371,7 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
             <div class="meter-bar" aria-hidden="true">
               <div style={{ width: `${Math.round(level * 100)}%` }} />
             </div>
+            {keyer && <BackgroundControls keyer={keyer} preview={preview} disabled={busy} />}
             <details class="studio-settings">
               <summary>{t.deviceSettings}</summary>
               <div class="field">

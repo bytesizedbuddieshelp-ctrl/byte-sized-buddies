@@ -952,3 +952,26 @@
 .prompt-text a {
   color: inherit;
 }
+
+/* Studio: picking the wall color by clicking the preview */
+.studio-preview.is-picking {
+  cursor: crosshair;
+  outline: 4px solid var(--sunshine);
+  outline-offset: 2px;
+}
+
+.studio-wall {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+}
+
+.studio-swatch {
+  display: inline-block;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+}
