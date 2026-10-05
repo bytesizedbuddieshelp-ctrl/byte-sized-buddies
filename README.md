@@ -21,7 +21,7 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `scripts/check-copy.mjs` | Looks for banned words (see "Voice" in `CLAUDE.md`). |
 | `scripts/check-rls.mjs` | Tests the database locks as a stranger (`npm run check:rls`). |
 | `supabase/` | The database: `schema.sql` builds it, `seed.sql` adds starter data. |
-| `docs/` | `DEPLOY.md` (setup steps) and `SECURITY.md` (the rules and how to test them). |
+| `docs/` | `DEPLOY.md` (setup steps), `SECURITY.md` (the rules and how to test them), `KIT-FORMAT.md` (the lesson kit format), and `sample-kit/` (a kit to try). |
 | `tests/` | Small automatic tests for the helper code. |
 | `wrangler.jsonc` | Tells Cloudflare to publish the finished site from the `dist` folder. |
 
@@ -64,12 +64,17 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/` | Landing page |
 | `/for-senior-homes` | How a visit works, and the "Request a visit" form |
 | `/ask` | The "Ask a question" form |
-| `/lessons` | Lesson library (a "first lessons are on the way" card until Phase 3) |
+| `/lessons` | The free lesson library, with filters and search |
+| `/lesson?slug=...` | One lesson: downloads, a slide preview, videos, and the teacher guide |
 | `/teach` | "Teach it yourself" (words live in `src/content/teach-it-yourself.md`) |
 | `/about` | About (write your story in `src/content/about.md`) |
 | `/privacy`, `/license` | Plain-language privacy and license pages |
 | `/answer?t=...` | The private page where someone reads the answer to their question |
-| `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, and `/admin/inbox` |
+| `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox`, and `/admin/lessons` |
+
+## Lessons
+
+Make a lesson kit in a Claude chat (see `docs/KIT-FORMAT.md`), then import it in **Admin, Lessons, Import a kit**. It saves as a **draft**. Check it with **Preview**, then press **Publish**. To try it first, import the sample kit in `docs/sample-kit/`.
 
 ## The database
 

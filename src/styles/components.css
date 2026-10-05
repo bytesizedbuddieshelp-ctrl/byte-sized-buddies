@@ -96,3 +96,39 @@
 .logo-tile img {
   display: block;
 }
+
+/* Filter chips: words, not color alone. The chosen one is filled and says "selected" to screen readers. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.chips legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.chip {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 3px solid var(--forest);
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+  color: var(--forest);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--forest);
+  color: var(--paper);
+}

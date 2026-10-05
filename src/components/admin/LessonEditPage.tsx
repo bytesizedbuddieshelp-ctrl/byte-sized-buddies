@@ -382,7 +382,8 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
           value={form.slug}
           onInput={(value) => {
             setSlugTouched(true);
-            set('slug', value.toLowerCase());
+            // Spaces become dashes and odd characters drop out as you type, so the address is always valid.
+            set('slug', value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
           }}
         />
         <Text id="week" label={t.fields.week} type="number" value={form.week} onInput={(v) => set('week', v)} />

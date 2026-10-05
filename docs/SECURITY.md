@@ -55,6 +55,9 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 | Markdown is cleaned before it shows | `src/lib/markdown.ts` uses DOMPurify |
 | YouTube videos | `src/lib/youtube.ts` accepts only an 11-character ID and builds a `youtube-nocookie.com` address |
 | Private tokens | Made in the browser with `crypto.getRandomValues` (64 hex characters). The answer page is `noindex` |
+| Drafts stay private (lessons) | The database only lets strangers read lessons with `status = 'published'`. Unpublish a lesson and it disappears for everyone but you |
+| Uploaded files | Only the owner may upload. `src/lib/kit.ts` checks the first bytes of every file, so a renamed file is refused. SVG pictures with scripts, event handlers, or links to other websites are refused. The bucket also limits file types and size (10 MB) |
+| Pictures in teacher guides | `src/lib/markdown.ts` keeps a picture only if it comes from our own `lesson-files` storage. Other websites cannot load anything through a guide |
 | Draft answers stay private | `get_ticket` returns the answer only after the ticket has been answered |
 | Spam | A hidden `website` field, and no more than 20 new tickets or requests per hour |
 | Email misuse | Anyone can type any email address into a form. The database queues at most 30 confirmation emails an hour in total and 3 a day to one inbox (`name+tag@` counts as `name@`), so the forms cannot be used to flood a stranger |

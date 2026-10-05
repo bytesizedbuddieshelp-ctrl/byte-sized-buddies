@@ -80,7 +80,7 @@ export default function LessonLibrary() {
       ) : (
         <ul class="grid clean-list">
           {shown.map((lesson) => (
-            <LessonCard lesson={lesson} key={lesson.id} />
+            <LessonCard lesson={lesson} level={2} key={lesson.id} />
           ))}
         </ul>
       )}
