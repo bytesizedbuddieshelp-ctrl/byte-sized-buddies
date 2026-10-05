@@ -9,7 +9,9 @@ import { youTubeEmbedUrl } from '../../lib/youtube';
 const t = copy.lesson;
 
 // A whole lesson page. The public page and the owner's preview both use this.
-export function LessonView({ lesson, draftNote = false }: { lesson: Lesson; draftNote?: boolean }) {
+export function LessonView({ lesson, draftNote = false, embedded = false }: { lesson: Lesson; draftNote?: boolean; embedded?: boolean }) {
+  // Inside the admin shell the page already has an h1, so the lesson title becomes an h2.
+  const Title = embedded ? 'h2' : 'h1';
   const downloads = downloadsFor(lesson.files);
   const guideHtml = useMemo(() => (lesson.teacher_guide_md ? renderMarkdown(lesson.teacher_guide_md, { allowImages: true }) : ''), [lesson.teacher_guide_md]);
   const imageUrl = (file: string) => imageUrlFor(lesson, file);
@@ -23,7 +25,7 @@ export function LessonView({ lesson, draftNote = false }: { lesson: Lesson; draf
         <p>
           <span class="badge badge-sunshine">{copy.lessons.week(lesson.week_number)}</span>
         </p>
-        <h1>{lesson.title}</h1>
+        <Title>{lesson.title}</Title>
         {lesson.summary && <p class="lead">{lesson.summary}</p>}
         <p class="lesson-badges">
           {lesson.devices.map((device) => (

@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import LessonPreviewPage from '../../components/admin/LessonPreviewPage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.lessonEdit.titleEdit}>
+  <LessonPreviewPage client:only="preact" />
+</AdminLayout>

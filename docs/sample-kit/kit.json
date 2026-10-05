@@ -1,0 +1,67 @@
+{
+  "kit_version": 1,
+  "lesson": {
+    "slug": "week-01-calling-a-friend",
+    "week_number": 1,
+    "title": "Calling a friend",
+    "summary": "Find the green phone, pick a name, and make your first call.",
+    "topic": "Phone calls",
+    "devices": ["iphone", "android"],
+    "level": "beginner",
+    "duration_minutes": 45,
+    "objectives": [
+      "Find the green phone icon",
+      "Open Contacts",
+      "Call someone from Contacts"
+    ],
+    "license": "CC BY-SA 4.0"
+  },
+  "slides": {
+    "version": 1,
+    "slides": [
+      {
+        "layout": "title",
+        "title": "Calling a friend",
+        "subtitle": "Week 1",
+        "notes": "Welcome everyone. Ask a warm-up question: who is the last person you called?"
+      },
+      {
+        "layout": "idea",
+        "title": "The green phone",
+        "body": ["It opens your calls."],
+        "image": { "file": "phone-home.png", "alt": "A phone home screen with the green phone icon circled in yellow" },
+        "notes": "Hold up your own phone. Point to the green phone. Ask everyone to find theirs."
+      },
+      {
+        "layout": "step",
+        "step": 1,
+        "title": "Tap Contacts",
+        "body": ["Find the word Contacts at the bottom."],
+        "image": { "file": "contacts.png", "alt": "The Contacts screen with a short list of names and the Contacts tab circled in yellow" },
+        "notes": "Go slowly. Wait until everyone has found it before you move on."
+      },
+      {
+        "layout": "tryit",
+        "title": "Try it now",
+        "body": ["Find a name in your contacts. Tap it."],
+        "timer_minutes": 5,
+        "notes": "Walk around and help. Everyone gets stuck here. Say so out loud."
+      },
+      {
+        "layout": "keepit",
+        "title": "Keep it",
+        "body": ["Take your handout home.", "This week's challenge: call one person you love."],
+        "notes": "Hand out the large-print handout. Explain the take-home challenge."
+      }
+    ]
+  },
+  "teacher_guide_md": "# Teacher guide: Calling a friend\n\nA 45-minute lesson. Learners leave able to call someone from their Contacts.\n\n## Before you start\n\n- Bring a large-print handout and a worksheet for every learner.\n- Use a practice contact if a learner does not want to call a real person.\n- Never ask anyone to type a real password.\n\n## Minute by minute\n\n1. **Welcome and a warm-up question (three minutes).** Ask: \"Who was the last person you called?\"\n2. **Learn it (10 minutes).** Show the slides. One idea on each slide. Pause after each one.\n3. **Try it (20 minutes).** Learners practice on their own devices. Walk around. Sit beside people instead of standing over them.\n4. **Worksheet and teach-back (seven minutes).** Each learner shows a neighbor the steps.\n5. **Keep it (five minutes).** Hand out the handout. Explain the take-home challenge.\n\n## Common mistakes\n\n- **Tapping the wrong icon.** Say: \"Everyone does this. Tap the back arrow and let's look again.\"\n- **The screen looks different.** Phones differ. Ask the learner to tell you what they see.\n- **A call connects by accident.** Say: \"Tap the red button to hang up. That's normal.\"\n\n## Safety reminder\n\nIf a stranger calls and asks for money or a password: hang up, then call someone you trust.\n",
+  "video_script_md": "## Opener\n\nHello, I'm [YOUR FIRST NAME]. Today we'll call a friend, one step at a time.\n\n## Main\n\nTap the green phone. Then tap Contacts. Find a name you know and tap it.\n\n## Closer\n\nYou did it. Try one call this week. See you next time.\n",
+  "files": {
+    "worksheet": "week-01-worksheet.pdf",
+    "handout": "week-01-handout.pdf",
+    "answer_key": null,
+    "teacher_guide_pdf": null
+  },
+  "images": ["phone-home.png", "contacts.png"]
+}

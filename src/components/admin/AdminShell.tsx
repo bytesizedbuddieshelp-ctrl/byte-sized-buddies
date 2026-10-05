@@ -6,12 +6,13 @@ import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
 import type { IconName } from '../../lib/icons';
 
-export type AdminPage = 'dashboard' | 'tickets' | 'inbox';
+export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons';
 
 const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[] = [
   { id: 'dashboard', href: '/admin/dashboard', label: a.nav.dashboard, icon: 'home' },
   { id: 'tickets', href: '/admin/tickets', label: a.nav.tickets, icon: 'question' },
   { id: 'inbox', href: '/admin/inbox', label: a.nav.inbox, icon: 'mail' },
+  { id: 'lessons', href: '/admin/lessons', label: a.nav.lessons, icon: 'book' },
 ];
 
 let leaving = false;
