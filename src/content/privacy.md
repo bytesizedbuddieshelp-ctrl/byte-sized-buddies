@@ -37,7 +37,7 @@ This website has no advertising and no tracking. We do not use analytics. We do 
 - **Supabase** stores what you send through the forms.
 - **Cloudflare** hosts the website.
 - **Google** sends and receives our email through a Gmail account.
-- **YouTube** shows our videos. We use its privacy-friendly player, youtube-nocookie.com.
+- **YouTube** shows our videos. We use its privacy-friendly player, youtube-nocookie.com. Nothing loads from YouTube until you press Play.
 
 ## Your choices
 

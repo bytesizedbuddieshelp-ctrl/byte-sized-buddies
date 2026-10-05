@@ -72,6 +72,7 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/about` | About (write your story in `src/content/about.md`) |
 | `/privacy`, `/license` | Plain-language privacy and license pages |
 | `/answer?t=...` | The private page where someone reads the answer to their question |
+| `/admin/studio` | The video studio: record an opener, a screen demo, and a closer, then attach the YouTube links to a lesson or an answer |
 | `/admin/present`, `/admin/remote` | Presenter mode (two windows) and the phone remote (needs `docs/DEPLOY.md` Step 12) |
 | `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox` (Contact exchange: Gmail emails and senior-home requests), and `/admin/lessons` |
 
@@ -82,6 +83,19 @@ The website never touches Gmail directly. A small script in your Google account 
 ## Lessons
 
 Make a lesson kit in a Claude chat (see `docs/KIT-FORMAT.md`), then import it in **Admin, Lessons, Import a kit**. It saves as a **draft**. Check it with **Preview**, then press **Publish**. To try it first, import the sample kit in `docs/sample-kit/`.
+
+## Videos
+
+Open **Admin, Studio** in Chrome or Edge on a computer.
+
+1. Choose the lesson. Its video script shows on the teleprompter.
+2. Turn on the camera and microphone. Check the sound level says "Good".
+3. Record the opener (camera), the main part (your screen), and the closer (camera). You hear three beeps before each recording starts. Play each take back, and download the ones you keep.
+4. Upload the files to YouTube yourself (Unlisted or Public, "not made for kids"). Paste the links in **Publish**, choose the lesson or question, and press **Save video**.
+
+Record your opener and closer once, tick **Make this my standard opener** (or closer), and reuse them next time. Video answers to questions play your standard opener and closer around the answer.
+
+Takes are kept only in the open page. Download them before you close it. Videos are never stored in Supabase.
 
 ## The database
 

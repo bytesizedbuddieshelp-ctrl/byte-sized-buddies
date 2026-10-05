@@ -53,7 +53,8 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 | Sign-ups off | Supabase dashboard (`docs/DEPLOY.md`, Step 2) and checked by `npm run check:rls` |
 | No `service_role` key | Never in this repository. Only the public key is used, in `.env` and in Cloudflare build variables |
 | Markdown is cleaned before it shows | `src/lib/markdown.ts` uses DOMPurify |
-| YouTube videos | `src/lib/youtube.ts` accepts only an 11-character ID and builds a `youtube-nocookie.com` address |
+| YouTube videos | `src/lib/youtube.ts` accepts only an 11-character ID and builds a `youtube-nocookie.com` address. The playlist player (`src/components/video/PlaylistPlayer.tsx`) skips any ID that doesn't pass, and loads nothing from YouTube until the visitor presses Play |
+| Studio recordings | Recordings stay in the owner's browser until downloaded. They are never uploaded to Supabase. Only YouTube IDs are saved (`videos`, `lessons.video_ids`, `tickets.answer_video_youtube_id`, and the public `opener_video` and `closer_video` settings) |
 | Private tokens | Made in the browser with `crypto.getRandomValues` (64 hex characters). The answer page is `noindex` |
 | Drafts stay private (lessons) | The database only lets strangers read lessons with `status = 'published'`. Unpublish a lesson and it disappears for everyone but you |
 | Uploaded files | Only the owner may upload. `src/lib/kit.ts` checks the first bytes of every file, so a renamed file is refused. SVG pictures with scripts, event handlers, or links to other websites are refused. The bucket also limits file types and size (10 MB) |
@@ -82,4 +83,10 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 
 ## Still to come
 
-The headers file (`public/_headers`) and the final review are in later phases.
+The headers file (`public/_headers`) and the final review are in Phase 7. When writing the headers, these must stay allowed, or the studio and the video player break:
+
+- `script-src https://www.youtube.com` (the player controller, loaded only after Play is pressed)
+- `frame-src https://www.youtube-nocookie.com`
+- `media-src 'self' blob:` (playing back studio takes)
+- `worker-src 'self'` (`/studio-timer.js`, the clock for the camera circle)
+- `Permissions-Policy: camera=(self), microphone=(self), display-capture=(self)`
