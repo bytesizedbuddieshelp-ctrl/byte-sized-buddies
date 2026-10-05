@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import LessonPage from '../components/lessons/LessonPage';
+import { copy } from '../content/copy';
+---
+
+<Base title={copy.lessons.title} description={copy.lessons.description}>
+  <div class="container section">
+    <div class="lesson-page">
+      <!-- The lesson itself (and its h1) is drawn in the browser once the lesson is found. -->
+      <LessonPage client:only="preact" />
+    </div>
+  </div>
+</Base>

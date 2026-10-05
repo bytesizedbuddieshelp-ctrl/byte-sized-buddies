@@ -1,0 +1,98 @@
+/* Card, Badge, and Callout, used by the Astro components and by Preact screens. */
+/* Card */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+}
+
+.card > :last-child {
+  margin-bottom: 0;
+}
+
+/* Badge */
+.badge {
+  display: inline-block;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.badge-sunshine {
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+.badge-tint {
+  background: var(--forest-tint);
+  color: var(--forest-deep);
+}
+
+/* Callout */
+.callout {
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  color: var(--ink);
+}
+
+.callout-remember {
+  background: var(--forest-tint);
+}
+
+.callout-tryit {
+  background: var(--sunshine-soft);
+}
+
+.callout-careful {
+  background: var(--paper);
+  border: 3px solid var(--brick);
+}
+
+.callout-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+}
+
+.callout-title svg {
+  flex: none;
+}
+
+.callout-remember .callout-title {
+  color: var(--forest-deep);
+}
+
+.callout-careful .callout-title {
+  color: var(--brick);
+}
+
+.callout-body > :last-child {
+  margin-bottom: 0;
+}
+
+/* Logo tile: reversed logos sit on a rounded forest tile */
+.logo-tile {
+  display: inline-block;
+  background: var(--forest);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.logo-tile-mark {
+  border-radius: var(--radius-sm);
+}
+
+.logo-tile-wide {
+  border-radius: var(--radius-md);
+}
+
+.logo-tile img {
+  display: block;
+}

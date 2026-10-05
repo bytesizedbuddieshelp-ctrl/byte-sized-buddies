@@ -44,3 +44,18 @@ function safeJson(text: string): unknown {
     return null;
   }
 }
+
+/** Reads rows the public is allowed to see (for example published lessons). The database rules decide what comes back. */
+export async function restGet<T>(pathAndQuery: string): Promise<T> {
+  if (!isConfigured) throw new ApiError('Not connected.', false);
+  const headers: Record<string, string> = { apikey: supabaseKey };
+  if (supabaseKey.startsWith('eyJ')) headers.Authorization = `Bearer ${supabaseKey}`;
+  let response: Response;
+  try {
+    response = await fetch(`${supabaseUrl}/rest/v1/${pathAndQuery}`, { headers });
+  } catch {
+    throw new ApiError(genericError, false);
+  }
+  if (!response.ok) throw new ApiError(genericError, false);
+  return (await response.json()) as T;
+}

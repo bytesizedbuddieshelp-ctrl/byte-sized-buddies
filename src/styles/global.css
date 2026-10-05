@@ -1,5 +1,6 @@
 @import '../../brand/tokens.css';
 @import './buttons.css';
+@import './components.css';
 @import './forms.css';
 
 /* Base ----------------------------------------------------------------- */
@@ -260,5 +261,43 @@ main {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Lesson cards and badges */
+.lesson-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lesson-card h3 {
+  margin-bottom: var(--space-2);
+}
+
+.guide h2 {
+  font-size: 28px;
+}
+
+/* Printing a lesson page without the slides: just the lesson, no website around it. */
+@media print {
+  .site-header,
+  .site-footer,
+  .skip-link,
+  .viewer,
+  .button-row,
+  .actions {
+    display: none !important;
+  }
+
+  body {
+    background: var(--paper);
+    font-size: 14pt;
+    line-height: 1.4;
+  }
+
+  a {
+    color: var(--ink);
   }
 }

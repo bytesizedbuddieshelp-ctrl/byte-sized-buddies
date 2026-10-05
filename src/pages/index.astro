@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
 import Card from '../components/Card.astro';
 import Icon from '../components/Icon.astro';
+import HomeLessons from '../components/lessons/HomeLessons';
 import { copy } from '../content/copy';
 
 const t = copy.home;
@@ -37,13 +38,10 @@ const t = copy.home;
     </ol>
   </section>
 
-  <!-- 3. What you can learn (lessons come from the database in Phase 3) -->
+  <!-- 3. What you can learn: published lessons from the database, or a calm card when there are none -->
   <section class="container section" aria-labelledby="learn-title">
     <h2 id="learn-title">{t.lessons.heading}</h2>
-    <Card>
-      <h3>{t.lessons.emptyTitle}</h3>
-      <p>{t.lessons.emptyText}</p>
-    </Card>
+    <HomeLessons client:idle />
   </section>
 
   <!-- 4. For senior homes -->
