@@ -76,11 +76,19 @@ The emails we send contain a link to your site, so the database needs to know th
 
 ### Step 7: Find your project address and key
 
-1. In the left menu click **Project Settings** (the gear icon), then **API Keys** (or **API**).
-2. Find the **Project URL**. It looks like `https://abcdxyz.supabase.co`.
-3. Find the **Publishable key**. It starts with `sb_publishable_`. (Older projects show an `anon` key that starts with `eyJ`. That works too.)
-4. These two are **meant to be public**. Anyone can see them in a website's code, and the database rules protect your data.
-5. **Never use the Secret key or the service_role key.** Never copy them anywhere. If you ever do, tell a parent or guardian and reset the key in the same screen.
+You need two things: the **Project URL** and the **Publishable key**.
+
+**The Project URL** looks like `https://abcdxyzqwerty.supabase.co`. Supabase moves it around, so use whichever of these you can find:
+
+- **From the address bar.** While you are inside your project, the web address looks like `supabase.com/dashboard/project/abcdxyzqwerty`. The last part is your **project ID**. Your Project URL is `https://` + the project ID + `.supabase.co`.
+- **The Connect button.** On the project's home page, click **Connect** at the top. The window shows the Project URL.
+- **Project Settings.** Click the gear icon, then **Data API** (or **API**). The URL is at the top. The project ID is also under **General**.
+
+**The Publishable key** starts with `sb_publishable_`. Find it under **Project Settings**, then **API Keys**. (Older projects show an `anon` key that starts with `eyJ`. That works too.)
+
+These two are **meant to be public**. Anyone can see them in a website's code, and the database rules protect your data.
+
+**Never use the Secret key or the service_role key.** Never copy them anywhere. If you ever do, tell a parent or guardian and reset the key on the same screen.
 
 ### Step 8: Put them in a `.env` file on your computer
 
