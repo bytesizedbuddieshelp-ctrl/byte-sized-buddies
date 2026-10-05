@@ -60,6 +60,9 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 | Pictures in teacher guides | `src/lib/markdown.ts` keeps a picture only if it comes from our own `lesson-files` storage. Other websites cannot load anything through a guide |
 | Draft answers stay private | `get_ticket` returns the answer only after the ticket has been answered |
 | Spam | A hidden `website` field, and no more than 20 new tickets or requests per hour |
+| Gmail bridge secret | Lives only in Apps Script (Script Properties). The database stores only its SHA-256 fingerprint in `bridge_secret`, which nobody can read through the API. Every `bridge_*` function checks it first and answers "not allowed" otherwise |
+| Gmail stays private | The bridge copies only emails with the **BSB** label, skips your own sent mail, and cuts each email to 8,000 characters. Emails show as plain text, never as web code |
+| Email headers | The database refuses line breaks in an email's address or subject, and the bridge checks again before sending, so nobody can sneak in extra recipients |
 | Email misuse | Anyone can type any email address into a form. The database queues at most 30 confirmation emails an hour in total and 3 a day to one inbox (`name+tag@` counts as `name@`), so the forms cannot be used to flood a stranger |
 
 ## Safe habits
@@ -69,6 +72,14 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 - If a secret key ever leaks, reset it in the Supabase dashboard and tell a parent or guardian.
 - Run `npm audit` now and then.
 
+## The Gmail bridge
+
+- The bridge secret never leaves Script Properties. Only its fingerprint is in the database, and it is only ever compared inside the database (`bridge_ok`).
+- The `service_role` key is never used, not even by the bridge. It uses the public key plus the secret.
+- Make a new secret with `npm run bridge:secret`, in your own Terminal, never in a chat.
+- If the secret leaks, run `npm run bridge:secret` again, save the new fingerprint in the SQL Editor, and replace `BRIDGE_SECRET` in Script Properties. The old secret stops working right away. Full steps: `apps-script/README.md`, "If the secret leaks".
+- Test it: `npm run check:rls` calls the bridge with a wrong secret and expects "not allowed".
+
 ## Still to come
 
-The headers file (`public/_headers`), the Gmail bridge secret notes, and the final review are in later phases.
+The headers file (`public/_headers`) and the final review are in later phases.

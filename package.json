@@ -8,7 +8,8 @@
     "check": "node scripts/check-copy.mjs && vitest run && astro build",
     "check:copy": "node scripts/check-copy.mjs",
     "test": "vitest run",
-    "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs"
+    "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs",
+    "bridge:secret": "node scripts/make-bridge-secret.mjs"
   },
   "repository": {
     "type": "git",

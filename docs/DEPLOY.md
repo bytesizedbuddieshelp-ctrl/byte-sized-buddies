@@ -142,6 +142,12 @@ The remote sends messages between your laptop and your phone over a **private** 
 4. If the Wi-Fi is bad, use your phone as a hotspot for the laptop and the phone, or use the keyboard on the laptop: arrow keys or Space, B for blank, F for full screen.
 5. Closing the presenter window ends the code. The next time you present, you get a new code.
 
+### Step 13: Connect your Gmail (Phase 5)
+
+The Gmail bridge shows your labeled emails in **Admin, Contact exchange**, sends your replies and the website's emails, and keeps the database awake. Follow `apps-script/README.md`. It takes about 20 minutes.
+
+Until the bridge is set up, the website still saves every question and request, and queues the emails. They go out once the bridge runs.
+
 ### If something goes wrong
 
 | What you see | What to try |

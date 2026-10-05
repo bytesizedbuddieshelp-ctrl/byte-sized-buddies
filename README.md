@@ -20,6 +20,8 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `public/` | Files served as they are: logos and the browser tab icon. |
 | `scripts/check-copy.mjs` | Looks for banned words (see "Voice" in `CLAUDE.md`). |
 | `scripts/check-rls.mjs` | Tests the database locks as a stranger (`npm run check:rls`). |
+| `apps-script/` | The Gmail bridge: `Code.gs` runs in your Google account; `README.md` shows how to install it. |
+| `scripts/make-bridge-secret.mjs` | Makes the Gmail bridge secret (`npm run bridge:secret`, in your own Terminal). |
 | `supabase/` | The database: `schema.sql` builds it, `seed.sql` adds starter data. |
 | `docs/` | `DEPLOY.md` (setup steps), `SECURITY.md` (the rules and how to test them), `KIT-FORMAT.md` (the lesson kit format), and `sample-kit/` (a kit to try). |
 | `tests/` | Small automatic tests for the helper code. |
@@ -71,7 +73,11 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/privacy`, `/license` | Plain-language privacy and license pages |
 | `/answer?t=...` | The private page where someone reads the answer to their question |
 | `/admin/present`, `/admin/remote` | Presenter mode (two windows) and the phone remote (needs `docs/DEPLOY.md` Step 12) |
-| `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox`, and `/admin/lessons` |
+| `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox` (Contact exchange: Gmail emails and senior-home requests), and `/admin/lessons` |
+
+## Email
+
+The website never touches Gmail directly. A small script in your Google account (the Gmail bridge) copies emails labeled **BSB** to the website and sends the emails the website queues. Set it up with `apps-script/README.md`.
 
 ## Lessons
 

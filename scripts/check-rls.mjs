@@ -64,6 +64,8 @@ await check('Signed-out visitor cannot change lessons', async () => {
 await check('Wrong bridge secret is refused (bridge_get_work)', async () => refused(await call('POST', '/rest/v1/rpc/bridge_get_work', { p_secret: 'wrong' })));
 await check('Wrong bridge secret is refused (bridge_purge)', async () => refused(await call('POST', '/rest/v1/rpc/bridge_purge', { p_secret: 'wrong' })));
 await check('Wrong bridge secret is refused (bridge_upsert_inbox)', async () => refused(await call('POST', '/rest/v1/rpc/bridge_upsert_inbox', { p_secret: 'wrong', p_rows: [] })));
+await check('Wrong bridge secret is refused (bridge_mark_outbox)', async () => refused(await call('POST', '/rest/v1/rpc/bridge_mark_outbox', { p_secret: 'wrong', p_id: '00000000-0000-0000-0000-000000000000', p_ok: true, p_error: null })));
+await check('Wrong bridge secret is refused (bridge_mark_notified)', async () => refused(await call('POST', '/rest/v1/rpc/bridge_mark_notified', { p_secret: 'wrong', p_kind: 'ticket', p_id: '00000000-0000-0000-0000-000000000000' })));
 await check('bridge_ok cannot be called from outside', async () => refused(await call('POST', '/rest/v1/rpc/bridge_ok', { p_secret: 'wrong' })));
 
 await check('An unknown answer link finds nothing (get_ticket)', async () => {
