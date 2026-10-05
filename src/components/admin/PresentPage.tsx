@@ -11,6 +11,7 @@ import { validateDeck, type Slide } from '../../lib/slides';
 import {
   EVENTS,
   clockMood,
+  countdownLeft,
   formatClock,
   localChannelFor,
   makeRemoteCode,
@@ -23,6 +24,38 @@ import {
 import { linkWords, openRemote, type LinkStatus, type RemoteLink } from '../../lib/remoteChannel';
 
 const t = a.present;
+
+// A countdown that works from the real clock. It remembers when it started, so slow or late ticks never make it drift.
+// The functions never change, so messages that arrive later can use them safely.
+function useCountdown(initial: number) {
+  const [s, setS] = useState<{ base: number; startedAt: number | null }>({ base: initial, startedAt: null });
+  const [now, setNow] = useState(() => Date.now());
+  const latest = useRef(s);
+  latest.current = s;
+  useEffect(() => {
+    if (s.startedAt === null) return;
+    const id = window.setInterval(() => setNow(Date.now()), 250);
+    return () => window.clearInterval(id);
+  }, [s.startedAt]);
+  const api = useRef({
+    start() {
+      const c = latest.current;
+      if (c.startedAt !== null) return;
+      const at = Date.now();
+      setNow(at);
+      setS({ base: c.base, startedAt: at });
+    },
+    pause() {
+      const c = latest.current;
+      if (c.startedAt === null) return;
+      setS({ base: countdownLeft(c.base, c.startedAt, Date.now()), startedAt: null });
+    },
+    reset(base: number) {
+      setS({ base, startedAt: null });
+    },
+  }).current;
+  return { remaining: countdownLeft(s.base, s.startedAt, now), running: s.startedAt !== null, base: s.base, startedAt: s.startedAt, ...api };
+}
 
 export default function PresentPage() {
   return (
@@ -121,10 +154,6 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
 
   const [index, setIndex] = useState(0);
   const [blank, setBlank] = useState(false);
-  const [remaining, setRemaining] = useState(clockTotal);
-  const [running, setRunning] = useState(false);
-  const [tryRemaining, setTryRemaining] = useState<number | null>(null);
-  const [tryRunning, setTryRunning] = useState(false);
   const [single, setSingle] = useState(false);
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [popupBlocked, setPopupBlocked] = useState(false);
@@ -135,6 +164,12 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
   const slide = slides[index];
   const upNext = slides[index + 1] ?? null;
   const tryMinutes = slide.layout === 'tryit' ? slide.timer_minutes : undefined;
+  const clockCd = useCountdown(clockTotal);
+  const tryCd = useCountdown(0);
+  const remaining = clockCd.remaining;
+  const running = clockCd.running;
+  const tryRemaining: number | null = tryMinutes ? Math.max(0, tryCd.remaining) : null;
+  const tryRunning = tryCd.running && tryRemaining !== null && tryRemaining > 0;
   const tryText = tryRemaining === null ? null : formatClock(tryRemaining);
 
   const images = useMemo(() => {
@@ -145,8 +180,9 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
   const imageUrl = (file: string) => images[file] ?? '';
 
   // The newest values, for messages that arrive later (a phone press, a key in the audience window).
-  const live = useRef({ index, blank, remaining, running, tryText, tryRemaining, tryRunning, tryMinutes });
-  live.current = { index, blank, remaining, running, tryText, tryRemaining, tryRunning, tryMinutes };
+  const tryBase = tryMinutes ? tryCd.base : null;
+  const live = useRef({ index, blank, remaining, running, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes });
+  live.current = { index, blank, remaining, running, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes };
   const bc = useRef<BroadcastChannel | null>(null);
   const remote = useRef<RemoteLink | null>(null);
   const audienceWindow = useRef<Window | null>(null);
@@ -160,8 +196,8 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
       case 'last': setIndex(total - 1); setBlank(false); break;
       case 'goto': setIndex(Math.min(Math.max(command.n, 0), total - 1)); setBlank(false); break;
       case 'blank': setBlank((b) => !b); break;
-      case 'timer': setRunning(command.run); break;
-      case 'trytimer': setTryRunning(command.run); break;
+      case 'timer': if (command.run) clockCd.start(); else clockCd.pause(); break;
+      case 'trytimer': if (command.run) tryCd.start(); else tryCd.pause(); break;
     }
   }
 
@@ -190,7 +226,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
         const message = event.data;
         if (!message || typeof message !== 'object') return;
         if (message.type === 'hello') {
-          const init: AudienceInit = { type: 'init', slides, lessonName: lesson.title, images, index: live.current.index, blank: live.current.blank, tryText: live.current.tryText };
+          const init: AudienceInit = { type: 'init', slides, lessonName: lesson.title, images, index: live.current.index, blank: live.current.blank, tryBase: live.current.tryBase, tryStartedAt: live.current.tryStartedAt };
           channel.postMessage(init);
         } else if (message.type === 'cmd') apply({ t: message.t } as Command);
       };
@@ -223,18 +259,13 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
 
   // Tell the audience window and the phone whenever something they show changes
   useEffect(() => {
-    bc.current?.postMessage({ type: 'update', index, blank, tryText } satisfies LocalMessage);
-  }, [index, blank, tryText]);
+    bc.current?.postMessage({ type: 'update', index, blank, tryBase, tryStartedAt: tryCd.startedAt } satisfies LocalMessage);
+  }, [index, blank, tryBase, tryCd.startedAt]);
   useEffect(() => {
     sendStateToPhone();
   }, [index, blank, running, link, tryRunning, tryMinutes]);
 
-  // ---- Clocks
-  useEffect(() => {
-    if (!running) return;
-    const id = window.setTimeout(() => setRemaining((r) => r - 1), 1000);
-    return () => window.clearTimeout(id);
-  }, [running, remaining]);
+  // ---- Clocks (see useCountdown: they follow the real clock, so they cannot drift)
   useEffect(() => {
     if (remaining === 300 && running) setAnnounce(t.clockWarn);
     if (remaining === 0 && running) setAnnounce(t.clockOver);
@@ -242,19 +273,13 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
 
   // A new slide starts with a fresh, stopped practice timer
   useEffect(() => {
-    setTryRunning(false);
-    setTryRemaining(tryMinutes ? tryMinutes * 60 : null);
+    tryCd.reset(tryMinutes ? tryMinutes * 60 : 0);
     setAnnounce(a.present.slideCounter(index + 1, total) + ': ' + slide.title);
   }, [index, tryMinutes]);
+  // The practice timer stops by itself at zero
   useEffect(() => {
-    if (!tryRunning || tryRemaining === null) return;
-    if (tryRemaining <= 0) {
-      setTryRunning(false);
-      return;
-    }
-    const id = window.setTimeout(() => setTryRemaining((r) => (r === null ? r : r - 1)), 1000);
-    return () => window.clearTimeout(id);
-  }, [tryRunning, tryRemaining]);
+    if (tryCd.running && tryCd.remaining <= 0) tryCd.pause();
+  }, [tryCd.remaining, tryCd.running]);
 
   // ---- Windows
   useEffect(() => {
@@ -384,7 +409,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
                 {t.next} <Icon name="arrow-right" size={24} />
               </button>
               {tryMinutes && tryRemaining !== null && (
-                <button type="button" class="button button-secondary" disabled={tryRemaining <= 0} onClick={() => setTryRunning((r) => !r)}>
+                <button type="button" class="button button-secondary" disabled={tryRemaining <= 0} onClick={() => (tryRunning ? tryCd.pause() : tryCd.start())}>
                   {tryRunning ? t.tryTimerPause : t.tryTimerStart(tryMinutes)}
                 </button>
               )}
@@ -420,10 +445,10 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
                 <p class="caption">{t.clockFine}</p>
               )}
               <div class="button-row">
-                <button type="button" class="button button-primary" onClick={() => setRunning((r) => !r)}>
+                <button type="button" class="button button-primary" onClick={() => (running ? clockCd.pause() : clockCd.start())}>
                   {running ? t.clockPause : t.clockStart}
                 </button>
-                <button type="button" class="button button-secondary" onClick={() => { setRunning(false); setRemaining(clockTotal); }}>
+                <button type="button" class="button button-secondary" onClick={() => clockCd.reset(clockTotal)}>
                   {t.clockReset}
                 </button>
               </div>

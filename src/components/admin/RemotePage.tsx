@@ -141,7 +141,7 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
 
   // A ticking clock so "time left" moves smoothly, and so a silent presenter is noticed
   useEffect(() => {
-    const id = window.setInterval(() => setNow(Date.now()), 1000);
+    const id = window.setInterval(() => setNow(Date.now()), 250);
     return () => window.clearInterval(id);
   }, []);
 

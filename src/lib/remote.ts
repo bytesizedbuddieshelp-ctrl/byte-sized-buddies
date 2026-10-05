@@ -133,6 +133,14 @@ export function formatClock(seconds: number): string {
 }
 
 export const WARNING_SECONDS = 5 * 60;
+/**
+ * Seconds left on a countdown, worked out from the real clock. A timer that is running remembers when it
+ * started, so a late or slowed-down tick can never make it drift.
+ */
+export function countdownLeft(base: number, startedAt: number | null, now: number): number {
+  return startedAt === null ? base : base - Math.floor(Math.max(0, now - startedAt) / 1000);
+}
+
 export type ClockMood = 'fine' | 'warning' | 'over';
 export function clockMood(remaining: number): ClockMood {
   return remaining <= 0 ? 'over' : remaining <= WARNING_SECONDS ? 'warning' : 'fine';
@@ -152,11 +160,13 @@ export interface AudienceInit {
   images: Record<string, string>;
   index: number;
   blank: boolean;
-  tryText: string | null;
+  /** The practice timer: seconds left when stopped, and when it started if it is running. */
+  tryBase: number | null;
+  tryStartedAt: number | null;
 }
 export type LocalMessage =
   | AudienceInit
-  | { type: 'update'; index: number; blank: boolean; tryText: string | null }
+  | { type: 'update'; index: number; blank: boolean; tryBase: number | null; tryStartedAt: number | null }
   | { type: 'hello' }
   | { type: 'bye' }
   | { type: 'cmd'; t: 'next' | 'prev' | 'blank' | 'first' | 'last' };

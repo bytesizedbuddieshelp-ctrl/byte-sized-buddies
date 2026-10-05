@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CODE_ALPHABET, clockMood, clockNow, formatClock, makeRemoteCode, normalizeCode, parseCommand, parseState, topicFor } from '../src/lib/remote';
+import { CODE_ALPHABET, clockMood, countdownLeft, clockNow, formatClock, makeRemoteCode, normalizeCode, parseCommand, parseState, topicFor } from '../src/lib/remote';
 
 describe('makeRemoteCode', () => {
   it('makes four letters with no I, L, or O', () => {
@@ -92,6 +92,18 @@ describe('clock helpers', () => {
     expect(clockNow({ total: 100, remaining: 50, running: true }, 1000, 4500)).toBe(47);
     expect(clockNow({ total: 100, remaining: 50, running: false }, 1000, 9000)).toBe(50);
   });
+});
+
+describe('countdownLeft', () => {
+  it('stands still when stopped', () => expect(countdownLeft(300, null, 99999)).toBe(300));
+  it('counts real seconds from when it started, however late the ticks are', () => {
+    expect(countdownLeft(300, 1000, 1000)).toBe(300);
+    expect(countdownLeft(300, 1000, 1999)).toBe(300);
+    expect(countdownLeft(300, 1000, 2000)).toBe(299);
+    expect(countdownLeft(300, 1000, 61000)).toBe(240); // a throttled tab that only ticked once a minute is still right
+  });
+  it('never runs backwards if the clock is odd', () => expect(countdownLeft(300, 5000, 4000)).toBe(300));
+  it('can go below zero', () => expect(countdownLeft(10, 0, 15000)).toBe(-5));
 });
 
 it('names the private channel after the code', () => expect(topicFor('KFPD')).toBe('remote:KFPD'));

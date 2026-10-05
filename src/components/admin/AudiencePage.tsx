@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { Stage } from '../slides/Stage';
 import { adminCopy as a } from '../../content/adminCopy';
-import { localChannelFor, normalizeCode, type AudienceInit, type LocalMessage } from '../../lib/remote';
+import { countdownLeft, formatClock, localChannelFor, normalizeCode, type AudienceInit, type LocalMessage } from '../../lib/remote';
 import { validateDeck, type Slide } from '../../lib/slides';
 
 // The window you drag to the TV. It shows the slide and nothing else. It has no sign-in and no database:
@@ -13,7 +13,9 @@ export default function AudiencePage() {
   const [images, setImages] = useState<Record<string, string>>({});
   const [index, setIndex] = useState(0);
   const [blank, setBlank] = useState(false);
-  const [tryText, setTryText] = useState<string | null>(null);
+  const [tryBase, setTryBase] = useState<number | null>(null);
+  const [tryStartedAt, setTryStartedAt] = useState<number | null>(null);
+  const [now, setNow] = useState(() => Date.now());
   const [ended, setEnded] = useState(false);
   const [hint, setHint] = useState(true);
   const channel = useRef<BroadcastChannel | null>(null);
@@ -35,12 +37,14 @@ export default function AudiencePage() {
         setImages(typeof message.images === 'object' && message.images ? message.images : {});
         setIndex(Number.isInteger(message.index) ? message.index : 0);
         setBlank(Boolean(message.blank));
-        setTryText(message.tryText ?? null);
+        setTryBase(typeof message.tryBase === 'number' ? message.tryBase : null);
+        setTryStartedAt(typeof message.tryStartedAt === 'number' ? message.tryStartedAt : null);
         setEnded(false);
       } else if (message.type === 'update') {
         setIndex(Number.isInteger(message.index) ? message.index : 0);
         setBlank(Boolean(message.blank));
-        setTryText(message.tryText ?? null);
+        setTryBase(typeof message.tryBase === 'number' ? message.tryBase : null);
+        setTryStartedAt(typeof message.tryStartedAt === 'number' ? message.tryStartedAt : null);
       } else if (message.type === 'bye') {
         setEnded(true);
       }
@@ -56,6 +60,14 @@ export default function AudiencePage() {
       bc.close();
     };
   }, []);
+
+  // This window keeps its own countdown from the start time, so it stays smooth even if the presenter window is in the background.
+  useEffect(() => {
+    if (tryStartedAt === null) return;
+    const id = window.setInterval(() => setNow(Date.now()), 250);
+    setNow(Date.now());
+    return () => window.clearInterval(id);
+  }, [tryStartedAt]);
 
   function toggleFullscreen() {
     if (document.fullscreenElement) void document.exitFullscreen();
@@ -79,6 +91,7 @@ export default function AudiencePage() {
   }
 
   const current = slides ? slides[Math.min(index, slides.length - 1)] : null;
+  const tryText = tryBase === null ? null : formatClock(Math.max(0, countdownLeft(tryBase, tryStartedAt, now)));
 
   return (
     <main id="main" tabIndex={-1} class="audience" ref={root} onKeyDown={onKeyDown} onDblClick={toggleFullscreen}>
