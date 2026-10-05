@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import TicketsPage from '../../components/admin/TicketsPage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.tickets.title}>
+  <TicketsPage client:only="preact" />
+</AdminLayout>

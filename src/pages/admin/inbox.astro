@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import InboxPage from '../../components/admin/InboxPage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.inbox.title}>
+  <InboxPage client:only="preact" />
+</AdminLayout>

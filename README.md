@@ -19,6 +19,10 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `src/styles/global.css` | Base styles. It loads the brand colors from `brand/tokens.css`. |
 | `public/` | Files served as they are: logos and the browser tab icon. |
 | `scripts/check-copy.mjs` | Looks for banned words (see "Voice" in `CLAUDE.md`). |
+| `scripts/check-rls.mjs` | Tests the database locks as a stranger (`npm run check:rls`). |
+| `supabase/` | The database: `schema.sql` builds it, `seed.sql` adds starter data. |
+| `docs/` | `DEPLOY.md` (setup steps) and `SECURITY.md` (the rules and how to test them). |
+| `tests/` | Small automatic tests for the helper code. |
 | `wrangler.jsonc` | Tells Cloudflare to publish the finished site from the `dist` folder. |
 
 ## Run it on your computer
@@ -33,12 +37,15 @@ You need [Node.js](https://nodejs.org) version 22.12 or newer.
 
 ## Check your work
 
-Run `npm run check`. It does two things:
+Run `npm run check`. It does three things:
 
 1. Looks through `src/` for banned words, such as the ones that make people feel they are the problem.
-2. Builds the site, to make sure nothing is broken.
+2. Runs the small automatic tests (`npm test` runs just these).
+3. Builds the site, to make sure nothing is broken.
 
 Run it before every commit.
+
+Run `npm run check:rls` after you set up the database. It acts like a stranger on the internet and proves the database locks work. See `docs/SECURITY.md`.
 
 ## Put it online
 
@@ -61,12 +68,16 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/teach` | "Teach it yourself" (words live in `src/content/teach-it-yourself.md`) |
 | `/about` | About (write your story in `src/content/about.md`) |
 | `/privacy`, `/license` | Plain-language privacy and license pages |
+| `/answer?t=...` | The private page where someone reads the answer to their question |
+| `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, and `/admin/inbox` |
 
-Both forms check what people type, but they do not send anything yet. They connect to the database in Phase 2.
+## The database
+
+Everything the forms and the admin area save lives in Supabase. Follow `docs/DEPLOY.md` to set it up. The whole database is in `supabase/schema.sql`. Until you do, both forms say "isn't connected yet" and nothing breaks.
 
 ## Secrets
 
-Copy `.env.example` to `.env` when the database arrives in Phase 2. Never commit `.env`. Never put the Supabase `service_role` key anywhere in this project.
+Copy `.env.example` to `.env` and fill it in (`docs/DEPLOY.md`, Step 8). Never commit `.env`. Never put the Supabase `service_role` or secret key anywhere in this project. Only the public key goes here.
 
 ## License
 

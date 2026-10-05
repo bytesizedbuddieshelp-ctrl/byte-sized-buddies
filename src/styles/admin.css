@@ -1,0 +1,338 @@
+/* The owner's admin area. Same brand, same sizes: admin is not an exception to accessibility. */
+.skip-link {
+  position: absolute;
+  left: var(--space-3);
+  top: var(--space-3);
+  z-index: 100;
+  padding: var(--space-3) var(--space-4);
+  min-height: 56px;
+  display: inline-flex;
+  align-items: center;
+  background: var(--forest-deep);
+  color: var(--cream);
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: var(--radius-md);
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.admin {
+  display: block;
+}
+
+.admin-side {
+  padding: var(--space-3) var(--space-4);
+  background: var(--forest-deep);
+  color: var(--cream);
+}
+
+.admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  color: var(--cream);
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-side ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-2) 0 var(--space-3);
+  padding: 0;
+}
+
+.admin-side nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--cream);
+  font-size: 18px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-side nav a:hover {
+  text-decoration: underline;
+}
+
+.admin-side nav a[aria-current='page'] {
+  background: var(--cream);
+  color: var(--forest-deep);
+}
+
+.admin-side svg {
+  flex: none;
+}
+
+.admin-main {
+  padding: var(--space-5) var(--space-4) var(--space-7);
+  max-width: 62rem;
+}
+
+.admin-main h1 {
+  margin-bottom: var(--space-4);
+}
+
+.admin-main h2 {
+  margin-top: var(--space-4);
+}
+
+.admin-main:focus {
+  outline: none;
+}
+
+.admin-narrow {
+  max-width: 34rem;
+  padding: var(--space-6) var(--space-4);
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) {
+  .admin {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  .admin-side {
+    padding: var(--space-4);
+  }
+
+  .admin-side ul {
+    flex-direction: column;
+    margin: var(--space-4) 0;
+  }
+
+  .admin-main {
+    padding: var(--space-6) var(--space-6) var(--space-7);
+  }
+}
+
+/* Messages that are spoken to screen readers as they appear. */
+.admin-message {
+  margin: var(--space-3) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--forest-tint);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.admin-message:empty {
+  display: none;
+}
+
+.admin-message.is-error {
+  background: var(--paper);
+  border: 3px solid var(--brick);
+  color: var(--brick);
+}
+
+/* Filter chips: words, not color alone. The chosen one is filled and says "selected" to screen readers. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.chips legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.chip {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  border: 3px solid var(--forest);
+  border-radius: var(--radius-pill);
+  background: var(--cream);
+  color: var(--forest);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chip[aria-pressed='true'] {
+  background: var(--forest);
+  color: var(--paper);
+}
+
+.admin-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-list li {
+  margin-bottom: var(--space-3);
+}
+
+.admin-row {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 20px;
+  line-height: 30px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.admin-row:hover {
+  background: var(--forest-tint);
+}
+
+.admin-row strong {
+  color: var(--forest-deep);
+}
+
+.admin-row .meta {
+  display: block;
+  font-size: 18px;
+  line-height: 26px;
+  color: var(--ink-muted);
+}
+
+.admin-row .snippet {
+  display: block;
+  margin-top: var(--space-1);
+}
+
+.detail-grid {
+  display: grid;
+  gap: var(--space-1) var(--space-4);
+  grid-template-columns: 1fr;
+  margin: 0 0 var(--space-4);
+}
+
+.detail-grid dt {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-muted);
+}
+
+.detail-grid dd {
+  margin: 0 0 var(--space-3);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (min-width: 700px) {
+  .detail-grid {
+    grid-template-columns: 14rem 1fr;
+  }
+
+  .detail-grid dd {
+    margin: 0 0 var(--space-2);
+  }
+}
+
+.admin-box {
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-box > h2:first-child,
+.admin-box > h3:first-child {
+  margin-top: 0;
+}
+
+.preview {
+  min-height: 80px;
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
+  border: 2px dashed var(--ink-muted);
+  border-radius: var(--radius-md);
+  background: var(--cream);
+  overflow-wrap: anywhere;
+}
+
+.preview > :last-child {
+  margin-bottom: 0;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.button-danger {
+  background: var(--brick);
+  border-color: var(--brick);
+  color: var(--paper);
+}
+
+.button-danger:hover {
+  background: var(--brick);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.counter-grid {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  margin-bottom: var(--space-5);
+}
+
+.counter {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.confirm-dialog {
+  width: calc(100% - 2 * var(--space-3));
+  max-width: 32rem;
+  padding: var(--space-4);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.confirm-dialog::backdrop {
+  background: color-mix(in srgb, var(--ink) 60%, transparent);
+}
+
+.confirm-dialog h2 {
+  margin-top: 0;
+}
+
+.confirm-dialog .button-row {
+  margin: var(--space-4) 0 0;
+}

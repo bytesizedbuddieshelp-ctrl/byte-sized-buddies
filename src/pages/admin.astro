@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../layouts/AdminLayout.astro';
+import LoginPage from '../components/admin/LoginPage';
+import { adminCopy } from '../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.login.title}>
+  <LoginPage client:only="preact" />
+</AdminLayout>
