@@ -2,10 +2,11 @@
   "name": "byte-sized-buddies",
   "version": "1.0.0",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "check": "node scripts/check-copy.mjs && astro build",
+    "check:copy": "node scripts/check-copy.mjs"
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,8 @@
     "preact": "10.29.8",
     "typescript": "7.0.2"
   },
-  "private": "true"
+  "private": "true",
+  "devDependencies": {
+    "axe-core": "4.13.0"
+  }
 }

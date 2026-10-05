@@ -1,0 +1,89 @@
+---
+import Logo from './Logo.astro';
+import { copy } from '../content/copy';
+---
+
+<footer class="site-footer on-dark">
+  <div class="container site-footer-inner">
+    <Logo variant="mark-reversed" width={48} alt="" />
+    <div class="site-footer-text">
+      <p class="site-footer-line">{copy.footer.line}</p>
+      <nav aria-label={copy.footer.linksLabel}>
+        <ul class="site-footer-links">
+          {
+            copy.footer.links.map((link) => (
+              <li>
+                <a href={link.href}>{link.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+      <p class="site-footer-tagline">{copy.tagline}</p>
+      <p class="site-footer-small">{copy.footer.studentLed}</p>
+    </div>
+  </div>
+</footer>
+
+<style is:global>
+  .site-footer {
+    background: var(--forest-deep);
+    color: var(--cream);
+    padding-block: var(--space-6);
+  }
+
+  .site-footer-inner {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .site-footer-inner > .logo-tile {
+    flex: none;
+  }
+
+  .site-footer-line {
+    font-size: 20px;
+    line-height: 30px;
+    margin: 0 0 var(--space-2);
+  }
+
+  .site-footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-4);
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+  }
+
+  .site-footer a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    color: var(--cream);
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .site-footer a:hover {
+    color: var(--paper);
+    text-decoration-thickness: 3px;
+  }
+
+  .site-footer-tagline {
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-display);
+    font-size: 22px;
+    line-height: 30px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+
+  .site-footer-small {
+    margin: 0;
+    font-size: 18px;
+    line-height: 26px;
+    color: var(--cream);
+  }
+</style>

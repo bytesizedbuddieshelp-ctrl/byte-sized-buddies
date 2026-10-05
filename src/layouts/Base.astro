@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { copy } from '../content/copy';
+import fraunces from '../../brand/fonts/Fraunces-Soft.woff2?url';
+import atkinsonRegular from '../../brand/fonts/AtkinsonHyperlegible-Regular.woff2?url';
+import atkinsonBold from '../../brand/fonts/AtkinsonHyperlegible-Bold.woff2?url';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { title = copy.siteName, description = copy.home.description, noindex = false } = Astro.props;
+const fullTitle = title === copy.siteName ? title : `${title} | ${copy.siteName}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href={fraunces} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={atkinsonRegular} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={atkinsonBold} as="font" type="font/woff2" crossorigin />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">{copy.skipLink}</a>
+    <Header />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+
+<style is:global>
+  .skip-link {
+    position: absolute;
+    left: var(--space-3);
+    top: var(--space-3);
+    z-index: 100;
+    padding: var(--space-3) var(--space-4);
+    min-height: 56px;
+    display: inline-flex;
+    align-items: center;
+    background: var(--forest-deep);
+    color: var(--cream);
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    transform: translateY(-200%);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+</style>

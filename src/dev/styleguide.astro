@@ -1,0 +1,184 @@
+---
+// Development only (see astro.config.mjs). Shows every component so we can check it against brand/.
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Card from '../components/Card.astro';
+import Badge from '../components/Badge.astro';
+import Callout from '../components/Callout.astro';
+import FormField from '../components/FormField.astro';
+import Icon from '../components/Icon.astro';
+import Logo from '../components/Logo.astro';
+
+const icons = ['menu', 'close', 'check', 'alert', 'info', 'arrow-right', 'download', 'copy', 'home', 'book', 'question', 'phone'] as const;
+const swatches = ['forest', 'forest-deep', 'forest-tint', 'sunshine', 'sunshine-soft', 'cream', 'paper', 'ink', 'ink-muted', 'rule', 'brick', 'focus'];
+---
+
+<Base title="Style guide" noindex>
+  <div class="container section sg">
+    <h1>Style guide</h1>
+    <p class="lead">Development only. This page is not part of the real website.</p>
+
+    <h2>Type</h2>
+    <p class="hero-title" style="font-family: var(--font-display); color: var(--forest); margin: 0;">Learn it. Try it. Keep it.</p>
+    <h1>Page title</h1>
+    <h2>Section heading</h2>
+    <p class="lead">Body large. Tap the green phone icon. It opens your calls.</p>
+    <p>Body. Tap the green phone icon. It opens your calls.</p>
+    <p class="label">Label: Request a visit</p>
+    <p class="caption">Caption: Updated every Saturday</p>
+    <p><a href="/styleguide">A link in body text</a></p>
+
+    <h2>Colors</h2>
+    <ul class="sg-swatches">
+      {swatches.map((name) => (
+        <li>
+          <span class="sg-chip" style={`background: var(--${name});`}></span>
+          <span class="caption">--{name}</span>
+        </li>
+      ))}
+    </ul>
+
+    <h2>Buttons</h2>
+    <div class="sg-row">
+      <Button href="/for-senior-homes#contact">Request a visit</Button>
+      <Button variant="secondary" href="/lessons">Get free lessons</Button>
+      <Button type="submit">Send question</Button>
+      <Button variant="secondary" type="button"><Icon name="download" size={24} /> Download</Button>
+    </div>
+
+    <h2>Badges</h2>
+    <div class="sg-row">
+      <Badge tone="sunshine">Week 1</Badge>
+      <Badge>iPhone</Badge>
+      <Badge>Beginner</Badge>
+    </div>
+
+    <h2>Cards</h2>
+    <div class="sg-grid">
+      <Card as="article">
+        <Badge tone="sunshine">Week 1</Badge>
+        <h3>Calling a friend</h3>
+        <p>Find the green phone, pick a name, and make your first call.</p>
+      </Card>
+      <Card as="article">
+        <h3>Our first lessons are on the way</h3>
+        <p>Check back soon.</p>
+      </Card>
+    </div>
+
+    <h2>Callouts</h2>
+    <div class="stack">
+      <Callout kind="remember"><p>Everyone gets stuck here. Let's try again.</p></Callout>
+      <Callout kind="tryit"><p>Find a name in your contacts. Tap it.</p></Callout>
+      <Callout kind="careful"><p>Hang up. Call the number on your card.</p></Callout>
+    </div>
+
+    <h2>Form fields</h2>
+    <form class="prose" novalidate>
+      <FormField id="sg-name" label="Your name" required autocomplete="name" />
+      <FormField id="sg-email" label="Email" type="email" helper="So we can send your answer." autocomplete="email" />
+      <FormField id="sg-bad" label="Email with a problem" type="email" value="maria@" error="Please enter an email like name@example.com." required />
+      <FormField id="sg-q" label="Your question" as="textarea" helper="Please don't include passwords, medical details, or bank information." required />
+    </form>
+
+    <h2>Icons</h2>
+    <ul class="sg-icons">
+      {icons.map((name) => (
+        <li><Icon name={name} /> <span class="label">{name}</span></li>
+      ))}
+    </ul>
+
+    <h2>Logos</h2>
+    <div class="sg-row">
+      <Logo variant="horizontal" width={240} />
+      <Logo variant="stacked" width={200} />
+      <Logo variant="mark" width={64} />
+      <Logo variant="mark-mono" width={64} />
+    </div>
+    <div class="sg-dark on-dark">
+      <Logo variant="horizontal-reversed" width={240} />
+      <Logo variant="mark-reversed" width={64} />
+      <a href="/styleguide">Link on dark</a>
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Lets Playwright run accessibility checks with window.axe.run().
+  import axe from 'axe-core';
+  (window as unknown as { axe: typeof axe }).axe = axe;
+</script>
+
+<style is:global>
+  .sg h2 {
+    margin-top: var(--space-6);
+  }
+
+  .sg-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .sg-grid {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  }
+
+  .sg-swatches {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sg-chip {
+    display: block;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--rule);
+  }
+
+  .sg-icons {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sg-icons li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--forest);
+  }
+
+  .sg .card .badge {
+    margin-bottom: var(--space-2);
+  }
+
+  .sg-dark {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    background: var(--forest-deep);
+    color: var(--cream);
+    border-radius: var(--radius-lg);
+  }
+
+  .sg-dark a {
+    color: var(--cream);
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+  }
+</style>

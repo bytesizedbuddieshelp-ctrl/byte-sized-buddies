@@ -1,19 +1,14 @@
 ---
-import '../styles/global.css';
+import Base from '../layouts/Base.astro';
+import { copy } from '../content/copy';
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Byte-Sized Buddies</title>
-  </head>
-  <body>
-    <main style="padding: var(--space-6);">
-      <h1 style="font-family: var(--font-display); font-size: 40px; line-height: 46px; color: var(--forest);">
-        Byte-Sized Buddies
-      </h1>
-      <p>Our website is on its way. Thank you for your patience. Learn it. Try it. Keep it.</p>
-    </main>
-  </body>
-</html>
+
+<Base title={copy.home.title} description={copy.home.description}>
+  <div class="container section">
+    <div class="prose">
+      <h1>{copy.siteName}</h1>
+      <p class="lead">{copy.home.hello}</p>
+      <p>{copy.tagline}</p>
+    </div>
+  </div>
+</Base>
