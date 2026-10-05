@@ -333,6 +333,9 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
                 <a class="button button-secondary" href={`/admin/lesson-preview?slug=${encodeURIComponent(row.slug)}`}>
                   {t.preview}
                 </a>
+                <a class="button button-secondary" href={`/admin/present?slug=${encodeURIComponent(row.slug)}`}>
+                  {t.present}
+                </a>
                 {row.status === 'published' && (
                   <a class="button button-secondary" href={`/lesson?slug=${encodeURIComponent(row.slug)}`} target="_blank" rel="noopener noreferrer">
                     {t.viewPublic}

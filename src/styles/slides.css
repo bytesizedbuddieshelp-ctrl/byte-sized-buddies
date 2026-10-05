@@ -341,11 +341,14 @@
   body.print-slides-only .site-header,
   body.print-slides-only .site-footer,
   body.print-slides-only .skip-link,
+  body.print-slides-only .admin-side,
+  body.print-slides-only .admin-bare-title,
   body.print-slides-only .screen-only {
     display: none !important;
   }
 
-  body.print-slides-only main {
+  body.print-slides-only main,
+  body.print-slides-only .admin-bare {
     padding: 0;
   }
 

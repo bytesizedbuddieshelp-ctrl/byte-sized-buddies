@@ -468,3 +468,26 @@ create policy "lesson-files owner delete" on storage.objects for delete to authe
 drop policy if exists "lesson-files owner list" on storage.objects;
 create policy "lesson-files owner list" on storage.objects for select to authenticated
   using (bucket_id = 'lesson-files' and public.is_owner());
+
+-- ---------------------------------------------------------------------------
+-- Phone remote: only the owner may use the private "remote:" channels (Phase 4).
+-- Same as supabase/realtime-remote.sql. See docs/DEPLOY.md, Step 12.
+-- ---------------------------------------------------------------------------
+
+drop policy if exists "owner can receive remote messages" on realtime.messages;
+create policy "owner can receive remote messages"
+  on realtime.messages for select to authenticated
+  using (
+    public.is_owner()
+    and realtime.messages.extension = 'broadcast'
+    and (select realtime.topic()) like 'remote:%'
+  );
+
+drop policy if exists "owner can send remote messages" on realtime.messages;
+create policy "owner can send remote messages"
+  on realtime.messages for insert to authenticated
+  with check (
+    public.is_owner()
+    and realtime.messages.extension = 'broadcast'
+    and (select realtime.topic()) like 'remote:%'
+  );

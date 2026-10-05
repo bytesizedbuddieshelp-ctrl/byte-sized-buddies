@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import RemotePage from '../../components/admin/RemotePage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.remote.title}>
+  <RemotePage client:only="preact" />
+</AdminLayout>

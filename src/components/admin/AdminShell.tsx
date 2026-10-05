@@ -6,13 +6,15 @@ import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
 import type { IconName } from '../../lib/icons';
 
-export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons';
+export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons' | 'present' | 'remote';
 
 const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[] = [
   { id: 'dashboard', href: '/admin/dashboard', label: a.nav.dashboard, icon: 'home' },
   { id: 'tickets', href: '/admin/tickets', label: a.nav.tickets, icon: 'question' },
   { id: 'inbox', href: '/admin/inbox', label: a.nav.inbox, icon: 'mail' },
   { id: 'lessons', href: '/admin/lessons', label: a.nav.lessons, icon: 'book' },
+  { id: 'present', href: '/admin/present', label: a.nav.present, icon: 'play' },
+  { id: 'remote', href: '/admin/remote', label: a.nav.remote, icon: 'phone' },
 ];
 
 let leaving = false;
@@ -28,10 +30,13 @@ export function AdminShell({
   current,
   title,
   children,
+  bare = false,
 }: {
   current: AdminPage;
   title: string;
   children: (supabase: SupabaseClient) => ComponentChildren;
+  /** The presenter screen and the phone remote use the whole window, with no side menu. */
+  bare?: boolean;
 }) {
   const supabase = useMemo(() => getSupabase(), []);
   const [state, setState] = useState<'checking' | 'off' | 'ready'>('checking');
@@ -76,6 +81,15 @@ export function AdminShell({
       <main id="main" tabIndex={-1} class="admin-narrow">
         <h1>{a.pageTitle}</h1>
         <p role="status">{state === 'off' ? a.notConfigured : a.checking}</p>
+      </main>
+    );
+  }
+
+  if (bare) {
+    return (
+      <main id="main" tabIndex={-1} class="admin-bare">
+        <h1 class="admin-bare-title">{title}</h1>
+        {children(supabase)}
       </main>
     );
   }

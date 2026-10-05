@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import AudiencePage from '../../components/admin/AudiencePage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.audience.title}>
+  <AudiencePage client:only="preact" />
+</AdminLayout>
