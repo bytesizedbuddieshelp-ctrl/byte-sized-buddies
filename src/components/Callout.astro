@@ -1,0 +1,72 @@
+---
+import Icon from './Icon.astro';
+import type { IconName } from './Icon.astro';
+
+// "Remember" (forest tint), "Try it" (sunshine soft), or "Careful" (brick, with icon and words).
+interface Props {
+  kind?: 'remember' | 'tryit' | 'careful';
+  /** Replaces the default heading. */
+  title?: string;
+  class?: string;
+}
+
+const heading = { remember: 'Remember', tryit: 'Try it', careful: 'Careful' } as const;
+const icons: Record<NonNullable<Props['kind']>, IconName> = {
+  remember: 'info',
+  tryit: 'check',
+  careful: 'alert',
+};
+
+const { kind = 'remember', title, class: className } = Astro.props;
+---
+
+<div class:list={['callout', `callout-${kind}`, className]}>
+  <p class="callout-title">
+    <Icon name={icons[kind]} size={28} />
+    <span>{title ?? heading[kind]}</span>
+  </p>
+  <div class="callout-body"><slot /></div>
+</div>
+
+<style is:global>
+  .callout {
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    color: var(--ink);
+  }
+
+  .callout-remember {
+    background: var(--forest-tint);
+  }
+
+  .callout-tryit {
+    background: var(--sunshine-soft);
+  }
+
+  .callout-careful {
+    background: var(--paper);
+    border: 3px solid var(--brick);
+  }
+
+  .callout-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    font-size: 22px;
+    line-height: 30px;
+    font-weight: 700;
+  }
+
+  .callout-remember .callout-title {
+    color: var(--forest-deep);
+  }
+
+  .callout-careful .callout-title {
+    color: var(--brick);
+  }
+
+  .callout-body > :last-child {
+    margin-bottom: 0;
+  }
+</style>

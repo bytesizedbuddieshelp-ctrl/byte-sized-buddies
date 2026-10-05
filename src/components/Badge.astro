@@ -1,0 +1,32 @@
+---
+// A small pill. The words carry the meaning; color is only decoration.
+interface Props {
+  tone?: 'sunshine' | 'tint';
+  class?: string;
+}
+
+const { tone = 'tint', class: className } = Astro.props;
+---
+
+<span class:list={['badge', `badge-${tone}`, className]}><slot /></span>
+
+<style is:global>
+  .badge {
+    display: inline-block;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .badge-sunshine {
+    background: var(--sunshine);
+    color: var(--ink);
+  }
+
+  .badge-tint {
+    background: var(--forest-tint);
+    color: var(--forest-deep);
+  }
+</style>

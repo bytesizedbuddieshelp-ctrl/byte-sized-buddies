@@ -1,0 +1,27 @@
+---
+// A flat paper card. A 2px rule line under it, no blur.
+interface Props {
+  as?: 'div' | 'article' | 'section' | 'li';
+  class?: string;
+  [attr: string]: unknown;
+}
+
+const { as: Tag = 'div', class: className, ...rest } = Astro.props;
+---
+
+<Tag class:list={['card', className]} {...rest}>
+  <slot />
+</Tag>
+
+<style is:global>
+  .card {
+    background: var(--paper);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: var(--space-4);
+  }
+
+  .card > :last-child {
+    margin-bottom: 0;
+  }
+</style>

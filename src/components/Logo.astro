@@ -1,0 +1,84 @@
+---
+// Uses the supplied files in public/logos. Never redraw, recolor, or stretch them.
+interface Props {
+  variant?: 'horizontal' | 'horizontal-reversed' | 'stacked' | 'mark' | 'mark-reversed' | 'mark-mono';
+  /** Width in pixels. Minimum 160 for horizontal, 32 for marks. */
+  width?: number;
+  /** Words read aloud. Pass "" when the logo sits next to the same words. */
+  alt?: string;
+  class?: string;
+}
+
+const ratios = {
+  horizontal: [415, 132],
+  'horizontal-reversed': [415, 132],
+  stacked: [412, 190],
+  mark: [120, 120],
+  'mark-reversed': [120, 120],
+  'mark-mono': [120, 120],
+} as const;
+
+const files = {
+  horizontal: 'byte-sized-buddies-logo-horizontal.svg',
+  'horizontal-reversed': 'byte-sized-buddies-logo-horizontal-reversed.svg',
+  stacked: 'byte-sized-buddies-logo-stacked.svg',
+  mark: 'byte-sized-buddies-mark.svg',
+  'mark-reversed': 'byte-sized-buddies-mark-reversed.svg',
+  'mark-mono': 'byte-sized-buddies-mark-mono.svg',
+} as const;
+
+const { variant = 'horizontal', alt = 'Byte-Sized Buddies', class: className } = Astro.props;
+const isMark = variant.startsWith('mark');
+const minWidth = isMark ? 32 : 160;
+const width = Math.max(Astro.props.width ?? (isMark ? 48 : 220), minWidth);
+const [rw, rh] = ratios[variant];
+const height = Math.round((width * rh) / rw);
+// The reversed files carry their own --forest background. On a darker band we show them on a rounded tile
+// so that background reads as part of the logo, instead of a sharp box.
+const tiled = variant.endsWith('reversed');
+---
+
+{
+  tiled ? (
+    <span class:list={['logo-tile', isMark ? 'logo-tile-mark' : 'logo-tile-wide']}>
+      <img
+        src={`/logos/${files[variant]}`}
+        width={width}
+        height={height}
+        alt={alt}
+        class={className}
+        style="max-width: 100%; height: auto;"
+      />
+    </span>
+  ) : (
+    <img
+      src={`/logos/${files[variant]}`}
+      width={width}
+      height={height}
+      alt={alt}
+      class={className}
+      style="max-width: 100%; height: auto;"
+    />
+  )
+}
+
+<style is:global>
+  .logo-tile {
+    display: inline-block;
+    background: var(--forest);
+    overflow: hidden;
+    line-height: 0;
+  }
+
+  .logo-tile-mark {
+    border-radius: var(--radius-sm);
+  }
+
+  .logo-tile-wide {
+    border-radius: var(--radius-md);
+  }
+
+  .logo-tile img {
+    display: block;
+  }
+</style>
