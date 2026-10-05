@@ -1127,7 +1127,23 @@ body.draw-pip > div {
 
 .draw-pad.is-floating .draw-toolbar {
   flex: none;
-  margin-bottom: var(--space-2);
+  margin: var(--space-2) 0 0;
+}
+
+/* The empty strip at the top of the floating pad, where Chrome lets you move the window. */
+.draw-grab {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin: 0 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--forest-tint);
+  color: var(--forest-deep);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: grab;
 }
 
 /* The picture sits in a fixed box that fills the rest of the window. Nothing else can push it around. */

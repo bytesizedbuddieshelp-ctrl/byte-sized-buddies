@@ -467,6 +467,7 @@ export const adminCopy = {
       float: 'Float on top',
       floatHelp: 'Keeps the drawing pad above every window, even while you use another app. Move it and resize it like any window.',
       floating: 'The drawing pad is floating on top of your windows.',
+      grab: 'Drag this strip to move the pad',
       bringBack: 'Bring the pad back here',
       noFloat: 'This browser cannot float the pad. Use Chrome or Edge, or put this window beside the one you share.',
       count: (n: number) => (n === 0 ? 'Nothing drawn.' : `${n} ${n === 1 ? 'drawing' : 'drawings'} showing.`),

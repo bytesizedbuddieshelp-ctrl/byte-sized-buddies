@@ -11,7 +11,14 @@ const toolIcons: Record<Tool, IconName> = { pen: 'pen', highlighter: 'highlighte
 
 // Chrome and Edge can open a small window that stays on top of every other window ("Document Picture-in-Picture").
 interface PipApi {
-  requestWindow(options: { width: number; height: number }): Promise<Window>;
+  requestWindow(options: { width: number; height: number; preferInitialWindowPlacement?: boolean; disallowReturnToOpener?: boolean }): Promise<Window>;
+}
+
+/** A good size for the floating pad: about half the screen wide, with room for the picture (16:9) and the tools. */
+function padSize(): { width: number; height: number } {
+  const width = Math.round(Math.max(640, Math.min(screen.availWidth * 0.5, 1200)));
+  const height = Math.round(Math.min(screen.availHeight * 0.85, width * (9 / 16) + 190));
+  return { width, height };
 }
 const pipApi = (): PipApi | undefined => (window as unknown as { documentPictureInPicture?: PipApi }).documentPictureInPicture;
 
@@ -157,7 +164,14 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
   async function float() {
     const api = pipApi();
     if (!api) return;
-    const win = await api.requestWindow({ width: 720, height: 560 });
+    // Every time: the same, roomy size (not whatever size the last pad was left at).
+    const size = padSize();
+    const win = await api.requestWindow({ ...size, preferInitialWindowPlacement: true });
+    try {
+      win.resizeTo(size.width, size.height);
+    } catch {
+      // Chrome may keep its own size; the pad still works.
+    }
     copyStyles(win.document);
     win.document.title = t.heading;
     // The floating window must never scroll or select text, or the picture would slide while drawing.
@@ -186,6 +200,9 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
 
   const pad = (
     <div class={`draw-pad${pip ? ' is-floating' : ''}`}>
+      {/* Chrome moves a floating window by its top edge, so the top is a clear strip, not buttons. */}
+      {pip && <p class="draw-grab">{t.grab}</p>}
+      {pip && <div class="draw-holder" ref={holder} />}
       <div class="draw-toolbar">
         <div class="draw-group" role="group" aria-label={t.tools}>
           {TOOLS.map((x) => (
@@ -218,7 +235,7 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
           <span>{t.fade}</span>
         </label>
       </div>
-      <div class="draw-holder" ref={holder} />
+      {!pip && <div class="draw-holder" ref={holder} />}
       {/* One fixed line, so the picture above never moves when this text changes. */}
       <p class="caption draw-keys">
         <span class="draw-keys-text">{t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
