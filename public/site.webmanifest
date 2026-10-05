@@ -1,0 +1,13 @@
+{
+  "name": "Byte-Sized Buddies",
+  "short_name": "Byte-Sized Buddies",
+  "description": "Free, patient, hands-on technology lessons for older adults.",
+  "start_url": "/",
+  "display": "browser",
+  "theme_color": "#2F5D50",
+  "background_color": "#FAF7F0",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
