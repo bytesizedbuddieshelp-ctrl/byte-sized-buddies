@@ -5,7 +5,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "node scripts/check-copy.mjs && vitest run && astro build",
+    "check": "node scripts/check-copy.mjs && vitest run && astro build && node scripts/check-csp.mjs",
     "check:copy": "node scripts/check-copy.mjs",
     "test": "vitest run",
     "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs",

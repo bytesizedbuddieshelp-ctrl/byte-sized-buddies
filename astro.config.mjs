@@ -26,4 +26,29 @@ export default defineConfig({
   build: { format: 'file' },
   trailingSlash: 'never',
   integrations: [preact(), devStyleguide],
+  // Content Security Policy: a list of where the browser may load things from. Astro adds it to every
+  // page as a <meta> tag, with fingerprints (hashes) of its own small scripts made fresh on every build.
+  // public/_headers adds the rules a <meta> tag can't hold (for example, no other site may frame ours).
+  // If you add a new outside service, it must be listed here, or the browser will block it.
+  security: {
+    csp: {
+      directives: [
+        "default-src 'self'",
+        "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+        "img-src 'self' data: blob: https://*.supabase.co",
+        "media-src 'self' blob:",
+        "frame-src https://www.youtube-nocookie.com",
+        "font-src 'self'",
+        "worker-src 'self'",
+        "manifest-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+      ],
+      // YouTube's player controller loads only after a visitor presses Play on a video.
+      scriptDirective: { resources: ["'self'", 'https://www.youtube.com'] },
+      // Preact sets a few sizes as inline styles (slide scaling, progress bars), so inline styles stay allowed.
+      styleDirective: { resources: ["'self'", "'unsafe-inline'"] },
+    },
+  },
 });
