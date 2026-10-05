@@ -5,11 +5,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "node scripts/check-copy.mjs && vitest run && astro build && node scripts/check-csp.mjs",
+    "check": "node scripts/check-copy.mjs && vitest run && astro build && node scripts/check-csp.mjs && node scripts/check-a11y.mjs",
     "check:copy": "node scripts/check-copy.mjs",
     "test": "vitest run",
     "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs",
-    "bridge:secret": "node scripts/make-bridge-secret.mjs"
+    "bridge:secret": "node scripts/make-bridge-secret.mjs",
+    "check:a11y": "node scripts/check-a11y.mjs",
+    "screenshots": "node scripts/check-a11y.mjs --shots"
   },
   "repository": {
     "type": "git",

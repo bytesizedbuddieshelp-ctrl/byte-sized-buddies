@@ -7,3 +7,4 @@ dist
 !.env.example
 *.webm
 *.mp4
+test-results
