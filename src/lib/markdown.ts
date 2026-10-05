@@ -17,11 +17,13 @@ export function renderMarkdown(markdown: string, options: { allowImages?: boolea
         node.setAttribute('rel', 'noopener noreferrer');
       }
     });
-    DOMPurify.addHook('uponSanitizeElement', (node, data) => {
-      if (data.tagName === 'img') {
-        const src = (node as Element).getAttribute('src') ?? '';
-        if (!supabaseUrl || !src.startsWith(ownImages())) node.parentNode?.removeChild(node);
-      }
+    // Pictures: only our own lesson-files storage. This runs after the attributes are cleaned, so it sees
+    // the final result. Other ways to load a picture (srcset, lazy-load tricks) are removed outright.
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      if (node.tagName !== 'IMG') return;
+      for (const name of ['srcset', 'sizes', 'lowsrc', 'dynsrc', 'longdesc', 'ping']) node.removeAttribute(name);
+      const src = node.getAttribute('src') ?? '';
+      if (!supabaseUrl || !src.startsWith(ownImages())) node.parentNode?.removeChild(node);
     });
     hooked = true;
   }
@@ -31,6 +33,6 @@ export function renderMarkdown(markdown: string, options: { allowImages?: boolea
   const blocked = ['style', 'form', 'input', 'button', 'select', 'textarea', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'svg', 'math'];
   return DOMPurify.sanitize(html, {
     FORBID_TAGS: options.allowImages ? [...blocked, 'picture', 'source'] : [...blocked, 'img', 'picture', 'source'],
-    FORBID_ATTR: ['style'],
+    FORBID_ATTR: ['style', 'srcset', 'sizes'],
   });
 }

@@ -38,9 +38,31 @@ describe('classifyFile', () => {
   });
   it('refuses pictures that carry code', () => {
     expect(classifyFile('a.svg', 50, bytes(), '<svg xmlns="x"><circle/></svg>').problem).toBeUndefined();
-    expect(classifyFile('a.svg', 50, bytes(), '<svg onload="x()"></svg>').problem).toContain('code');
-    expect(classifyFile('a.svg', 50, bytes(), '<svg><script>x</script></svg>').problem).toContain('code');
+    expect(classifyFile('a.svg', 50, bytes(), '<svg onload="x()"></svg>').problem).toContain('event handler');
+    expect(classifyFile('a.svg', 50, bytes(), '<svg><script>x</script></svg>').problem).toContain('code or embedded content');
     expect(classifyFile('a.svg', 50, bytes(), 'hello').problem).toContain("isn't a real SVG");
+  });
+  it('refuses the sneaky ways to hide code in a picture', () => {
+    const sneaky = [
+      '<svg/onload=alert(1)></svg>',
+      '<svg xmlns="x"><circle/onclick="x()"/></svg>',
+      '<svg"onload="x()"></svg>',
+      '<svg><a href="https://tracker.example/x"><circle/></a></svg>',
+      '<svg><a xlink:href="java&#115;cript:x()"><circle/></a></svg>',
+      '<svg><a href="javascript:x()"><circle/></a></svg>',
+      '<svg><a href="jav\tascript:x()"><circle/></a></svg>',
+      '<svg><image href="data:image/png;base64,AAAA"/></svg>',
+      '<svg><style>@import url(https://tracker.example/a.css);</style></svg>',
+      '<svg><rect style="fill:url(https://tracker.example/a)"/></svg>',
+      '<!DOCTYPE svg [<!ENTITY x "boom">]><svg>&x;</svg>',
+      '<svg><foreignObject><div/></foreignObject></svg>',
+      '<svg><SCRIPT>x()</SCRIPT></svg>',
+    ];
+    for (const text of sneaky) expect(classifyFile('a.svg', 80, bytes(), text).problem, text).toBeTruthy();
+  });
+  it('still accepts an ordinary drawing, including links inside the file', () => {
+    const fine = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><defs><linearGradient id="g"/></defs><use href="#a"/><rect fill="url(#g)" width="5" height="5"/></svg>';
+    expect(classifyFile('ok.svg', 80, bytes(), fine).problem).toBeUndefined();
   });
 });
 

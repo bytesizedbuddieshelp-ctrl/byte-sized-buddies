@@ -24,6 +24,37 @@ export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 const EXTENSION_KIND: Record<string, FileKind> = { pdf: 'pdf', png: 'png', jpg: 'jpg', jpeg: 'jpg', webp: 'webp', svg: 'svg', json: 'json' };
 
+// An SVG is a picture, but it can also carry code or pull in things from other websites. We only accept plain
+// drawings. Two checks run: a text check that works anywhere, and (in the browser) a real parse of the file.
+const SVG_TEXT_RULES: [RegExp, string][] = [
+  [/<!ENTITY|<!DOCTYPE|<\?xml-stylesheet/i, 'a document type or entity'],
+  [/<\s*(script|foreignObject|iframe|object|embed|audio|video|link|meta)\b/i, 'code or embedded content'],
+  [/[\s/"'`]on[a-z]+\s*=/i, 'an event handler'],
+  [/j\s*a\s*v\s*a\s*s\s*c\s*r\s*i\s*p\s*t\s*:/i, 'a script link'],
+  [/&#x?0*[0-9a-f]+;?\s*[a-z]*\s*script/i, 'a disguised script link'],
+  [/href\s*=\s*(?!["']?\s*#)/i, 'a link to somewhere else'],
+  [/@import|url\(\s*(?!["']?\s*#)/i, 'a link to somewhere else'],
+];
+
+/** Returns null for a plain SVG, "not-svg" for something that is not an SVG, or a plain-words reason. */
+export function svgProblem(text: string): string | null {
+  if (!/<svg[\s>/]/i.test(text)) return 'not-svg';
+  for (const [rule, reason] of SVG_TEXT_RULES) if (rule.test(text)) return reason;
+  if (typeof DOMParser === 'undefined') return null;
+  const doc = new DOMParser().parseFromString(text, 'image/svg+xml');
+  if (doc.querySelector('parsererror') || doc.documentElement.localName.toLowerCase() !== 'svg') return 'not-svg';
+  for (const el of Array.from(doc.getElementsByTagName('*'))) {
+    if (/^(script|foreignobject|iframe|object|embed|audio|video|link|meta)$/i.test(el.localName)) return 'code or embedded content';
+    for (const attr of Array.from(el.attributes)) {
+      const value = attr.value.replace(/[\s\u0000-\u001f]/g, '').toLowerCase();
+      if (/^on/i.test(attr.localName)) return 'an event handler';
+      if (/javascript:|vbscript:|data:text/.test(value)) return 'a script link';
+      if (/(^|:)href$/i.test(attr.name) && !value.startsWith('#')) return 'a link to somewhere else';
+    }
+  }
+  return null;
+}
+
 /** Looks at a file's name and its first bytes. A renamed file does not fool it. */
 export function classifyFile(name: string, size: number, head: Uint8Array, svgText = ''): KitFileInfo {
   const extension = name.split('.').pop()?.toLowerCase() ?? '';
@@ -39,8 +70,9 @@ export function classifyFile(name: string, size: number, head: Uint8Array, svgTe
   else if (kind === 'jpg' && !(head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff)) info.problem = `"${name}" says it is a JPG, but it isn't a real JPG.`;
   else if (kind === 'webp' && !(ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP')) info.problem = `"${name}" says it is a WebP, but it isn't a real WebP.`;
   else if (kind === 'svg') {
-    if (!/<svg[\s>]/i.test(svgText)) info.problem = `"${name}" says it is an SVG, but it isn't a real SVG.`;
-    else if (/<script|\son\w+\s*=|javascript:|<foreignObject|<iframe/i.test(svgText)) info.problem = `"${name}" contains code that is not allowed in a picture. Export it again as a plain SVG.`;
+    const problem = svgProblem(svgText);
+    if (problem === 'not-svg') info.problem = `"${name}" says it is an SVG, but it isn't a real SVG.`;
+    else if (problem) info.problem = `"${name}" contains ${problem}, which is not allowed in a picture. Export it again as a plain SVG.`;
   }
   return info;
 }
