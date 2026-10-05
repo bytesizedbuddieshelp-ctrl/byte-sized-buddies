@@ -24,3 +24,13 @@ describe('drawing on the recording', () => {
     expect(lineWidth('pen', 3840)).toBeGreaterThan(lineWidth('pen', 1920));
   });
 });
+
+describe('fading lines', () => {
+  it('stay for 3 seconds, then fade out', async () => {
+    const { fadeOpacity } = await import('../src/lib/drawing');
+    expect(fadeOpacity(0)).toBe(1);
+    expect(fadeOpacity(3000)).toBe(1);
+    expect(fadeOpacity(3400)).toBeCloseTo(0.5);
+    expect(fadeOpacity(5000)).toBe(0);
+  });
+});

@@ -22,6 +22,12 @@ export const iconPaths = {
   record: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/>',
   pause: '<path d="M9 6v12M15 6v12"/>',
   stop: '<rect x="6" y="6" width="12" height="12" rx="2.5"/>',
+  pen: '<path d="M4 20l1.2-4.4L15.8 5a2.1 2.1 0 0 1 3 3L8.4 18.8z"/><path d="M13.8 7l3 3"/>',
+  highlighter: '<path d="M14.5 4.5l5 5-7.5 7.5-5-5z"/><path d="M7 12.5l-2.5 5 2 2 5-2.5"/><path d="M3.5 20.5h6"/>',
+  pointer: '<path d="M5 19L18 6"/><path d="M10 6h8v8"/>',
+  oval: '<ellipse cx="12" cy="12" rx="9" ry="6.5"/>',
+  undo: '<path d="M9 5L4 10l5 5"/><path d="M4 10h10a5 5 0 0 1 0 10h-3"/>',
+  float: '<rect x="3" y="4" width="18" height="16" rx="3"/><rect x="11" y="11" width="7" height="6" rx="1.5"/>',
 } as const;
 
 export type IconName = keyof typeof iconPaths;

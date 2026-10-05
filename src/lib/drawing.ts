@@ -12,11 +12,28 @@ export interface Stroke {
   tool: Tool;
   color: InkColor;
   points: Point[];
+  /** When the stroke was finished (milliseconds), for fading lines. */
+  at?: number;
+  /** 0 (gone) to 1 (fully drawn). */
+  opacity?: number;
 }
+
+/** Fading lines stay for HOLD_MS, then fade out over FADE_MS. */
+export const HOLD_MS = 3000;
+export const FADE_MS = 800;
+
+/** How visible a fading line is, by its age: 1 while it holds, then down to 0. */
+export function fadeOpacity(ageMs: number, hold = HOLD_MS, fade = FADE_MS): number {
+  if (ageMs <= hold) return 1;
+  return Math.max(0, 1 - (ageMs - hold) / fade);
+}
+
+/** The keyboard shortcuts on the drawing pad. */
+export const TOOL_KEYS: Record<string, Tool> = { p: 'pen', h: 'highlighter', a: 'arrow', c: 'circle' };
 
 /** Line widths grow with the size of the recording, so they look the same at any size. */
 export function lineWidth(tool: Tool, canvasWidth: number): number {
-  const base = Math.max(3, canvasWidth * 0.004);
+  const base = Math.max(4, canvasWidth * 0.006);
   return tool === 'highlighter' ? base * 6 : base;
 }
 
@@ -73,10 +90,11 @@ export function renderStrokes(g: CanvasRenderingContext2D, strokes: Stroke[], co
   g.lineCap = 'round';
   g.lineJoin = 'round';
   for (const stroke of strokes) {
-    if (stroke.points.length === 0) continue;
+    const visible = stroke.opacity ?? 1;
+    if (stroke.points.length === 0 || visible <= 0) continue;
     const w = lineWidth(stroke.tool, width);
     if (stroke.tool === 'highlighter') {
-      g.globalAlpha = 0.35;
+      g.globalAlpha = 0.35 * visible;
       g.lineWidth = w;
       g.strokeStyle = colors[stroke.color];
       path(g, stroke, w * 5);
@@ -86,6 +104,7 @@ export function renderStrokes(g: CanvasRenderingContext2D, strokes: Stroke[], co
     }
     g.lineWidth = w + Math.max(2, w * 0.6);
     // The same head size for the outline and the color, so the outline stays a thin edge.
+    g.globalAlpha = visible;
     g.strokeStyle = outline;
     path(g, stroke, w * 5);
     g.stroke();
@@ -93,5 +112,6 @@ export function renderStrokes(g: CanvasRenderingContext2D, strokes: Stroke[], co
     g.strokeStyle = colors[stroke.color];
     path(g, stroke, w * 5);
     g.stroke();
+    g.globalAlpha = 1;
   }
 }
