@@ -199,6 +199,25 @@ revoke all on public.owners, public.bridge_secret from authenticated;
 -- function below revokes everything first, then grants only what it should.
 -- ---------------------------------------------------------------------------
 
+-- Anyone can type any email address into the public forms, so confirmation emails are limited:
+--   * no more than 30 confirmation emails an hour in total, and
+--   * no more than 3 a day to one inbox. "name+anything@example.com" counts as "name@example.com".
+-- (Providers that ignore dots, like Gmail, can still treat a.b@ and ab@ as different here. The hourly total
+--  keeps that harmless.) The question or request is always saved; only the email is skipped.
+create or replace function public.can_queue_public_email(p_email text) returns boolean
+language sql stable set search_path = public as $$
+  select
+    (select count(*) from public.outbox
+      where kind in ('ticket_received', 'contact_received') and created_at > now() - interval '1 hour') < 30
+    and
+    (select count(*) from public.outbox
+      where kind in ('ticket_received', 'contact_received') and created_at > now() - interval '1 day'
+        and lower(regexp_replace(split_part(to_email, '@', 1), '\+.*$', '')) || '@' || lower(split_part(to_email, '@', 2))
+          = lower(regexp_replace(split_part(p_email, '@', 1), '\+.*$', '')) || '@' || lower(split_part(p_email, '@', 2))
+    ) < 3;
+$$;
+revoke all on function public.can_queue_public_email(text) from public, anon, authenticated;
+
 -- A question from the Ask page. The browser makes the private token.
 create or replace function public.submit_ticket(
   p_token text, p_name text, p_facility text, p_email text,
@@ -236,10 +255,8 @@ begin
   insert into public.tickets (token, requester_name, facility, requester_email, device, urgency, question)
   values (p_token, v_name, v_facility, v_email, v_device, v_urgency, v_question);
 
-  -- Anyone can type any email address here, so we never send one address more than 3 emails a day.
-  -- (The question is still saved; only the confirmation email is skipped.)
-  if v_email is not null
-     and (select count(*) from public.outbox where lower(to_email) = lower(v_email) and created_at > now() - interval '1 day') < 3 then
+  -- Limits on confirmation emails: see can_queue_public_email above. The question is saved either way.
+  if v_email is not null and public.can_queue_public_email(v_email) then
     select coalesce(value #>> '{}', '') into v_site from public.settings where key = 'site_url';
     insert into public.outbox (kind, to_email, subject, body_text)
     values (
@@ -312,8 +329,8 @@ begin
   insert into public.contact_requests (contact_name, facility, role, email, phone, learner_count, devices, preferred_times, message)
   values (v_name, v_facility, v_role, v_email, v_phone, v_learners, v_devices, v_times, v_message);
 
-  -- Same limit as tickets: never more than 3 emails a day to one address.
-  if (select count(*) from public.outbox where lower(to_email) = lower(v_email) and created_at > now() - interval '1 day') < 3 then
+  -- Same email limits as tickets. The request is saved either way.
+  if public.can_queue_public_email(v_email) then
   insert into public.outbox (kind, to_email, subject, body_text)
   values (
     'contact_received', v_email, 'Thank you for reaching out to Byte-Sized Buddies',
