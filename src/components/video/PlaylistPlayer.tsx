@@ -3,7 +3,7 @@ import { Icon } from '../forms/Icon';
 import { copy } from '../../content/copy';
 import type { VideoSegment } from '../../lib/lessons';
 import { parseYouTubeId, youTubePlayerUrl } from '../../lib/youtube';
-import { loadYouTubeApi, type YTPlayer } from '../../lib/youtubeApi';
+import { loadYouTubeApi } from '../../lib/youtubeApi';
 
 const t = copy.player;
 
@@ -15,21 +15,22 @@ export function PlaylistPlayer({ segments: given, title }: { segments: VideoSegm
   const [index, setIndex] = useState(0);
   const [ended, setEnded] = useState(false);
   const frame = useRef<HTMLIFrameElement>(null);
-  const player = useRef<YTPlayer | null>(null);
   const total = segments.length;
   const current = segments[Math.min(index, total - 1)];
 
   // Each part gets a fresh frame. When the controller is available, it tells us when the part ends.
+  // The old frame is removed by the page itself, so the controller's destroy() is never called
+  // (it would try to remove the same frame a second time). Messages from an old frame are ignored.
   useEffect(() => {
     if (!started || !frame.current) return;
     let cancelled = false;
     const element = frame.current;
     loadYouTubeApi().then((YT) => {
       if (cancelled || !YT) return;
-      player.current = new YT.Player(element, {
+      new YT.Player(element, {
         events: {
           onStateChange: (event) => {
-            if (event.data !== YT.PlayerState.ENDED) return;
+            if (cancelled || event.data !== YT.PlayerState.ENDED) return;
             if (index < total - 1) setIndex(index + 1);
             else setEnded(true);
           },
@@ -38,8 +39,6 @@ export function PlaylistPlayer({ segments: given, title }: { segments: VideoSegm
     });
     return () => {
       cancelled = true;
-      player.current?.destroy();
-      player.current = null;
     };
   }, [started, index, total]);
 

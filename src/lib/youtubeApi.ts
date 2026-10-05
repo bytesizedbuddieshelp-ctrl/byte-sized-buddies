@@ -2,12 +2,8 @@
 // It lets the playlist player notice when a part ends and start the next one.
 // If it can't load (blocked, offline), the videos still play; they just don't move on by themselves.
 
-export interface YTPlayer {
-  destroy(): void;
-}
-
 interface YTNamespace {
-  Player: new (element: HTMLIFrameElement, options: { events: { onStateChange?: (event: { data: number }) => void } }) => YTPlayer;
+  Player: new (element: HTMLIFrameElement, options: { events: { onStateChange?: (event: { data: number }) => void } }) => unknown;
   PlayerState: { ENDED: number };
 }
 
