@@ -1,0 +1,16 @@
+/* Byte-Sized Buddies design tokens. Source of truth: tokens.json. Never paste raw hex values elsewhere; use these variables. */
+@font-face { font-family: "Fraunces"; src: url("./fonts/Fraunces-Soft.woff2") format("woff2"); font-weight: 500 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("./fonts/AtkinsonHyperlegible-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible"; src: url("./fonts/AtkinsonHyperlegible-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+:root {
+  --forest: #2F5D50; --forest-deep: #1F4237; --forest-tint: #DCE9E3;
+  --sunshine: #FFD166; --sunshine-soft: #FFF1C7;
+  --cream: #FAF7F0; --paper: #FFFFFF;
+  --ink: #222222; --ink-muted: #55605B; --rule: #D9D4C7;
+  --brick: #A63D2F; --focus: #1A56B8;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-sans: "Atkinson Hyperlegible", "Segoe UI", Verdana, system-ui, sans-serif;
+  --space-1: 4px; --space-2: 8px; --space-3: 16px; --space-4: 24px; --space-5: 32px; --space-6: 48px; --space-7: 72px;
+  --radius-sm: 10px; --radius-md: 18px; --radius-lg: 28px; --radius-pill: 999px;
+  --shadow-card: 0 2px 0 #D9D4C7;
+}
