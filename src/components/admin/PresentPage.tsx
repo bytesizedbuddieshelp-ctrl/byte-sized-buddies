@@ -181,8 +181,8 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
 
   // The newest values, for messages that arrive later (a phone press, a key in the audience window).
   const tryBase = tryMinutes ? tryCd.base : null;
-  const live = useRef({ index, blank, remaining, running, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes });
-  live.current = { index, blank, remaining, running, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes };
+  const live = useRef({ index, blank, remaining, running, clockBase: clockCd.base, clockStartedAt: clockCd.startedAt, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes });
+  live.current = { index, blank, remaining, running, clockBase: clockCd.base, clockStartedAt: clockCd.startedAt, tryBase, tryStartedAt: tryCd.startedAt, tryRemaining, tryRunning, tryMinutes };
   const bc = useRef<BroadcastChannel | null>(null);
   const remote = useRef<RemoteLink | null>(null);
   const audienceWindow = useRef<Window | null>(null);
@@ -211,8 +211,9 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
       next: slides[now.index + 1]?.title ?? null,
       notes: current.notes ?? '',
       blank: now.blank,
-      clock: { total: clockTotal, remaining: now.remaining, running: now.running },
-      tryTimer: now.tryMinutes && now.tryRemaining !== null ? { minutes: now.tryMinutes, remaining: now.tryRemaining, running: now.tryRunning } : null,
+      clock: { total: clockTotal, base: now.clockBase, startedAt: now.clockStartedAt },
+      sentAt: Date.now(),
+      tryTimer: now.tryMinutes ? { minutes: now.tryMinutes, base: now.tryBase ?? 0, startedAt: now.tryStartedAt } : null,
     };
   }
   const sendStateToPhone = () => remote.current?.send(EVENTS.state, stateForPhone() as unknown as Record<string, unknown>);

@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { AdminShell } from './AdminShell';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
-import { EVENTS, clockMood, clockNow, formatClock, normalizeCode, parseState, type RemoteState } from '../../lib/remote';
+import { EVENTS, clockMood, clockOffset, countdownLeft, formatClock, normalizeCode, parseState, type RemoteState } from '../../lib/remote';
 import { openRemote, type LinkStatus, type RemoteLink } from '../../lib/remoteChannel';
 
 const t = a.remote;
@@ -100,6 +100,7 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
   const [awake, setAwake] = useState<boolean | null>(null);
   const remote = useRef<RemoteLink | null>(null);
   const connectedAt = useRef(0);
+  const offset = useRef<number | null>(null);
 
   // ---- The channel
   useEffect(() => {
@@ -110,6 +111,7 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
         if (event === EVENTS.state) {
           const next = parseState(payload);
           if (next) {
+            offset.current = clockOffset(offset.current, next.sentAt, Date.now());
             setState(next);
             setSeenAt(Date.now());
             setEnded(false);
@@ -187,8 +189,13 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
     remote.current?.send(event, payload);
   }
 
-  const left = state ? clockNow(state.clock, seenAt, now) : null;
-  const tryLeft = state?.tryTimer ? Math.max(0, clockNow(state.tryTimer, seenAt, now)) : null;
+  // The laptop sends start times, and the phone works out the time left itself. That way a new message never makes it jump.
+  const shift = offset.current ?? 0;
+  const timeLeft = (base: number, startedAt: number | null) => countdownLeft(base, startedAt === null ? null : startedAt + shift, now);
+  const left = state ? timeLeft(state.clock.base, state.clock.startedAt) : null;
+  const tryLeft = state?.tryTimer ? Math.max(0, timeLeft(state.tryTimer.base, state.tryTimer.startedAt)) : null;
+  const clockRunning = state?.clock.startedAt != null;
+  const tryRunning = state?.tryTimer?.startedAt != null;
   const mood = left === null ? 'fine' : clockMood(left);
 
   return (
@@ -239,9 +246,9 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
             type="button"
             class="button button-primary remote-practice"
             disabled={!live || (tryLeft ?? 0) <= 0}
-            onClick={() => press(state.tryTimer?.running ? EVENTS.tryPause : EVENTS.tryStart)}
+            onClick={() => press(tryRunning ? EVENTS.tryPause : EVENTS.tryStart)}
           >
-            {state.tryTimer.running ? t.practicePause : t.practiceStart(state.tryTimer.minutes)}
+            {tryRunning ? t.practicePause : t.practiceStart(state.tryTimer.minutes)}
           </button>
         )}
         <div class="remote-small">
@@ -252,9 +259,9 @@ function Connected({ supabase, code, onLeave }: { supabase: SupabaseClient; code
             type="button"
             class="button button-secondary"
             disabled={!live}
-            onClick={() => press(state?.clock.running ? EVENTS.timerPause : EVENTS.timerStart)}
+            onClick={() => press(clockRunning ? EVENTS.timerPause : EVENTS.timerStart)}
           >
-            {state?.clock.running ? t.timerPause : t.timerStart}
+            {clockRunning ? t.timerPause : t.timerStart}
           </button>
         </div>
         <div class="remote-big">

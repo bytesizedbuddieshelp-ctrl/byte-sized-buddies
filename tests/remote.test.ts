@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CODE_ALPHABET, clockMood, countdownLeft, clockNow, formatClock, makeRemoteCode, normalizeCode, parseCommand, parseState, topicFor } from '../src/lib/remote';
+import { CODE_ALPHABET, clockMood, clockOffset, countdownLeft, formatClock, makeRemoteCode, normalizeCode, parseCommand, parseState, topicFor } from '../src/lib/remote';
 
 describe('makeRemoteCode', () => {
   it('makes four letters with no I, L, or O', () => {
@@ -53,12 +53,13 @@ describe('parseCommand', () => {
 });
 
 describe('parseState', () => {
-  const good = { index: 1, total: 5, title: 'Tap Contacts', next: 'Try it', notes: 'Go slowly.', blank: false, clock: { total: 2700, remaining: 2650, running: true }, tryTimer: null };
+  const good = { index: 1, total: 5, title: 'Tap Contacts', next: 'Try it', notes: 'Go slowly.', blank: false, clock: { total: 2700, base: 2700, startedAt: 1700000000000 }, sentAt: 1700000005000, tryTimer: null };
   it('accepts a good state', () => expect(parseState(good)).toEqual(good));
   it('reads a practice timer, and ignores a broken one', () => {
-    const tryTimer = { minutes: 5, remaining: 290, running: true };
+    const tryTimer = { minutes: 5, base: 290, startedAt: 1700000001000 };
     expect(parseState({ ...good, tryTimer })!.tryTimer).toEqual(tryTimer);
     expect(parseState({ ...good, tryTimer: { minutes: '5' } })!.tryTimer).toBeNull();
+    expect(parseState({ ...good, tryTimer: { minutes: 5, base: 300, startedAt: null } })!.tryTimer).toEqual({ minutes: 5, base: 300, startedAt: null });
     expect(parseState({ ...good, tryTimer: undefined })!.tryTimer).toBeNull();
   });
   it('cuts long text', () => {
@@ -67,7 +68,7 @@ describe('parseState', () => {
     expect(state.notes).toHaveLength(2000);
   });
   it('refuses broken states', () => {
-    for (const bad of [null, 'x', {}, { ...good, index: 5 }, { ...good, index: -1 }, { ...good, total: 0 }, { ...good, blank: 'no' }, { ...good, clock: null }, { ...good, clock: { total: 1, remaining: '2', running: true } }]) {
+    for (const bad of [null, 'x', {}, { ...good, index: 5 }, { ...good, index: -1 }, { ...good, total: 0 }, { ...good, blank: 'no' }, { ...good, clock: null }, { ...good, clock: { total: 1, base: '2', startedAt: null } }, { ...good, sentAt: 'now' }]) {
       expect(parseState(bad)).toBeNull();
     }
   });
@@ -88,10 +89,18 @@ describe('clock helpers', () => {
     expect(clockMood(0)).toBe('over');
     expect(clockMood(-5)).toBe('over');
   });
-  it('guesses the time left between messages', () => {
-    expect(clockNow({ total: 100, remaining: 50, running: true }, 1000, 4500)).toBe(47);
-    expect(clockNow({ total: 100, remaining: 50, running: false }, 1000, 9000)).toBe(50);
+});
+
+describe('clockOffset', () => {
+  it('starts from the first reading', () => expect(clockOffset(null, 1000, 1250)).toBe(250));
+  it('keeps the smallest reading, so slow messages cannot make the numbers jump', () => {
+    let best = clockOffset(null, 1000, 1300);
+    best = clockOffset(best, 6000, 6900); // a slow one
+    expect(best).toBe(300);
+    best = clockOffset(best, 11000, 11120); // a quick one is more accurate
+    expect(best).toBe(120);
   });
+  it('works when the phone clock is behind', () => expect(clockOffset(null, 5000, 3000)).toBe(-2000));
 });
 
 describe('countdownLeft', () => {

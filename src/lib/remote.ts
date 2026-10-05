@@ -75,17 +75,20 @@ export function parseCommand(event: string, payload: unknown, slideCount: number
   }
 }
 
+/** A countdown, described by when it started, so the phone can follow it without jumping. */
 export interface Clock {
   total: number;
-  remaining: number;
-  running: boolean;
+  /** Seconds left when it was last stopped. */
+  base: number;
+  /** The laptop's time (milliseconds) when it started, or null while stopped. */
+  startedAt: number | null;
 }
 
 /** The practice timer on a "Try it" slide. */
 export interface TryTimer {
   minutes: number;
-  remaining: number;
-  running: boolean;
+  base: number;
+  startedAt: number | null;
 }
 
 /** What the presenter tells the phone. */
@@ -97,6 +100,8 @@ export interface RemoteState {
   notes: string;
   blank: boolean;
   clock: Clock;
+  /** The laptop's time (milliseconds) when this message was sent. */
+  sentAt: number;
   /** Only when the current slide has a practice timer. */
   tryTimer: TryTimer | null;
 }
@@ -109,10 +114,12 @@ export function parseState(payload: unknown): RemoteState | null {
   const p = payload as Record<string, unknown>;
   const clock = p.clock as Record<string, unknown> | undefined;
   if (!whole(p.index) || !whole(p.total) || p.total < 1 || p.index < 0 || p.index >= p.total || typeof p.blank !== 'boolean') return null;
-  if (!clock || !whole(clock.total) || !whole(clock.remaining) || typeof clock.running !== 'boolean') return null;
+  const started = (v: unknown): v is number | null => v === null || (typeof v === 'number' && Number.isFinite(v));
+  if (!clock || !whole(clock.total) || !whole(clock.base) || !started(clock.startedAt)) return null;
+  if (typeof p.sentAt !== 'number' || !Number.isFinite(p.sentAt)) return null;
   const tt = p.tryTimer as Record<string, unknown> | null | undefined;
   const tryTimer: TryTimer | null =
-    tt && whole(tt.minutes) && whole(tt.remaining) && typeof tt.running === 'boolean' ? { minutes: tt.minutes, remaining: tt.remaining, running: tt.running } : null;
+    tt && whole(tt.minutes) && whole(tt.base) && started(tt.startedAt) ? { minutes: tt.minutes, base: tt.base, startedAt: tt.startedAt } : null;
   return {
     index: p.index,
     total: p.total,
@@ -120,7 +127,8 @@ export function parseState(payload: unknown): RemoteState | null {
     next: typeof p.next === 'string' ? clip(p.next, 120) : null,
     notes: clip(p.notes, 2000),
     blank: p.blank,
-    clock: { total: clock.total, remaining: clock.remaining, running: clock.running },
+    clock: { total: clock.total, base: clock.base, startedAt: clock.startedAt },
+    sentAt: p.sentAt,
     tryTimer,
   };
 }
@@ -146,10 +154,14 @@ export function clockMood(remaining: number): ClockMood {
   return remaining <= 0 ? 'over' : remaining <= WARNING_SECONDS ? 'warning' : 'fine';
 }
 
-/** The phone shows a guess of the time left between messages, so the clock moves smoothly. */
-export function clockNow(clock: Clock, receivedAtMs: number, nowMs: number): number {
-  if (!clock.running) return clock.remaining;
-  return clock.remaining - Math.floor((nowMs - receivedAtMs) / 1000);
+/**
+ * How far the phone's clock is ahead of the laptop's (milliseconds). Each message gives a reading that is a bit too
+ * big, by however long the message took. The smallest reading is the best one, so we keep that, and the numbers on
+ * the phone then count smoothly instead of jumping each time a new message arrives.
+ */
+export function clockOffset(best: number | null, sentAt: number, receivedAt: number): number {
+  const reading = receivedAt - sentAt;
+  return best === null ? reading : Math.min(best, reading);
 }
 
 // Messages between the presenter window and the audience window (same computer, BroadcastChannel).
