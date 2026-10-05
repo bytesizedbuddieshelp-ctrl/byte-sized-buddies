@@ -1,0 +1,20 @@
+---
+import Base from './Base.astro';
+
+// A plain page with a title and readable text, used for About, Teach, Privacy, and License.
+interface Props {
+  title: string;
+  description: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Base title={title} description={description}>
+  <div class="container section">
+    <div class="prose">
+      <h1>{title}</h1>
+      <slot />
+    </div>
+  </div>
+</Base>

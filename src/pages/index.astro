@@ -1,14 +1,94 @@
 ---
 import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Card from '../components/Card.astro';
+import Icon from '../components/Icon.astro';
 import { copy } from '../content/copy';
+
+const t = copy.home;
 ---
 
-<Base title={copy.home.title} description={copy.home.description}>
-  <div class="container section">
+<Base title={t.title} description={t.description}>
+  <!-- 1. Hero -->
+  <section class="container section" aria-labelledby="hero-title">
     <div class="prose">
-      <h1>{copy.siteName}</h1>
-      <p class="lead">{copy.home.hello}</p>
-      <p>{copy.tagline}</p>
+      <h1 id="hero-title" class="hero-title">{copy.tagline}</h1>
+      <p class="lead">{copy.mission}</p>
+      <div class="actions">
+        <Button href="/for-senior-homes#contact">{t.heroButtons.visit}</Button>
+        <Button variant="secondary" href="/lessons">{t.heroButtons.lessons}</Button>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- 2. How a visit works -->
+  <section class="container section" aria-labelledby="visit-title">
+    <h2 id="visit-title">{t.visit.heading}</h2>
+    <ol class="grid clean-list">
+      {
+        t.visit.steps.map((step, index) => (
+          <Card as="li">
+            <div class="step-number" aria-hidden="true">{index + 1}</div>
+            <h3><span class="visually-hidden">Step {index + 1}: </span>{step.title}</h3>
+            <p>{step.text}</p>
+          </Card>
+        ))
+      }
+    </ol>
+  </section>
+
+  <!-- 3. What you can learn (lessons come from the database in Phase 3) -->
+  <section class="container section" aria-labelledby="learn-title">
+    <h2 id="learn-title">{t.lessons.heading}</h2>
+    <Card>
+      <h3>{t.lessons.emptyTitle}</h3>
+      <p>{t.lessons.emptyText}</p>
+    </Card>
+  </section>
+
+  <!-- 4. For senior homes -->
+  <section class="container section" aria-labelledby="homes-title">
+    <div class="panel">
+      <h2 id="homes-title">{t.homes.heading}</h2>
+      <p>{t.homes.text}</p>
+      <h3>{t.homes.needHeading}</h3>
+      <ul class="check-list">
+        {
+          t.homes.needs.map((need) => (
+            <li>
+              <Icon name="check" size={24} />
+              <span>{need}</span>
+            </li>
+          ))
+        }
+      </ul>
+      <Button href="/for-senior-homes#contact">{t.homes.button}</Button>
+    </div>
+  </section>
+
+  <!-- 5. Free for everyone -->
+  <section class="container section" aria-labelledby="free-title">
+    <div class="prose">
+      <h2 id="free-title">{t.free.heading}</h2>
+      <p>{t.free.text}</p>
+      <Button variant="secondary" href="/teach">{t.free.button}</Button>
+    </div>
+  </section>
+
+  <!-- 6. A promise to families and staff -->
+  <section class="container section" aria-labelledby="promise-title">
+    <Card>
+      <h2 id="promise-title">{t.promise.heading}</h2>
+      <ul class="check-list">
+        {
+          t.promise.items.map((item) => (
+            <li>
+              <Icon name="check" size={24} />
+              <span>{item}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </Card>
+  </section>
 </Base>

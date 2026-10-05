@@ -15,6 +15,11 @@ interface Props {
 
 const { title = copy.siteName, description = copy.home.description, noindex = false } = Astro.props;
 const fullTitle = title === copy.siteName ? title : `${title} | ${copy.siteName}`;
+
+// Absolute addresses only work once PUBLIC_SITE_URL is set (see README). Without it, we leave them out.
+const site = Astro.site;
+const canonical = site ? new URL(Astro.url.pathname, site).href : undefined;
+const shareImage = site ? new URL('/og-image.png', site).href : undefined;
 ---
 
 <!doctype html>
@@ -25,7 +30,21 @@ const fullTitle = title === copy.siteName ? title : `${title} | ${copy.siteName}
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
+    {canonical && <link rel="canonical" href={canonical} />}
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta property="og:site_name" content={copy.siteName} />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    {canonical && <meta property="og:url" content={canonical} />}
+    {shareImage && <meta property="og:image" content={shareImage} />}
+    {shareImage && <meta property="og:image:width" content="1200" />}
+    {shareImage && <meta property="og:image:height" content="630" />}
+    {shareImage && <meta property="og:image:alt" content="Byte-Sized Buddies. Learn it. Try it. Keep it." />}
+    <meta name="twitter:card" content={shareImage ? 'summary_large_image' : 'summary'} />
     <link rel="preload" href={fraunces} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={atkinsonRegular} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={atkinsonBold} as="font" type="font/woff2" crossorigin />

@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import AskForm from '../components/forms/AskForm';
+import { copy } from '../content/copy';
+
+const t = copy.ask;
+---
+
+<Base title={t.title} description={t.description}>
+  <div class="container section">
+    <div class="prose">
+      <h1>{t.title}</h1>
+      <p class="lead">{t.intro}</p>
+      <AskForm client:load />
+    </div>
+  </div>
+</Base>

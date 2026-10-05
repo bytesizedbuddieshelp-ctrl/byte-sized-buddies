@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import ContactForm from '../components/forms/ContactForm';
+import { copy } from '../content/copy';
+
+const t = copy.homes;
+---
+
+<Base title={t.title} description={t.description}>
+  <div class="container section">
+    <div class="prose">
+      <h1>{t.title}</h1>
+      <p class="lead">{t.intro}</p>
+    </div>
+  </div>
+
+  <section class="container section" aria-labelledby="flow-title">
+    <div class="prose">
+      <h2 id="flow-title">{t.flowHeading}</h2>
+      <p>{t.flowIntro}</p>
+      <ol>
+        {t.flow.map((step) => <li>{step}</li>)}
+      </ol>
+    </div>
+  </section>
+
+  <section class="container section" aria-labelledby="need-title">
+    <div class="grid">
+      <div class="panel">
+        <h2 id="need-title">{t.needHeading}</h2>
+        <ul class="check-list">
+          {
+            t.needs.map((item) => (
+              <li>
+                <Icon name="check" size={24} />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="panel">
+        <h2>{t.bringHeading}</h2>
+        <ul class="check-list">
+          {
+            t.bring.map((item) => (
+              <li>
+                <Icon name="check" size={24} />
+                <span>{item}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container section" id="contact" aria-labelledby="contact-title">
+    <div class="prose">
+      <h2 id="contact-title">{t.formHeading}</h2>
+      <p>{t.formIntro}</p>
+      <ContactForm client:load />
+    </div>
+  </section>
+</Base>

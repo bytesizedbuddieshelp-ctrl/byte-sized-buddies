@@ -1,0 +1,14 @@
+---
+import TextPage from '../layouts/TextPage.astro';
+import Button from '../components/Button.astro';
+import { Content } from '../content/teach-it-yourself.md';
+import { copy } from '../content/copy';
+---
+
+<TextPage title={copy.teach.title} description={copy.teach.description}>
+  <Content />
+  <div class="actions">
+    <Button href="/for-senior-homes#contact">{copy.teach.tellButton}</Button>
+    <Button variant="secondary" href="/lessons">{copy.teach.lessonsButton}</Button>
+  </div>
+</TextPage>

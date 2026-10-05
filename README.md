@@ -44,6 +44,26 @@ Run it before every commit.
 
 Cloudflare is connected to the GitHub repository. When you push to the `main` branch, Cloudflare builds the site and publishes it. You do not need to click anything.
 
+## Your site address (PUBLIC_SITE_URL)
+
+Link previews and the sitemap need the full web address of your site, such as `https://byte-sized-buddies.your-name.workers.dev`. Until you set it, the site works but leaves out the sitemap entries and the preview image address.
+
+To set it on Cloudflare: open your project, go to **Settings**, find **Variables and secrets** (build section), add `PUBLIC_SITE_URL` with your address, and save. Then push any change, or retry the build.
+
+## Pages
+
+| Address | What it is |
+|---|---|
+| `/` | Landing page |
+| `/for-senior-homes` | How a visit works, and the "Request a visit" form |
+| `/ask` | The "Ask a question" form |
+| `/lessons` | Lesson library (a "first lessons are on the way" card until Phase 3) |
+| `/teach` | "Teach it yourself" (words live in `src/content/teach-it-yourself.md`) |
+| `/about` | About (write your story in `src/content/about.md`) |
+| `/privacy`, `/license` | Plain-language privacy and license pages |
+
+Both forms check what people type, but they do not send anything yet. They connect to the database in Phase 2.
+
 ## Secrets
 
 Copy `.env.example` to `.env` when the database arrives in Phase 2. Never commit `.env`. Never put the Supabase `service_role` key anywhere in this project.

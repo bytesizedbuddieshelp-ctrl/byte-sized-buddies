@@ -1,0 +1,9 @@
+---
+import TextPage from '../layouts/TextPage.astro';
+import { Content } from '../content/license.md';
+import { copy } from '../content/copy';
+---
+
+<TextPage title={copy.license.title} description={copy.license.description}>
+  <Content />
+</TextPage>

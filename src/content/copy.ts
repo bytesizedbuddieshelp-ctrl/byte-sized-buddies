@@ -28,12 +28,166 @@ export const copy = {
   },
   form: {
     required: '(required)',
+    optional: '(optional)',
     errorPrefix: 'Problem:',
+    summaryTitle: 'Please fix these before sending:',
+    notConnected: "This form isn't connected yet, so nothing was sent. Please check back soon.",
+    privacyHelper: "Please don't include passwords, medical details, or bank information.",
+    errors: {
+      name: 'Please tell us your name.',
+      facility: 'Please tell us the name of your facility.',
+      email: 'Please enter an email like name@example.com.',
+      questionShort: 'Please write at least 5 characters.',
+      questionLong: 'Please keep your question under 2,000 characters.',
+    },
   },
+  mission:
+    'Free, patient, hands-on technology lessons for older adults, and free materials for anyone who wants to teach them.',
   home: {
     title: 'Byte-Sized Buddies',
     description:
       'Free, patient, hands-on technology lessons for older adults, and free materials for anyone who wants to teach them.',
-    hello: 'Our website is on its way. Thank you for your patience.',
+    heroButtons: { visit: 'Request a visit', lessons: 'Get free lessons' },
+    visit: {
+      heading: 'How a visit works',
+      steps: [
+        { title: 'Learn it.', text: 'We start with a short, friendly slideshow. One idea at a time.' },
+        { title: 'Try it.', text: 'Everyone practices on their own device, with help beside them.' },
+        { title: 'Keep it.', text: 'Each person takes home a large-print handout to remember what they learned.' },
+      ],
+    },
+    lessons: {
+      heading: 'What you can learn',
+      emptyTitle: 'Our first lessons are on the way',
+      emptyText: 'Every lesson will be free to download, print, and share. Please check back soon.',
+    },
+    homes: {
+      heading: 'For senior homes',
+      text: "We bring everything. You provide a space, a TV or projector if you have one, and a few residents who want to learn. There's no cost, ever.",
+      needHeading: 'What we need from you',
+      needs: ['A room', 'A screen or TV (optional)', 'Wi-Fi, if you have it', 'A staff contact person'],
+      button: 'Ask about a visit',
+    },
+    free: {
+      heading: 'Free for everyone',
+      text: 'Want to teach these lessons in your community? Everything here is free to download, print, and adapt. Read the teacher guide, bring a friend, and tell us how it went.',
+      button: 'Teach it yourself',
+    },
+    promise: {
+      heading: 'A promise to families and staff',
+      items: [
+        'We never ask learners to type a real password in class.',
+        'We use practice accounts.',
+        'We take photos and video only with written consent.',
+        'Our lessons are free, always.',
+      ],
+    },
+  },
+  homes: {
+    title: 'For senior homes',
+    description:
+      'What a Byte-Sized Buddies visit looks like, what we need from you, and how to ask for a visit. Every lesson is free.',
+    intro:
+      "We bring everything. You provide a space, a TV or projector if you have one, and a few residents who want to learn. There's no cost, ever. Lessons run about 45 minutes. Each lesson comes with a large-print handout for every learner.",
+    flowHeading: 'How a visit works',
+    flowIntro: 'Each visit is one lesson, about 45 minutes long.',
+    flow: [
+      'Welcome and a warm-up question (three minutes)',
+      'Learn it: a short slideshow (10 minutes)',
+      'Try it: guided practice on each person\'s own device (20 minutes)',
+      'Worksheet, then teach it back to a neighbor (seven minutes)',
+      'Keep it: a large-print handout and a take-home challenge (five minutes)',
+    ],
+    needHeading: 'What we need from you',
+    needs: ['A room', 'A screen or TV (optional)', 'Wi-Fi, if you have it', 'A staff contact person'],
+    bringHeading: 'What we bring',
+    bring: [
+      'Everything we need, free of charge',
+      'A large-print handout for every learner',
+      'A short slideshow and a one-page worksheet',
+      'Practice accounts, so no one types a real password',
+    ],
+    formHeading: 'Request a visit',
+    formIntro: "Tell us a little about your community. We'll write back to plan a time.",
+    fields: {
+      name: 'Your name',
+      facility: 'Facility name',
+      role: 'Your role',
+      email: 'Email',
+      phone: 'Phone',
+      learners: 'Approximate number of learners',
+      devicesLegend: 'Devices they usually use',
+      times: 'Best days and times',
+      more: 'Anything else we should know',
+    },
+    devices: [
+      { value: 'iphone', label: 'iPhone' },
+      { value: 'android', label: 'Android phone' },
+      { value: 'tablet', label: 'Tablet' },
+      { value: 'computer', label: 'Computer' },
+      { value: 'not_sure', label: 'Not sure' },
+    ],
+    submit: 'Send request',
+  },
+  ask: {
+    title: 'Ask a question',
+    description:
+      'Have a quick question about a device or a lesson? Ask here. Your answer appears at a private link only you have.',
+    intro:
+      "Have a quick question about a device or a lesson? Tell us what you're seeing. Please don't include passwords, medical details, or bank information.",
+    fields: {
+      name: 'Your name',
+      facility: 'Facility',
+      email: 'Email',
+      emailHelper: 'So we can send your answer.',
+      deviceLegend: 'Which device is it about?',
+      urgencyLegend: 'How soon do you need an answer?',
+      question: 'Your question',
+      questionHelper: 'Write between 5 and 2,000 characters.',
+    },
+    devices: [
+      { value: 'iphone', label: 'iPhone' },
+      { value: 'android', label: 'Android phone' },
+      { value: 'tablet', label: 'Tablet' },
+      { value: 'computer', label: 'Computer' },
+      { value: 'not_sure', label: 'Not sure' },
+    ],
+    urgency: [
+      { value: 'whenever', label: 'Whenever' },
+      { value: 'this_week', label: 'This week' },
+      { value: 'before_next_visit', label: 'Before our next visit' },
+    ],
+    submit: 'Send question',
+  },
+  lessons: {
+    title: 'Free lessons',
+    description: 'Free technology lessons for older adults. Download, print, adapt, and share.',
+    emptyTitle: 'Our first lessons are on the way',
+    emptyText:
+      'Each lesson will come with a teacher guide, a slideshow, a worksheet, and a large-print handout. All of it will be free to download, print, and share.',
+    teachButton: 'Teach it yourself',
+  },
+  about: {
+    title: 'About',
+    description: 'Byte-Sized Buddies is a student-led volunteer project that teaches technology to older adults.',
+  },
+  teach: {
+    title: 'Teach it yourself',
+    description: 'Free, ready-to-use guidance for teaching technology to older adults in your own community.',
+    lessonsButton: 'See the free lessons',
+    tellButton: 'Tell us how it went',
+  },
+  privacy: {
+    title: 'Privacy',
+    description: 'What Byte-Sized Buddies collects, why, who sees it, and how long we keep it.',
+  },
+  license: {
+    title: 'License',
+    description: 'How you may use, print, adapt, and share Byte-Sized Buddies lessons.',
+  },
+  notFound: {
+    title: "We can't find that page",
+    text: 'The link may be old, or the address may have a typing mistake. Everyone ends up in the wrong place sometimes.',
+    button: 'Go to the home page',
   },
 } as const;
