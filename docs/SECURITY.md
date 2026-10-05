@@ -81,12 +81,30 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 - If the secret leaks, run `npm run bridge:secret` again, save the new fingerprint in the SQL Editor, and replace `BRIDGE_SECRET` in Script Properties. The old secret stops working right away. Full steps: `apps-script/README.md`, "If the secret leaks".
 - Test it: `npm run check:rls` calls the bridge with a wrong secret and expects "not allowed".
 
-## Still to come
+## Security headers
 
-The headers file (`public/_headers`) and the final review are in Phase 7. When writing the headers, these must stay allowed, or the studio and the video player break:
+- **Content Security Policy** (where the browser may load things from): added to every page by Astro (`security.csp` in `astro.config.mjs`), with fingerprints of Astro's own small scripts made fresh on every build. `npm run check` fails if any inline script on any page is not covered (`scripts/check-csp.mjs`).
+- **`public/_headers`** (read by Cloudflare): no other site may show ours in a frame, `nosniff`, `strict-origin-when-cross-origin` referrers, camera, microphone, and screen sharing only for our own pages, and `noindex` for `/admin` and `/answer`.
+- Two choices differ from the first plan, on purpose:
+  - `script-src` also allows `https://www.youtube.com`. YouTube's player controller lives there. It loads only after a visitor presses Play on a video.
+  - `style-src` allows inline styles. The slide viewer, progress bars, and meters set sizes as inline styles. Styles can't run code, so the risk is small.
+- Allowed connections: our own site, `*.supabase.co` (database, files, and the remote's realtime channel), and `www.youtube-nocookie.com` frames. Adding any other service means adding it to `astro.config.mjs` first.
 
-- `script-src https://www.youtube.com` (the player controller, loaded only after Play is pressed)
-- `frame-src https://www.youtube-nocookie.com`
-- `media-src 'self' blob:` (playing back studio takes)
-- `worker-src 'self'` (`/studio-timer.js`, the clock for the camera circle)
-- `Permissions-Policy: camera=(self), microphone=(self), display-capture=(self)`
+## Final review (Phase 7, October 2026)
+
+Checked against the 11 rules in `CLAUDE.md`, section 11:
+
+| Rule | Result |
+|---|---|
+| 1. RLS on every table; strangers read only published lessons and public settings | Pass: `npm run check:rls`, 22 checks |
+| 2. Sign-ups off; only the owner | Pass: checked by `npm run check:rls` |
+| 3. No `service_role` key anywhere | Pass: searched every file in git; only the warning comment in `.env.example` mentions it |
+| 4. Markdown cleaned; YouTube IDs only, on youtube-nocookie.com | Pass: every inserted HTML string goes through `renderMarkdown` (DOMPurify), except the fixed icon drawings in our own code |
+| 5. Content Security Policy and headers | Pass, with the two choices above |
+| 6. Private tokens: 256 bits, `noindex`, never in referrers | Pass: other sites receive only our site's address, never the page address with the token |
+| 7. Checks in the browser and in the database; spam trap; rate limits | Pass |
+| 8. No logging of secrets or personal data | Pass: no logging in the site code; the Gmail bridge logs only counts |
+| 9. Few, pinned dependencies; `npm audit` | Pass: exact versions in `package.json`; `npm audit` found 0 problems |
+| 10. `.gitignore` covers secrets, builds, recordings | Pass: `.env*` (except `.env.example`), `node_modules`, `dist`, `.astro`, `*.webm`, `*.mp4`, `test-results` |
+
+Run the review again before any big change: `npm run check`, `npm run check:rls`, and `npm audit`.
