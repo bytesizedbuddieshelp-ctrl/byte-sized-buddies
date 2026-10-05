@@ -10,7 +10,7 @@ import { renderMarkdown } from '../../lib/markdown';
 import { parseYouTubeId } from '../../lib/youtube';
 import { parseDeckText, type Layout, type Slide } from '../../lib/slides';
 import { FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
-import { fileUrl, formatBytes, imageUrlFor, lessonFolder, slugify, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
+import { extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
 import { filesRecord, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
 
 const t = a.lessonEdit;
@@ -149,6 +149,19 @@ function moveItem<T>(list: T[], from: number, to: number): T[] {
   return copy;
 }
 
+interface ExtraRow {
+  id: number;
+  title: string;
+  /** The file already saved for this row, if any. */
+  old: ExtraFile | null;
+  /** A new PDF chosen for this row, if any. */
+  file: File | null;
+  problem: string;
+}
+
+let extraRowId = 0;
+const extraRowsFrom = (files: LessonFiles): ExtraRow[] => extrasFor(files).map((old) => ({ id: ++extraRowId, title: old.title, old, file: null, problem: '' }));
+
 function Editor({ supabase }: { supabase: SupabaseClient }) {
   const slugParam = new URLSearchParams(window.location.search).get('slug');
   const [state, setState] = useState<'loading' | 'missing' | 'ready'>(slugParam ? 'loading' : 'ready');
@@ -159,6 +172,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
   const [slotRemove, setSlotRemove] = useState<Partial<Record<FileSlot, boolean>>>({});
   const [newImages, setNewImages] = useState<File[]>([]);
   const [imageRemove, setImageRemove] = useState<string[]>([]);
+  const [extraRows, setExtraRows] = useState<ExtraRow[]>([]);
   const [fileProblems, setFileProblems] = useState<Record<string, string>>({});
   const [problems, setProblems] = useState<FormProblem[]>([]);
   const [focusSignal, setFocusSignal] = useState(0);
@@ -181,6 +195,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
         if (!data) return setState('missing');
         setLesson(data as Lesson);
         setForm(fromLesson(data as Lesson));
+        setExtraRows(extraRowsFrom((data as Lesson).files ?? {}));
         setState('ready');
       });
   }, []);
@@ -240,6 +255,18 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
     setFileProblems(issues);
   }
 
+  async function chooseExtra(id: number, file: File | undefined) {
+    let problem = '';
+    if (file) {
+      const info = await inspectFile(file);
+      if (info.problem) problem = info.problem;
+      else if (info.kind !== 'pdf') problem = `"${file.name}" should be a PDF.`;
+    }
+    setExtraRows((rows) => rows.map((r) => (r.id === id ? { ...r, file: file && !problem ? file : null, problem } : r)));
+  }
+
+  const changeExtra = (id: number, changes: Partial<ExtraRow>) => setExtraRows((rows) => rows.map((r) => (r.id === id ? { ...r, ...changes } : r)));
+
   function validate(): FormProblem[] {
     const found: FormProblem[] = [];
     if (!form.title.trim() || form.title.length > 120) found.push({ id: 'title', label: t.fields.title, message: t.errors.title });
@@ -254,6 +281,23 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
       if (video.link.trim() && !parseYouTubeId(video.link)) found.push({ id: `video-link-${i}`, label: t.videoLink(i + 1), message: t.videoBad });
     });
     for (const [key, message] of Object.entries(fileProblems)) found.push({ id: key.startsWith('slot:') ? `slot-${key.slice(5)}` : 'images', label: t.filesHeading, message });
+
+    // Extra worksheets: a title and a PDF each, and no file name that another file in this lesson already uses.
+    const otherNames = [
+      ...FILE_SLOTS.flatMap((slot) => [slotFiles[slot]?.name, slotRemove[slot] ? undefined : lesson?.files[slot]?.path.split('/').pop()]),
+      ...(lesson?.files.images ?? []).map((i) => i.name),
+      ...newImages.map((f) => f.name),
+    ].filter(Boolean) as string[];
+    const extraNames: string[] = [];
+    extraRows.forEach((row, i) => {
+      const n = i + 1;
+      if (!row.title.trim() || row.title.trim().length > 80) found.push({ id: `extra-title-${row.id}`, label: t.extraTitle(n), message: t.errors.extraTitle });
+      if (row.problem) found.push({ id: `extra-file-${row.id}`, label: t.extraFile(n), message: row.problem });
+      else if (!row.file && !row.old) found.push({ id: `extra-file-${row.id}`, label: t.extraFile(n), message: t.errors.extraFile });
+      const name = row.file?.name ?? row.old?.name;
+      if (name && (otherNames.includes(name) || extraNames.includes(name))) found.push({ id: `extra-file-${row.id}`, label: t.extraFile(n), message: t.errors.extraDuplicate(name) });
+      if (name) extraNames.push(name);
+    });
     return found;
   }
 
@@ -283,14 +327,30 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
       for (const image of oldFiles.images ?? []) if (imageRemove.includes(image.name)) doomed.push(image.path);
       for (const file of newImages) uploads.push({ file });
 
+      // Extra worksheets: keep, replace, or remove, in the order shown.
+      const keptExtras = new Set(extraRows.filter((r) => r.old && !r.file).map((r) => r.old!.path));
+      for (const old of extrasFor(oldFiles)) if (!keptExtras.has(old.path)) doomed.push(old.path);
+      const total = uploads.length + extraRows.filter((r) => r.file).length;
+
       const uploadedImages: { name: string; path: string; bytes: number }[] = [];
       for (const [i, item] of uploads.entries()) {
-        setBusy(t.uploading(i + 1, uploads.length));
+        setBusy(t.uploading(i + 1, total));
         const stored = await uploadLessonFile(supabase, form.slug, item.file);
         if (item.slot) slots[item.slot] = stored;
         else uploadedImages.push({ name: item.file.name, ...stored });
       }
-      const files = filesRecord(slots, [...images, ...uploadedImages]);
+      const extras: ExtraFile[] = [];
+      let done = uploads.length;
+      for (const row of extraRows) {
+        if (row.file) {
+          setBusy(t.uploading(++done, total));
+          const stored = await uploadLessonFile(supabase, form.slug, row.file);
+          extras.push({ name: row.file.name, title: row.title.trim(), ...stored });
+        } else if (row.old) {
+          extras.push({ ...row.old, title: row.title.trim() });
+        }
+      }
+      const files = filesRecord(slots, [...images, ...uploadedImages], extras);
       const row = {
         slug: form.slug,
         week_number: form.week.trim() === '' ? null : Number(form.week),
@@ -329,6 +389,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
       setSlotRemove({});
       setNewImages([]);
       setImageRemove([]);
+      setExtraRows(extraRowsFrom((data as Lesson).files ?? {}));
       setOk(lesson ? t.saved : t.savedDraft);
       if (!lesson) window.history.replaceState(null, '', `/admin/lesson-edit?slug=${encodeURIComponent(form.slug)}`);
     } catch {
@@ -564,6 +625,46 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
             <p class="field-error" key={k}><Icon name="alert" size={24} /><span>{m}</span></p>
           ))}
         </div>
+      </section>
+
+      <section class="admin-box" aria-labelledby="extras-title">
+        <h2 id="extras-title">{t.extrasHeading}</h2>
+        <p class="field-helper">{t.extrasHelp}</p>
+        {extraRows.length === 0 && <p>{t.extrasNone}</p>}
+        {extraRows.map((row, i) => (
+          <div class="editor-row extra-row" key={row.id}>
+            <div class="field">
+              <label class="field-label" for={`extra-title-${row.id}`}>{t.extraTitle(i + 1)}</label>
+              <p class="field-helper" id={`extra-title-help-${row.id}`}>{t.extraTitleHelp}</p>
+              <input
+                id={`extra-title-${row.id}`}
+                class="field-control"
+                maxLength={80}
+                aria-describedby={`extra-title-help-${row.id}`}
+                value={row.title}
+                onInput={(e) => changeExtra(row.id, { title: e.currentTarget.value })}
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for={`extra-file-${row.id}`}>{row.old ? t.extraReplace : t.extraFile(i + 1)}</label>
+              {row.old && (
+                <p class="caption">
+                  {t.currentFile}:{' '}
+                  <a href={fileUrl(row.old.path)} target="_blank" rel="noopener noreferrer">{row.old.name}</a> ({formatBytes(row.old.bytes)})
+                </p>
+              )}
+              <input id={`extra-file-${row.id}`} class="field-control" type="file" accept=".pdf,application/pdf" onChange={(e) => void chooseExtra(row.id, e.currentTarget.files?.[0])} />
+              {row.file && <p class="caption">{t.chosen}: {row.file.name} ({formatBytes(row.file.size)})</p>}
+              {row.problem && <p class="field-error"><Icon name="alert" size={24} /><span>{row.problem}</span></p>}
+            </div>
+            <button type="button" class="button button-secondary" onClick={() => setExtraRows((rows) => rows.filter((r) => r.id !== row.id))}>
+              {t.removeExtra(i + 1)}
+            </button>
+          </div>
+        ))}
+        <button type="button" class="button button-secondary" onClick={() => setExtraRows((rows) => [...rows, { id: ++extraRowId, title: '', old: null, file: null, problem: '' }])}>
+          {t.addExtra}
+        </button>
       </section>
 
       <section class="admin-box" aria-labelledby="videos-title">

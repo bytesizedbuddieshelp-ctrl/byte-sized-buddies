@@ -127,4 +127,24 @@ describe('validateKit', () => {
     const fake = classifyFile('h.pdf', 10, new TextEncoder().encode('not a pdf at all!'));
     expect(validateKit(kit(), [pdf('w.pdf'), fake, png('contacts.png')]).errors.join()).toContain("isn't a real PDF");
   });
+
+  it('accepts extra worksheets and counts them in the summary', () => {
+    const extras = [{ file: 'x1.pdf', title: 'Extra practice: Favorites' }, { file: 'x2.pdf', title: 'Puzzle' }];
+    const r = validateKit(kit({ extras }), [...goodFiles(), pdf('x1.pdf'), pdf('x2.pdf')]);
+    expect(r.errors).toEqual([]);
+    expect(r.lesson?.extras).toEqual(extras);
+    expect(r.summary).toContain('2 extra worksheets');
+    expect(validateKit(kit(), goodFiles()).lesson?.extras).toEqual([]);
+  });
+
+  it('checks extra worksheets: present, a PDF, titled, not reused, not too many', () => {
+    const errs = (extras: unknown, files = [...goodFiles(), pdf('x1.pdf')]) => validateKit(kit({ extras }), files).errors.join(' ');
+    expect(errs([{ file: 'missing.pdf', title: 'A' }])).toContain("wasn't selected");
+    expect(errs([{ file: 'contacts.png', title: 'A' }], goodFiles())).toContain('should be a PDF');
+    expect(errs([{ file: 'x1.pdf' }])).toContain('needs a "file"');
+    expect(errs([{ file: 'x1.pdf', title: 'x'.repeat(81) }])).toContain('80 characters');
+    expect(errs([{ file: 'w.pdf', title: 'Again' }])).toContain('used twice');
+    expect(errs('x1.pdf')).toContain('"extras" should be a list');
+    expect(errs(Array.from({ length: 11 }, () => ({ file: 'x1.pdf', title: 'A' })))).toContain('up to 10');
+  });
 });

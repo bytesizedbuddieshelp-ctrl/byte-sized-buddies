@@ -1,7 +1,7 @@
 // Owner-only helpers for lessons: uploads, deletes, and the kit zip. They use the signed-in client,
 // and the database rules (and storage rules) decide what is allowed.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { BUCKET, fileUrl, lessonFolder, type Lesson, type LessonFiles, type StoredFile } from './lessons';
+import { BUCKET, extrasFor, fileUrl, lessonFolder, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from './lessons';
 import { FILE_SLOTS, type FileSlot, type NormalizedLesson } from './kit';
 import { makeZip } from './zip';
 
@@ -33,7 +33,11 @@ export async function removeStoragePaths(supabase: SupabaseClient, paths: string
 
 /** Every path a lesson's files record points at. */
 export function pathsIn(files: LessonFiles): string[] {
-  return [...FILE_SLOTS.flatMap((slot) => (files[slot] ? [files[slot]!.path] : [])), ...(files.images ?? []).map((image) => image.path)];
+  return [
+    ...FILE_SLOTS.flatMap((slot) => (files[slot] ? [files[slot]!.path] : [])),
+    ...(files.images ?? []).map((image) => image.path),
+    ...extrasFor(files).map((extra) => extra.path),
+  ];
 }
 
 /** Removes files left in a lesson's folder that the lesson no longer uses. */
@@ -45,10 +49,11 @@ export async function removeStaleFiles(supabase: SupabaseClient, slug: string, k
 }
 
 /** Builds the files record for a lesson from the names that were uploaded. */
-export function filesRecord(slots: Partial<Record<FileSlot, StoredFile>>, images: { name: string; path: string; bytes: number }[]): LessonFiles {
+export function filesRecord(slots: Partial<Record<FileSlot, StoredFile>>, images: { name: string; path: string; bytes: number }[], extras: ExtraFile[] = []): LessonFiles {
   const files: LessonFiles = {};
   for (const slot of FILE_SLOTS) if (slots[slot]) files[slot] = slots[slot];
   if (images.length) files.images = images;
+  if (extras.length) files.extras = extras;
   return files;
 }
 
@@ -65,6 +70,8 @@ export function kitFor(lesson: Lesson): { kit: Record<string, unknown>; fileList
   }
   const images = (lesson.files.images ?? []).map((image) => image.name);
   for (const image of lesson.files.images ?? []) fileList.push({ name: image.name, path: image.path });
+  const extras = extrasFor(lesson.files).map((extra) => ({ file: extra.name, title: extra.title }));
+  for (const extra of extrasFor(lesson.files)) fileList.push({ name: extra.name, path: extra.path });
   return {
     kit: {
       kit_version: 1,
@@ -85,6 +92,7 @@ export function kitFor(lesson: Lesson): { kit: Record<string, unknown>; fileList
       video_script_md: lesson.video_script_md ?? '',
       files,
       images,
+      ...(extras.length ? { extras } : {}),
     },
     fileList,
   };

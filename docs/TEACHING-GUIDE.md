@@ -48,7 +48,8 @@ How to run one 45-minute Byte-Sized Buddies lesson at a senior home, with the we
 | What happens | What to say or do |
 |---|---|
 | Someone is far behind | "Let's do this one together." Sit beside them. The others can keep practicing. |
-| Someone is far ahead | Ask them to help a neighbor, or try the take-home challenge early. |
+| Someone is far ahead | Ask them to help a neighbor, or hand them an **Extra practice** sheet. |
+| The whole group finishes early | Hand out the **Extra practice** sheets. A puzzle sheet works well in pairs. |
 | A device needs an update or a password nobody knows | Note it. Ask the staff contact to help after class. Move on with a practice screen. |
 | The Wi-Fi or the TV fails | Keep going with the printed handout. Present from the laptop screen alone. |
 | Someone is upset or frustrated | Slow down. "This is new for everyone. You're doing fine." Offer a break. |

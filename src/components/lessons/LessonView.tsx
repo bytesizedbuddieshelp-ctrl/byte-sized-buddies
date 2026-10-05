@@ -2,7 +2,7 @@ import { useMemo } from 'preact/hooks';
 import { Icon } from '../forms/Icon';
 import { SlideViewer, PrintSlides, printSlides } from '../slides/SlideViewer';
 import { copy } from '../../content/copy';
-import { deviceWords, downloadsFor, fileUrl, formatBytes, imageUrlFor, levelWords, type Lesson } from '../../lib/lessons';
+import { deviceWords, downloadsFor, extrasFor, fileUrl, formatBytes, imageUrlFor, levelWords, type Lesson } from '../../lib/lessons';
 import { renderMarkdown } from '../../lib/markdown';
 import { PlaylistPlayer } from '../video/PlaylistPlayer';
 
@@ -17,6 +17,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
   const imageUrl = (file: string) => imageUrlFor(lesson, file);
   const slides = lesson.slides?.slides ?? [];
   const videos = lesson.video_ids ?? [];
+  const extras = extrasFor(lesson.files ?? {});
 
   return (
     <article>
@@ -73,6 +74,23 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
             </div>
           )}
         </section>
+
+        {extras.length > 0 && (
+          <section aria-labelledby="extras-title">
+            <h2 id="extras-title">{t.extrasHeading}</h2>
+            <p>{t.extrasIntro}</p>
+            <div class="button-row">
+              {extras.map((extra) => (
+                <a class="button button-secondary" key={extra.path} href={fileUrl(extra.path)} target="_blank" rel="noopener noreferrer">
+                  <Icon name="download" size={24} />
+                  <span>
+                    {extra.title} ({t.pdf}, {formatBytes(extra.bytes)})
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
 
         {slides.length > 0 && (
           <section aria-labelledby="slides-title">

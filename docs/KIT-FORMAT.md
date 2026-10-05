@@ -12,6 +12,7 @@ You can try it right now with `docs/sample-kit/`.
 | `week-01-worksheet.pdf` | A one-page worksheet (large print). |
 | `week-01-handout.pdf` | A one-page handout (large print). |
 | `week-01-answer-key.pdf` | Optional. For the teacher only. |
+| `week-01-extra-1.pdf`, ... | Optional. Up to 10 extra worksheets, for when there's time left over. |
 | Pictures (`.png`, `.jpg`, `.webp`, `.svg`) | Screenshots used on the slides. |
 
 Select **kit.json and every file it names, all at once**, when you import.
@@ -42,9 +43,15 @@ Select **kit.json and every file it names, all at once**, when you import.
     "answer_key": null,
     "teacher_guide_pdf": null
   },
-  "images": ["phone-home.png", "contacts.png"]
+  "images": ["phone-home.png", "contacts.png"],
+  "extras": [
+    { "file": "week-01-extra-1.pdf", "title": "Extra practice: Call a second person" },
+    { "file": "week-01-extra-2.pdf", "title": "Puzzle: Match the phone buttons" }
+  ]
 }
 ```
+
+`extras` is optional. Leave it out if the lesson has no extra worksheets.
 
 ### The lesson details
 
@@ -69,6 +76,7 @@ Select **kit.json and every file it names, all at once**, when you import.
 - Each file is under 10 MB. A PDF over 5 MB gets a warning.
 - SVG pictures must be plain drawings. Ones with code or links to other websites are refused.
 - Every picture a slide uses must be in the `images` list.
+- Each extra worksheet in `extras` needs a `file` (a PDF that is selected with `kit.json`) and a `title` of 80 characters or fewer. Each one needs its own file. Up to 10.
 
 ## Slides
 
@@ -109,7 +117,7 @@ Every slide may have `notes`: your speaker notes. The audience never sees them.
 
 When the kit is good you will see a summary like:
 
-> Week 1: Calling a friend. 5 slides, 1 worksheet, 1 handout. No warnings.
+> Week 1: Calling a friend. 5 slides, 1 worksheet, 1 handout, 2 extra worksheets. No warnings.
 
 Press **Save as draft**. Look at it with **Preview**, then press **Publish**.
 
@@ -120,6 +128,33 @@ If a lesson with the same `slug` already exists, you must confirm **Replace this
 Paste this at the start of a chat, with your topic:
 
 > Make a Byte-Sized Buddies lesson kit about [TOPIC] for [iPhone/Android] learners. Follow `docs/KIT-FORMAT.md` exactly. Give me `kit.json`, a one-page large-print worksheet PDF, and a one-page large-print handout PDF. Use the brand voice. Keep each slide under 25 words. Add alt text to every picture. Never ask learners to type a real password.
+
+## Extra worksheets (for when there's time left over)
+
+Some groups finish early. Some learners want more. Extra worksheets give everyone something useful to do without starting a new topic. They show on the lesson page under **Extra practice**, after the main downloads.
+
+**What an extra worksheet contains**
+
+- **The same skill as the lesson, a little further.** No new topic. For "Calling a friend", that might be calling a second person, or calling back a missed call.
+- **One page, large print, the worksheet template** (`brand/teaching-materials.md`): title in forest green, 18-point text or bigger, 0.75-inch margins, and the footer "Byte-Sized Buddies · Free to print and share".
+- **3 to 5 tasks**, each with a checkbox for "I did it" and room to write.
+- **One of these kinds**, written at the top so you can choose quickly:
+  - **More practice:** the same steps again, with a small change.
+  - **Go further:** one step past the lesson (for example, adding a contact to Favorites).
+  - **Puzzle:** match, circle, or fill in. Good for groups, and no device needed.
+  - **Teach-back:** "Show a neighbor how to..." with a short checklist.
+- **The safety rules:** no real passwords, practice accounts only, and the scam reminder if the topic touches money, messages, or calls.
+- **A "Need help?" line** at the bottom: ask a family member, staff, or us at the next visit.
+
+**Asking Claude for extra worksheets**
+
+Paste this into the same chat where you made the kit (so Claude knows the lesson), or into a new chat with your `kit.json`:
+
+> Make [2] extra worksheets for the Byte-Sized Buddies lesson "[LESSON TITLE]" (week [N]), for groups who finish early. Each one is a one-page, large-print PDF using the worksheet template in `brand/teaching-materials.md`: 18-point text or bigger, 0.75-inch margins, title in forest green (#2F5D50), and the footer "Byte-Sized Buddies · Free to print and share". Make one "More practice" sheet and one "Go further" sheet [or: Puzzle / Teach-back]. Each has 3 to 5 tasks with a checkbox and room to write. Stay on the same skill as the lesson; don't start a new topic. Use the brand voice: short sentences, everyday words, never "easy", "just", or "simply". Never ask learners to type a real password. Name the files `week-[NN]-extra-1.pdf` and `week-[NN]-extra-2.pdf`. Then give me the updated `kit.json` with an `"extras"` list, following `docs/KIT-FORMAT.md`.
+
+Then import the kit again (choose **Replace this lesson**), or add the PDFs one at a time in **Admin, Lessons, Edit, Extra worksheets**.
+
+**Using them in class:** print one or two copies of each per table. Hand them out during **Try it** to anyone who finishes early, or use them in place of the worksheet if the group is quick.
 
 ## Exporting a kit
 

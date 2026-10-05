@@ -16,6 +16,13 @@ export interface LessonFiles {
   answer_key?: StoredFile;
   teacher_guide_pdf?: StoredFile;
   images?: (StoredFile & { name: string })[];
+  /** Extra worksheets for when there is time left over, in order. */
+  extras?: ExtraFile[];
+}
+
+export interface ExtraFile extends StoredFile {
+  name: string;
+  title: string;
 }
 
 export interface VideoSegment {
@@ -95,10 +102,16 @@ export function downloadsFor(files: LessonFiles): Download[] {
   );
 }
 
+/** The lesson's extra worksheets, skipping anything that doesn't look right. */
+export function extrasFor(files: LessonFiles): ExtraFile[] {
+  return Array.isArray(files.extras) ? files.extras.filter((e) => e && typeof e.path === 'string' && typeof e.title === 'string') : [];
+}
+
 /** All the bytes this lesson keeps in storage. */
 export function lessonBytes(files: LessonFiles): number {
   const slots = (['worksheet', 'handout', 'answer_key', 'teacher_guide_pdf'] as const).reduce((sum, key) => sum + (files[key]?.bytes ?? 0), 0);
-  return slots + (files.images ?? []).reduce((sum, image) => sum + image.bytes, 0);
+  const extras = extrasFor(files).reduce((sum, extra) => sum + extra.bytes, 0);
+  return slots + extras + (files.images ?? []).reduce((sum, image) => sum + image.bytes, 0);
 }
 
 export const deviceWords: Record<string, string> = { iphone: 'iPhone', android: 'Android', any: 'Any device' };

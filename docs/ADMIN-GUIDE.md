@@ -11,6 +11,8 @@ This is the week of a Byte-Sized Buddies lesson, step by step. Everything happen
 3. Download `kit.json`, the worksheet PDF, the handout PDF, and any screenshots, into one folder.
 4. Take the screenshots yourself on a **practice account**, with no real names, messages, or passwords on screen.
 
+Optional: if this group often finishes early, ask Claude for one or two **extra worksheets** too (the prompt is in `docs/KIT-FORMAT.md`, "Extra worksheets").
+
 ### 2. Import it
 
 1. **Admin, Lessons, Import a kit.** Select `kit.json` and every file it names, all at once.
@@ -25,7 +27,7 @@ This is the week of a Byte-Sized Buddies lesson, step by step. Everything happen
 
 ### 4. Print
 
-From the lesson page, open the **handout** and the **worksheet** and print one of each per learner, plus two spares. If the printer is slow, print the slides as a backup too (**Download slides as PDF**).
+From the lesson page, open the **handout** and the **worksheet** and print one of each per learner, plus two spares. If the lesson has **Extra practice** sheets, print one or two of each per table. If the printer is slow, print the slides as a backup too (**Download slides as PDF**).
 
 ## The day of the visit
 

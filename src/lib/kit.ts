@@ -19,6 +19,9 @@ export const LEVELS = ['beginner', 'intermediate'] as const;
 export const FILE_SLOTS = ['worksheet', 'handout', 'answer_key', 'teacher_guide_pdf'] as const;
 export type FileSlot = (typeof FILE_SLOTS)[number];
 
+export const MAX_EXTRAS = 10;
+export const MAX_EXTRA_TITLE = 80;
+
 export const FILE_NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,99}$/;
 export const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
@@ -101,6 +104,8 @@ export interface NormalizedLesson {
   video_script_md: string;
   files: Partial<Record<FileSlot, string>>;
   images: string[];
+  /** Extra worksheets for when there is time left over: the PDF's file name and a short title. */
+  extras: { file: string; title: string }[];
 }
 
 export interface KitResult {
@@ -190,6 +195,31 @@ export function validateKit(kit: unknown, droppedFiles: KitFileInfo[]): KitResul
   if (!fileSlots.handout) warnings.push('There is no handout. Every lesson should send learners home with one.');
   if (!fileSlots.worksheet) warnings.push('There is no worksheet. Every lesson should have a one-page worksheet.');
 
+  // Extra worksheets (optional): [{ "file": "week-01-extra-1.pdf", "title": "Extra practice: ..." }]
+  const listedExtras = k.extras ?? [];
+  const extras: { file: string; title: string }[] = [];
+  if (!Array.isArray(listedExtras) || listedExtras.length > MAX_EXTRAS) {
+    errors.push(`"extras" should be a list of up to ${MAX_EXTRAS} extra worksheets, each with a "file" and a "title".`);
+  } else {
+    const slotNames = Object.values(fileSlots);
+    listedExtras.forEach((entry, i) => {
+      const e = (typeof entry === 'object' && entry !== null ? entry : {}) as Record<string, unknown>;
+      const where = `Extra worksheet ${i + 1}`;
+      if (!text(e.file) || !text(e.title) || !e.title.trim() || e.title.length > MAX_EXTRA_TITLE) {
+        errors.push(`${where} needs a "file" (a PDF name) and a "title" of ${MAX_EXTRA_TITLE} characters or fewer.`);
+        return;
+      }
+      const found = byName.get(e.file);
+      if (!found) errors.push(`The kit lists the extra worksheet "${e.file}", but that file wasn't selected. Drop it in along with kit.json.`);
+      else if (found.kind !== 'pdf' && !found.problem) errors.push(`"${e.file}" is listed as an extra worksheet, so it should be a PDF.`);
+      else if (slotNames.includes(e.file) || extras.some((x) => x.file === e.file)) errors.push(`"${e.file}" is used twice in the kit. Each extra worksheet needs its own file.`);
+      else {
+        extras.push({ file: e.file, title: e.title.trim() });
+        if (found.size > PDF_WARN_BYTES) warnings.push(`"${e.file}" is over 5 MB. Smaller files download faster on slow Wi-Fi.`);
+      }
+    });
+  }
+
   const listedImages = k.images ?? [];
   const images: string[] = [];
   if (!Array.isArray(listedImages) || !listedImages.every(text)) errors.push('"images" should be a list of file names.');
@@ -231,11 +261,13 @@ export function validateKit(kit: unknown, droppedFiles: KitFileInfo[]): KitResul
         video_script_md: script as string,
         files: fileSlots,
         images,
+        extras,
       };
 
   const worksheets = fileSlots.worksheet ? 1 : 0;
   const handouts = fileSlots.handout ? 1 : 0;
   const warningText = warnings.length ? plural(warnings.length, 'warning') : 'No warnings';
   const slideCount = slideResult.deck?.slides.length ?? 0;
-  return done(lesson, `Week ${week}: ${(title as string)?.trim?.()}. ${plural(slideCount, 'slide')}, ${plural(worksheets, 'worksheet')}, ${plural(handouts, 'handout')}. ${warningText}.`);
+  const extraText = extras.length ? `, ${plural(extras.length, 'extra worksheet')}` : '';
+  return done(lesson, `Week ${week}: ${(title as string)?.trim?.()}. ${plural(slideCount, 'slide')}, ${plural(worksheets, 'worksheet')}, ${plural(handouts, 'handout')}${extraText}. ${warningText}.`);
 }

@@ -18,7 +18,7 @@ import {
   uploadLessonFile,
 } from '../../lib/lessonAdmin';
 import { FILE_SLOTS, type FileSlot } from '../../lib/kit';
-import type { StoredFile } from '../../lib/lessons';
+import type { ExtraFile, StoredFile } from '../../lib/lessons';
 
 type Row = Pick<Lesson, 'id' | 'slug' | 'week_number' | 'title' | 'status' | 'published_at' | 'updated_at' | 'files'>;
 const t = a.lessons;
@@ -104,19 +104,22 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
     say('');
     try {
       const byName = new Map(kit.files.map((file) => [file.name, file]));
-      const uploads: { name: string; slot?: FileSlot }[] = [
+      const uploads: { name: string; slot?: FileSlot; extraTitle?: string }[] = [
         ...FILE_SLOTS.flatMap((slot) => (lesson.files[slot] ? [{ name: lesson.files[slot]!, slot }] : [])),
         ...lesson.images.map((name) => ({ name })),
+        ...lesson.extras.map((extra) => ({ name: extra.file, extraTitle: extra.title })),
       ];
       const slots: Partial<Record<FileSlot, StoredFile>> = {};
       const images: { name: string; path: string; bytes: number }[] = [];
+      const extras: ExtraFile[] = [];
       for (const [i, item] of uploads.entries()) {
         setBusy(t.uploading(i + 1, uploads.length));
         const stored = await uploadLessonFile(supabase, lesson.slug, byName.get(item.name)!);
         if (item.slot) slots[item.slot] = stored;
+        else if (item.extraTitle !== undefined) extras.push({ name: item.name, title: item.extraTitle, ...stored });
         else images.push({ name: item.name, ...stored });
       }
-      const files = filesRecord(slots, images);
+      const files = filesRecord(slots, images, extras);
       const row = rowFromKit(lesson, files);
       if (kit.existing) {
         const { error } = await supabase.from('lessons').update(row).eq('id', kit.existing.id);
