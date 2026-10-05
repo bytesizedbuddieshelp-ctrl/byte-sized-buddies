@@ -24,6 +24,7 @@ export const copy = {
     links: [
       { label: 'Privacy', href: '/privacy' },
       { label: 'License', href: '/license' },
+      { label: 'Owner sign in', href: '/admin' },
     ],
   },
   form: {
