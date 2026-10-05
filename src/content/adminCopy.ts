@@ -373,6 +373,7 @@ export const adminCopy = {
     deviceBusy: 'Another app may be using the camera. Close it (for example Zoom or FaceTime), then try again.',
     cameraLabel: 'Camera',
     micLabel: 'Microphone',
+    deviceSettings: 'Change camera or microphone',
     previewLabel: 'Camera preview',
     level: 'Sound level',
     levelWords: {
@@ -423,6 +424,7 @@ export const adminCopy = {
     keepNote: 'Takes live only in this page. Download the ones you want to keep before you close it.',
     promptHeading: 'Teleprompter',
     scriptLabel: 'Script',
+    editScript: 'Edit the script',
     scriptHelp: "It comes from the lesson's video script. Changes here are not saved to the lesson.",
     textSize: 'Text size',
     smaller: 'Smaller text',
@@ -432,7 +434,7 @@ export const adminCopy = {
     startScroll: 'Start scrolling',
     pauseScroll: 'Pause scrolling',
     top: 'Back to the top',
-    emptyScript: 'No script yet. Type one above, or add a video script to the lesson.',
+    emptyScript: 'No script yet. Choose a lesson that has a video script, or open "Edit the script" below and type one.',
     publishHeading: '4. Publish',
     publishSteps: [
       'Upload each part you kept to YouTube (youtube.com, then Create, then Upload video).',

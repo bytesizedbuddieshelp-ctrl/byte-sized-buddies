@@ -44,19 +44,6 @@ export function Teleprompter({ script, onScript }: { script: string; onScript: (
   return (
     <section class="admin-box" aria-labelledby="prompt-title">
       <h2 id="prompt-title">{t.promptHeading}</h2>
-      <div class="field">
-        <label class="field-label" for="prompt-script">{t.scriptLabel}</label>
-        <p class="field-helper" id="prompt-script-help">{t.scriptHelp}</p>
-        <textarea
-          id="prompt-script"
-          class="field-control"
-          rows={5}
-          aria-describedby="prompt-script-help"
-          value={script}
-          onInput={(e) => onScript(e.currentTarget.value)}
-        />
-      </div>
-
       <div class="prompt-controls">
         <button type="button" class="button button-primary" disabled={!html} onClick={() => setRunning(!running)}>
           <Icon name={running ? 'pause' : 'play'} size={24} /> {running ? t.pauseScroll : t.startScroll}
@@ -91,6 +78,22 @@ export function Teleprompter({ script, onScript }: { script: string; onScript: (
       ) : (
         <p>{t.emptyScript}</p>
       )}
+
+      <details class="prompt-edit">
+        <summary>{t.editScript}</summary>
+        <div class="field">
+          <label class="field-label" for="prompt-script">{t.scriptLabel}</label>
+          <p class="field-helper" id="prompt-script-help">{t.scriptHelp}</p>
+          <textarea
+            id="prompt-script"
+            class="field-control"
+            rows={5}
+            aria-describedby="prompt-script-help"
+            value={script}
+            onInput={(e) => onScript(e.currentTarget.value)}
+          />
+        </div>
+      </details>
     </section>
   );
 }

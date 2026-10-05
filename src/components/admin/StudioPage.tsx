@@ -109,9 +109,15 @@ function Studio({ supabase }: { supabase: SupabaseClient }) {
         </div>
       </section>
 
-      <Recorder name={name} canShare={support.screen} standards={standards} />
-
-      <Teleprompter script={script} onScript={setScript} />
+      {/* On a wide screen the teleprompter sits beside the camera, so the owner can read and see themselves at once. */}
+      <div class="studio-workspace">
+        <div class="studio-main">
+          <Recorder name={name} canShare={support.screen} standards={standards} />
+        </div>
+        <div class="studio-side">
+          <Teleprompter script={script} onScript={setScript} />
+        </div>
+      </div>
 
       <PublishVideo supabase={supabase} lessons={lessons} lessonId={lessonId} title={name} script={script} onStandards={setStandards} />
     </div>
@@ -343,7 +349,14 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
         ) : (
           <div class="studio-devices">
             <video ref={preview} class="studio-preview" autoPlay muted playsInline aria-label={t.previewLabel} />
-            <div>
+            <p class="field-label studio-level" id="level-label">
+              <Icon name="mic" size={24} /> {t.level}: <span>{t.levelWords[word]}</span>
+            </p>
+            <div class="meter-bar" aria-hidden="true">
+              <div style={{ width: `${Math.round(level * 100)}%` }} />
+            </div>
+            <details class="studio-settings">
+              <summary>{t.deviceSettings}</summary>
               <div class="field">
                 <label class="field-label" for="studio-camera">{t.cameraLabel}</label>
                 <select id="studio-camera" class="field-control" value={cameraId} disabled={busy} onChange={(e) => turnOn(e.currentTarget.value, micId)}>
@@ -360,15 +373,8 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
                   ))}
                 </select>
               </div>
-              <p class="field-label" id="level-label">
-                <Icon name="mic" size={24} /> {t.level}
-              </p>
-              <div class="meter-bar" aria-hidden="true">
-                <div style={{ width: `${Math.round(level * 100)}%` }} />
-              </div>
-              <p aria-labelledby="level-label">{t.levelWords[word]}</p>
               <button type="button" class="button button-secondary" disabled={busy} onClick={turnOff}>{t.turnOff}</button>
-            </div>
+            </details>
           </div>
         )}
       </section>
