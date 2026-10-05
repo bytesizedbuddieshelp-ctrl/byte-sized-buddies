@@ -16,8 +16,11 @@ export function renderMarkdown(markdown: string, options: { allowImages?: boolea
     hooked = true;
   }
   const html = marked.parse(markdown ?? '', { async: false, gfm: true, breaks: false }) as string;
+  // No forms or other embedded things either: nothing in an answer should be able to ask for a password
+  // or load another page. Videos are added separately by youtube.ts.
+  const blocked = ['style', 'form', 'input', 'button', 'select', 'textarea', 'iframe', 'object', 'embed', 'link', 'meta', 'base', 'svg', 'math'];
   return DOMPurify.sanitize(html, {
-    FORBID_TAGS: options.allowImages ? ['style'] : ['style', 'img', 'picture', 'source'],
+    FORBID_TAGS: options.allowImages ? blocked : [...blocked, 'img', 'picture', 'source'],
     FORBID_ATTR: ['style'],
   });
 }

@@ -1,0 +1,16 @@
+---
+import Base from '../layouts/Base.astro';
+import AnswerView from '../components/AnswerView';
+import { copy } from '../content/copy';
+---
+
+<Base title={copy.answer.title} description={copy.answer.description} noindex>
+  <!-- Other websites (the video player) may learn that the visit came from this site, but never the private link. -->
+  <meta slot="head" name="referrer" content="strict-origin-when-cross-origin" />
+  <div class="container section">
+    <div class="prose">
+      <h1>{copy.answer.title}</h1>
+      <AnswerView client:only="preact" />
+    </div>
+  </div>
+</Base>
