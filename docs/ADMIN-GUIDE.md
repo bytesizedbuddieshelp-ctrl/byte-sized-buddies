@@ -61,10 +61,11 @@ The full 45-minute plan is in `docs/TEACHING-GUIDE.md`.
 ## When you make a video
 
 1. **Admin, Studio** in Chrome or Edge on your laptop. Choose the lesson.
-2. Record the opener, the main part (your screen), and the closer. Download the takes you keep.
-3. Upload them to YouTube as **Unlisted**, and choose "No, it's not made for kids".
-4. Paste the links in **Publish**, choose the lesson or the question, and press **Save video**.
-5. The first time, tick **Make this my standard opener** (and closer), so you can reuse them.
+2. Optional: under the camera preview, open **Background**, choose **Replace my wall**, and click your (plain) wall in the preview.
+3. Record the opener, the main part (your screen), and the closer. While recording the main part, draw on the picture of your screen to circle buttons or point with arrows; press **Clear drawings** before the next step. Download the takes you keep.
+4. Upload them to YouTube as **Unlisted**, and choose "No, it's not made for kids".
+5. Paste the links in **Publish**, choose the lesson or the question, and press **Save video**.
+6. The first time, tick **Make this my standard opener** (and closer), so you can reuse them.
 
 ## Once a month
 

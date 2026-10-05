@@ -99,6 +99,10 @@ Open **Admin, Studio** in Chrome or Edge on a computer.
 3. Record the opener (camera), the main part (your screen), and the closer (camera). You hear three beeps before each recording starts. Play each take back, and download the ones you keep.
 4. Upload the files to YouTube yourself (Unlisted or Public, "not made for kids"). Paste the links in **Publish**, choose the lesson or question, and press **Save video**.
 
+**No green screen needed:** sit in front of a plain wall, open **Background** under the camera preview, choose **Replace my wall**, and click the wall in the preview. Pick Garden, Forest, plain cream, or your own picture. **Download this background** saves it as a picture too.
+
+**Drawing:** when you record the main part, keep **Let me draw on the recording** ticked. A picture of your screen appears in the studio; draw on it with the pen, highlighter, arrow, or circle, and it shows in the video. Share a window (not your whole screen), and keep the studio beside it.
+
 Record your opener and closer once, tick **Make this my standard opener** (or closer), and reuse them next time. Video answers to questions play your standard opener and closer around the answer.
 
 Takes are kept only in the open page. Download them before you close it. Videos are never stored in Supabase.

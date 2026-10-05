@@ -5,6 +5,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { Notices } from './Notices';
 import { Teleprompter } from './studio/Teleprompter';
 import { BackgroundControls } from './studio/BackgroundControls';
+import { DrawingBoard } from './studio/DrawingBoard';
 import { CameraKeyer } from '../../lib/cameraKeyer';
 import { PublishVideo, type StudioLesson } from './studio/PublishVideo';
 import { Icon } from '../forms/Icon';
@@ -139,6 +140,8 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
   const [part, setPart] = useState<Part>('opener');
   const [bubble, setBubble] = useState(true);
   const [tabAudio, setTabAudio] = useState(false);
+  const [drawOn, setDrawOn] = useState(true);
+  const [board, setBoard] = useState<{ picture: HTMLCanvasElement; layer: HTMLCanvasElement } | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: 'idle' });
   const [elapsed, setElapsed] = useState(0);
   const [takes, setTakes] = useState<Take[]>([]);
@@ -244,9 +247,12 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
       } catch {
         return say(t.shareCancelled, true);
       }
-      const mix = mixMain(screen, camera, bubble ? camera : null);
+      const layer = drawOn ? document.createElement('canvas') : null;
+      const mix = mixMain(screen, camera, bubble ? camera : null, layer);
       stream = mix.stream;
+      if (mix.canvas && layer) setBoard({ picture: mix.canvas, layer });
       cleanup = () => {
+        setBoard(null);
         mix.stop();
         stopStream(screen);
       };
@@ -426,6 +432,11 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
             </label>
             <p class="field-helper" id="studio-bubble-help">{t.bubbleHelp}</p>
             <label class="choice">
+              <input type="checkbox" checked={drawOn} disabled={busy} onChange={(e) => setDrawOn(e.currentTarget.checked)} aria-describedby="studio-draw-help" />
+              <span>{t.draw}</span>
+            </label>
+            <p class="field-helper" id="studio-draw-help">{t.drawHelp}</p>
+            <label class="choice">
               <input type="checkbox" checked={tabAudio} disabled={busy} onChange={(e) => setTabAudio(e.currentTarget.checked)} aria-describedby="studio-tab-help" />
               <span>{t.tabAudio}</span>
             </label>
@@ -467,6 +478,7 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
           )}
         </div>
         {phase.kind === 'idle' && <p class="caption">{t.beepNote}</p>}
+        {board && <DrawingBoard picture={board.picture} layer={board.layer} />}
 
         <h3>{t.takesHeading}</h3>
         <p class="caption">{t.keepNote}</p>

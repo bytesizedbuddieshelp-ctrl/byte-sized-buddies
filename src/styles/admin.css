@@ -975,3 +975,39 @@
   border: 2px solid var(--ink);
   border-radius: var(--radius-sm);
 }
+
+/* Studio: drawing on the screen recording */
+.draw-board {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--forest-tint);
+}
+
+.draw-board h3 {
+  margin-top: 0;
+}
+
+.draw-holder .draw-picture {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.draw-color {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.draw-dot {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}

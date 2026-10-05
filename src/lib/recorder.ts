@@ -1,5 +1,6 @@
 // Browser recording helpers for the video studio: camera, microphone, screen, mixing, and the recorder.
 import { bubbleRect } from './studio';
+import { brandColor } from './backgrounds';
 
 export function stopStream(stream: MediaStream | null | undefined): void {
   stream?.getTracks().forEach((track) => track.stop());
@@ -48,14 +49,17 @@ function playingVideo(stream: MediaStream): HTMLVideoElement {
 
 export interface Mix {
   stream: MediaStream;
+  /** The picture being recorded, when the studio draws it (camera circle or drawings). Shown on the drawing board. */
+  canvas: HTMLCanvasElement | null;
   stop(): void;
 }
 
 /**
  * Builds the main part's stream: the shared screen, the microphone, sound from the shared tab (if any),
- * and a small round camera picture (if a camera stream is given).
+ * a small round camera picture (if a camera stream is given), and the owner's drawings (if a drawing layer is given).
+ * The drawing layer is resized to match the recording.
  */
-export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: MediaStream | null): Mix {
+export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: MediaStream | null, drawings: HTMLCanvasElement | null = null): Mix {
   const stops: (() => void)[] = [];
   const tracks: MediaStreamTrack[] = [];
 
@@ -74,10 +78,11 @@ export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: Me
     tracks.push(...screenAudio, ...micAudio);
   }
 
-  // Picture: the screen, or the screen with the camera circle drawn on top.
+  // Picture: the screen as it is, or drawn by the studio with the drawings and the camera circle on top.
   const screenTrack = screen.getVideoTracks()[0];
   const cameraTrack = bubble?.getVideoTracks()[0];
-  if (!cameraTrack) {
+  let shown: HTMLCanvasElement | null = null;
+  if (!cameraTrack && !drawings) {
     tracks.push(screenTrack);
   } else {
     const settings = screenTrack.getSettings();
@@ -87,9 +92,15 @@ export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: Me
     canvas.width = width;
     canvas.height = height;
     const g = canvas.getContext('2d')!;
+    shown = canvas;
+    if (drawings) {
+      drawings.width = width;
+      drawings.height = height;
+    }
     const screenVideo = playingVideo(new MediaStream([screenTrack]));
-    const cameraVideo = playingVideo(new MediaStream([cameraTrack]));
+    const cameraVideo = cameraTrack ? playingVideo(new MediaStream([cameraTrack])) : null;
     const circle = bubbleRect(width, height);
+    const ring = brandColor('cream'); // so the circle stands out on any screen
 
     const draw = () => {
       g.fillStyle = '#000';
@@ -101,9 +112,11 @@ export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: Me
         const scale = Math.min(width / sw, height / sh);
         g.drawImage(screenVideo, (width - sw * scale) / 2, (height - sh * scale) / 2, sw * scale, sh * scale);
       }
-      const cw = cameraVideo.videoWidth;
-      const ch = cameraVideo.videoHeight;
-      if (cw && ch) {
+      // The owner's drawings sit on the screen, under the camera circle.
+      if (drawings) g.drawImage(drawings, 0, 0);
+      const cw = cameraVideo?.videoWidth;
+      const ch = cameraVideo?.videoHeight;
+      if (cameraVideo && cw && ch) {
         const side = Math.min(cw, ch);
         g.save();
         g.beginPath();
@@ -112,7 +125,7 @@ export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: Me
         g.drawImage(cameraVideo, (cw - side) / 2, (ch - side) / 2, side, side, circle.x, circle.y, circle.size, circle.size);
         g.restore();
         g.lineWidth = Math.max(4, circle.size * 0.03);
-        g.strokeStyle = '#FAF7F0'; // brand cream, so the circle stands out on any screen
+        g.strokeStyle = ring;
         g.beginPath();
         g.arc(circle.x + circle.size / 2, circle.y + circle.size / 2, circle.size / 2, 0, Math.PI * 2);
         g.stroke();
@@ -129,11 +142,11 @@ export function mixMain(screen: MediaStream, mic: MediaStream | null, bubble: Me
       worker.terminate();
       stopStream(canvasStream);
       screenVideo.srcObject = null;
-      cameraVideo.srcObject = null;
+      if (cameraVideo) cameraVideo.srcObject = null;
     });
   }
 
-  return { stream: new MediaStream(tracks), stop: () => stops.forEach((s) => s()) };
+  return { stream: new MediaStream(tracks), canvas: shown, stop: () => stops.forEach((s) => s()) };
 }
 
 let beeper: AudioContext | null = null;
