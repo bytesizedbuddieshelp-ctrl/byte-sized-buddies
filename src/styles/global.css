@@ -1,0 +1,10 @@
+@import '../../brand/tokens.css';
+
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 20px;
+  line-height: 30px;
+}
