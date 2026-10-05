@@ -70,6 +70,7 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/about` | About (write your story in `src/content/about.md`) |
 | `/privacy`, `/license` | Plain-language privacy and license pages |
 | `/answer?t=...` | The private page where someone reads the answer to their question |
+| `/admin/present`, `/admin/remote` | Presenter mode (two windows) and the phone remote (needs `docs/DEPLOY.md` Step 12) |
 | `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox`, and `/admin/lessons` |
 
 ## Lessons

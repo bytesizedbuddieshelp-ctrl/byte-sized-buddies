@@ -126,6 +126,22 @@ These two are **meant to be public**. Anyone can see them in a website's code, a
 3. Open <http://localhost:4321/admin>, sign in, and open **Tickets**. Your test question should be there. Answer it, then open the private link.
 4. Open your live site in a **private window** and try the same, to see what a stranger sees.
 
+### Step 12: Turn on the phone remote (Phase 4)
+
+The remote sends messages between your laptop and your phone over a **private** channel. A database rule makes sure only you can use it. Without the rule, the remote refuses to connect, on purpose, so a stranger who guesses the 4-letter code can't read your notes or move your slides.
+
+1. Open the file `supabase/realtime-remote.sql` on your computer.
+2. Select everything, copy it, and paste it into a new query in the Supabase SQL Editor. Click **Run**. You should see **Success. No rows returned.** It is safe to run again.
+3. If the remote says "isn't allowed yet", the rule is not in place. Run this step again.
+
+**Using it**
+
+1. On your laptop, open **Admin, Present**, choose a lesson, and press **Open audience window**. Drag that window to the TV or projector and press **F** in it.
+2. On your phone, sign in at `/admin`, open **Remote**, and type the 4-letter code from the presenter screen.
+3. Use the big **Next** and **Back** buttons. Keep the phone page open.
+4. If the Wi-Fi is bad, use your phone as a hotspot for the laptop and the phone, or use the keyboard on the laptop: arrow keys or Space, B for blank, F for full screen.
+5. Closing the presenter window ends the code. The next time you present, you get a new code.
+
 ### If something goes wrong
 
 | What you see | What to try |
