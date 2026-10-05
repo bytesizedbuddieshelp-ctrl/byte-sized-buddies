@@ -132,3 +132,45 @@
   background: var(--forest);
   color: var(--paper);
 }
+
+/* Playlist player: parts of one video, played one after another. */
+.playlist {
+  margin-bottom: var(--space-5);
+}
+
+.playlist-start {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--forest-tint);
+}
+
+.playlist-start p {
+  margin: var(--space-4) 0 0;
+}
+
+.playlist-controls {
+  margin-top: var(--space-4);
+}
+
+.playlist-ended {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+  font-weight: 700;
+}
+
+.playlist-parts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.chip[aria-current='true'] {
+  background: var(--forest);
+  color: var(--paper);
+}

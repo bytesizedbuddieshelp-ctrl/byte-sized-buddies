@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'preact/hooks';
 import { copy } from '../content/copy';
 import { isConfigured } from '../lib/config';
-import { callRpc } from '../lib/publicApi';
+import { callRpc, restGet } from '../lib/publicApi';
 import { renderMarkdown } from '../lib/markdown';
-import { youTubeEmbedUrl } from '../lib/youtube';
+import { settingVideoId } from '../lib/studio';
+import type { VideoSegment } from '../lib/lessons';
+import { PlaylistPlayer } from './video/PlaylistPlayer';
 
 interface Ticket {
   status: 'new' | 'in_progress' | 'answered' | 'closed';
@@ -19,16 +21,39 @@ type State = { kind: 'loading' } | { kind: 'missing' } | { kind: 'error' } | { k
 
 const t = copy.answer;
 
+// The owner's standard opener and closer (public settings) play around a video answer, when they are set.
+async function answerSegments(mainId: string): Promise<VideoSegment[]> {
+  const main = { youtube_id: mainId, label: t.videoMain };
+  try {
+    const rows = await restGet<{ key: string; value: unknown }[]>('settings?select=key,value&key=in.(opener_video,closer_video)');
+    const find = (key: string) => settingVideoId(rows.find((r) => r.key === key)?.value);
+    const opener = find('opener_video');
+    const closer = find('closer_video');
+    return [
+      ...(opener ? [{ youtube_id: opener, label: t.videoOpener }] : []),
+      main,
+      ...(closer ? [{ youtube_id: closer, label: t.videoCloser }] : []),
+    ];
+  } catch {
+    return [main];
+  }
+}
+
 // The private answer page. It looks up one ticket by the token in the link, and nothing else.
 export default function AnswerView() {
   const [state, setState] = useState<State>({ kind: 'loading' });
+  const [segments, setSegments] = useState<VideoSegment[]>([]);
 
   useEffect(() => {
     const token = new URLSearchParams(window.location.search).get('t') ?? '';
     if (!isConfigured) return setState({ kind: 'off' });
     if (!/^[0-9a-f]{64,128}$/.test(token)) return setState({ kind: 'missing' });
     callRpc<Ticket[]>('get_ticket', { p_token: token })
-      .then((rows) => setState(rows.length ? { kind: 'ready', ticket: rows[0] } : { kind: 'missing' }))
+      .then(async (rows) => {
+        const videoId = rows[0]?.answered_at ? rows[0].answer_video_youtube_id : null;
+        if (videoId) setSegments(await answerSegments(videoId));
+        setState(rows.length ? { kind: 'ready', ticket: rows[0] } : { kind: 'missing' });
+      })
       .catch(() => setState({ kind: 'error' }));
   }, []);
 
@@ -69,19 +94,10 @@ export default function AnswerView() {
         <section aria-labelledby="answer-title">
           <h2 id="answer-title">{t.answerHeading}</h2>
           {ticket.answer_md && <div dangerouslySetInnerHTML={{ __html: renderMarkdown(ticket.answer_md) }} />}
-          {ticket.answer_video_youtube_id && (
+          {segments.length > 0 && (
             <div>
               <h3>{t.videoTitle}</h3>
-              <div class="video-frame">
-                <iframe
-                  src={youTubeEmbedUrl(ticket.answer_video_youtube_id)}
-                  title={t.videoTitle}
-                  loading="lazy"
-                  referrerpolicy="strict-origin-when-cross-origin"
-                  allow="encrypted-media; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+              <PlaylistPlayer segments={segments} title={t.videoTitle} />
             </div>
           )}
         </section>

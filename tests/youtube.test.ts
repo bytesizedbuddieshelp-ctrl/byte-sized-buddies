@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseYouTubeId, youTubeEmbedUrl } from '../src/lib/youtube';
+import { parseYouTubeId, youTubeEmbedUrl, youTubePlayerUrl } from '../src/lib/youtube';
 
 const id = 'dQw4w9WgXcQ';
 
@@ -26,4 +26,19 @@ describe('parseYouTubeId', () => {
 describe('youTubeEmbedUrl', () => {
   it('uses the privacy-friendly address', () => expect(youTubeEmbedUrl(id)).toBe(`https://www.youtube-nocookie.com/embed/${id}`));
   it('refuses anything that is not an ID', () => expect(() => youTubeEmbedUrl('x" onload="y')).toThrow());
+});
+
+describe('youTubePlayerUrl', () => {
+  it('uses the privacy-friendly address with captions on', () => {
+    const url = new URL(youTubePlayerUrl('dQw4w9WgXcQ', { autoplay: false, origin: 'https://site.example' }));
+    expect(url.origin).toBe('https://www.youtube-nocookie.com');
+    expect(url.pathname).toBe('/embed/dQw4w9WgXcQ');
+    expect(url.searchParams.get('cc_load_policy')).toBe('1');
+    expect(url.searchParams.get('enablejsapi')).toBe('1');
+    expect(url.searchParams.get('origin')).toBe('https://site.example');
+    expect(url.searchParams.get('autoplay')).toBe('0');
+  });
+  it('refuses anything that is not an ID', () => {
+    expect(() => youTubePlayerUrl('"><script>', { autoplay: true, origin: 'x' })).toThrow();
+  });
 });

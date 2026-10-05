@@ -211,10 +211,11 @@ textarea.field-control {
   font-weight: 700;
 }
 
-/* A 16:9 video frame. */
+/* A 16:9 video frame. YouTube needs at least 200px of height, so narrow phones get a taller frame. */
 .video-frame {
   position: relative;
   aspect-ratio: 16 / 9;
+  min-height: 200px;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--forest-deep);

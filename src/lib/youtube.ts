@@ -29,3 +29,16 @@ export function youTubeEmbedUrl(id: string): string {
   if (!ID.test(id)) throw new Error('Not a YouTube ID');
   return `https://www.youtube-nocookie.com/embed/${id}`;
 }
+
+/** The privacy-friendly player address, ready for the playlist player: captions on, controllable by our page. */
+export function youTubePlayerUrl(id: string, options: { autoplay: boolean; origin: string }): string {
+  const params = new URLSearchParams({
+    enablejsapi: '1',
+    origin: options.origin,
+    cc_load_policy: '1',
+    rel: '0',
+    playsinline: '1',
+    autoplay: options.autoplay ? '1' : '0',
+  });
+  return `${youTubeEmbedUrl(id)}?${params}`;
+}

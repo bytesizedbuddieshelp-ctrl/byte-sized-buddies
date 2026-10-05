@@ -4,7 +4,7 @@ import { SlideViewer, PrintSlides, printSlides } from '../slides/SlideViewer';
 import { copy } from '../../content/copy';
 import { deviceWords, downloadsFor, fileUrl, formatBytes, imageUrlFor, levelWords, type Lesson } from '../../lib/lessons';
 import { renderMarkdown } from '../../lib/markdown';
-import { youTubeEmbedUrl } from '../../lib/youtube';
+import { PlaylistPlayer } from '../video/PlaylistPlayer';
 
 const t = copy.lesson;
 
@@ -84,21 +84,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
         {videos.length > 0 && (
           <section aria-labelledby="video-title">
             <h2 id="video-title">{t.videoHeading}</h2>
-            {videos.map((video, i) => (
-              <div key={video.youtube_id + i} style="margin-bottom: 24px;">
-                <p class="label">{t.videoPart(i + 1, videos.length, video.label)}</p>
-                <div class="video-frame">
-                  <iframe
-                    src={youTubeEmbedUrl(video.youtube_id)}
-                    title={t.videoTitle(lesson.title, video.label)}
-                    loading="lazy"
-                    referrerpolicy="strict-origin-when-cross-origin"
-                    allow="encrypted-media; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-              </div>
-            ))}
+            <PlaylistPlayer segments={videos} title={lesson.title} />
           </section>
         )}
 
