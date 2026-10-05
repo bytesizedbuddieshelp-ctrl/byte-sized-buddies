@@ -23,7 +23,9 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `apps-script/` | The Gmail bridge: `Code.gs` runs in your Google account; `README.md` shows how to install it. |
 | `scripts/make-bridge-secret.mjs` | Makes the Gmail bridge secret (`npm run bridge:secret`, in your own Terminal). |
 | `supabase/` | The database: `schema.sql` builds it, `seed.sql` adds starter data. |
-| `docs/` | `DEPLOY.md` (setup steps), `SECURITY.md` (the rules and how to test them), `KIT-FORMAT.md` (the lesson kit format), and `sample-kit/` (a kit to try). |
+| `docs/` | `ADMIN-GUIDE.md` (your weekly routine), `TEACHING-GUIDE.md` (running a visit), `LAUNCH-CHECKLIST.md`, `LIMITS.md` (free-plan limits), `DEPLOY.md` (setup steps), `SECURITY.md` (the rules and how to test them), `KIT-FORMAT.md` (the lesson kit format), and `sample-kit/` (a kit to try). |
+| `scripts/check-csp.mjs`, `scripts/check-a11y.mjs` | Check the built site's security policy and accessibility (part of `npm run check`). |
+| `scripts/check-launch.mjs` | Lists placeholders still to fill in before launch (`npm run check:launch`). |
 | `tests/` | Small automatic tests for the helper code. |
 | `wrangler.jsonc` | Tells Cloudflare to publish the finished site from the `dist` folder. |
 
@@ -39,11 +41,15 @@ You need [Node.js](https://nodejs.org) version 22.12 or newer.
 
 ## Check your work
 
-Run `npm run check`. It does three things:
+Run `npm run check`. It does five things:
 
 1. Looks through `src/` for banned words, such as the ones that make people feel they are the problem.
-2. Runs the small automatic tests (`npm test` runs just these).
+2. Runs the small automatic tests (`npm test` runs only these).
 3. Builds the site, to make sure nothing is broken.
+4. Checks every page's security policy covers its scripts.
+5. Opens every public page in an invisible Chrome window and runs an accessibility check (axe), at phone and laptop widths. It is skipped if Chrome isn't installed.
+
+`npm run screenshots` saves pictures of every public page at 320, 768, and 1280 pixels wide in `test-results/` (not saved to git).
 
 Run it before every commit.
 

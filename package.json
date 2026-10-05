@@ -11,7 +11,8 @@
     "check:rls": "node --env-file-if-exists=.env scripts/check-rls.mjs",
     "bridge:secret": "node scripts/make-bridge-secret.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
-    "screenshots": "node scripts/check-a11y.mjs --shots"
+    "screenshots": "node scripts/check-a11y.mjs --shots",
+    "check:launch": "node scripts/check-launch.mjs"
   },
   "repository": {
     "type": "git",
