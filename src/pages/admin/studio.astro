@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import StudioPage from '../../components/admin/StudioPage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.studio.title}>
+  <StudioPage client:only="preact" />
+</AdminLayout>

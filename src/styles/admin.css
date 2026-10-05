@@ -751,3 +751,153 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* Video studio */
+.studio-checklist {
+  margin-bottom: var(--space-5);
+}
+
+.studio-checklist .check-list {
+  margin: 0;
+}
+
+.studio-devices {
+  display: grid;
+  gap: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .studio-devices {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+.studio-preview,
+.take-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  background: var(--forest-deep);
+}
+
+.studio-preview {
+  transform: scaleX(-1); /* a mirror, like a bathroom mirror; the recording itself is not flipped */
+}
+
+.studio-warning {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.studio-warning svg {
+  flex: none;
+  margin-top: 3px;
+}
+
+.studio-status:empty {
+  display: none;
+}
+
+.studio-count,
+.studio-recording {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-4) 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+}
+
+.studio-count {
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+.studio-recording {
+  background: var(--forest-deep);
+  color: var(--cream);
+}
+
+.take-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.take-list li {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--rule);
+}
+
+.take-video {
+  margin-bottom: var(--space-3);
+}
+
+.studio-link-tools {
+  align-items: center;
+  margin-top: var(--space-2);
+}
+
+.studio-link-tools .choice {
+  margin: 0;
+}
+
+/* Teleprompter */
+.prompt-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.prompt-size {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.prompt-speed {
+  margin: 0;
+  min-width: 220px;
+}
+
+.prompt-speed input {
+  width: 100%;
+  min-height: 48px;
+  accent-color: var(--forest);
+}
+
+.prompt-text {
+  height: 60vh;
+  min-height: 280px;
+  overflow-y: auto;
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--forest-deep);
+  color: var(--cream);
+  font-weight: 700;
+}
+
+.prompt-text :is(h1, h2, h3, h4, h5, h6, p, li) {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0 0 0.6em;
+}
+
+.prompt-text :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--sunshine);
+}
+
+.prompt-text a {
+  color: inherit;
+}

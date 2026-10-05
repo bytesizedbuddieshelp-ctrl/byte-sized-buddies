@@ -6,7 +6,7 @@ import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
 import type { IconName } from '../../lib/icons';
 
-export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons' | 'present' | 'remote';
+export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons' | 'present' | 'remote' | 'studio';
 
 const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[] = [
   { id: 'dashboard', href: '/admin/dashboard', label: a.nav.dashboard, icon: 'home' },
@@ -15,6 +15,7 @@ const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[]
   { id: 'lessons', href: '/admin/lessons', label: a.nav.lessons, icon: 'book' },
   { id: 'present', href: '/admin/present', label: a.nav.present, icon: 'play' },
   { id: 'remote', href: '/admin/remote', label: a.nav.remote, icon: 'phone' },
+  { id: 'studio', href: '/admin/studio', label: a.nav.studio, icon: 'video' },
 ];
 
 let leaving = false;
