@@ -1,0 +1,115 @@
+---
+import { copy } from '../content/copy';
+
+const t = copy.textSize;
+---
+
+<div class="text-size">
+  <div class="container text-size-inner" role="group" aria-labelledby="text-size-label">
+    <span id="text-size-label" class="text-size-label">{t.label}</span>
+    {
+      t.options.map((o) => (
+        <button type="button" class="text-size-button" data-size={o.value} aria-pressed={o.value === 'normal' ? 'true' : 'false'}>
+          {o.label}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<script>
+  // The choice is kept in this browser only, to make the next visit match. It is never sent anywhere.
+  const buttons = document.querySelectorAll<HTMLButtonElement>('.text-size-button');
+  const KEY = 'bsb-text-size';
+
+  function apply(size: string) {
+    document.documentElement.dataset.textSize = size;
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.size === size)));
+  }
+
+  let saved = 'normal';
+  try {
+    saved = localStorage.getItem(KEY) || 'normal';
+  } catch {
+    // Private windows may block storage. The page still works at normal size.
+  }
+  apply(['normal', 'larger', 'largest'].includes(saved) ? saved : 'normal');
+
+  buttons.forEach((b) =>
+    b.addEventListener('click', () => {
+      apply(b.dataset.size || 'normal');
+      try {
+        localStorage.setItem(KEY, b.dataset.size || 'normal');
+      } catch {
+        // Not saved, but the size still changes on this page.
+      }
+    })
+  );
+</script>
+
+<style is:global>
+  .text-size {
+    background: var(--forest-tint);
+  }
+
+  .text-size-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding-block: var(--space-2);
+  }
+
+  .text-size-label {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+    margin-right: var(--space-2);
+  }
+
+  .text-size-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0 var(--space-3);
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--forest);
+    background: var(--cream);
+    border: 3px solid var(--forest);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+
+  .text-size-button[aria-pressed='true'] {
+    background: var(--forest);
+    color: var(--paper);
+  }
+
+  .text-size-button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Zooming the page content keeps every fixed pixel size in proportion. The header stays put so its menu layout holds. */
+  html[data-text-size='larger'] main,
+  html[data-text-size='larger'] .site-footer {
+    zoom: 1.2;
+  }
+
+  html[data-text-size='largest'] main,
+  html[data-text-size='largest'] .site-footer {
+    zoom: 1.45;
+  }
+
+  @media print {
+    .text-size {
+      display: none;
+    }
+
+    html[data-text-size] main,
+    html[data-text-size] .site-footer {
+      zoom: 1;
+    }
+  }
+</style>

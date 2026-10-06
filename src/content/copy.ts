@@ -4,6 +4,14 @@ export const copy = {
   tagline: 'Learn it. Try it. Keep it.',
   skipLink: 'Skip to main content',
   logoHomeLabel: 'Byte-Sized Buddies, home',
+  textSize: {
+    label: 'Text size',
+    options: [
+      { value: 'normal', label: 'Normal' },
+      { value: 'larger', label: 'Larger' },
+      { value: 'largest', label: 'Largest' },
+    ],
+  },
   nav: {
     label: 'Main',
     items: [
