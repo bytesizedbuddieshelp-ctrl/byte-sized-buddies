@@ -1,0 +1,377 @@
+/* Page layouts for wide screens: two columns, tiles, timelines, and side panels.
+   Everything stacks into one column on phones and small windows. Brand tokens only. */
+
+/* Two columns: words on one side, a picture or panel on the other. */
+.split {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+/* Headlines break into even lines instead of leaving one word alone. */
+.hero-title,
+h1,
+h2 {
+  text-wrap: balance;
+}
+
+@media (min-width: 960px) {
+  .hero .split {
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.95fr);
+  }
+
+  .split {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-7);
+  }
+
+  .split--even {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  /* A long form with a narrower side panel next to it. */
+  .split--form {
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .split--reverse > :first-child {
+    order: 2;
+  }
+}
+
+/* Illustrations: flat shapes in brand colors. They decorate, so screen readers skip them. */
+.ill {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ill-frame {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.ill .c-forest { fill: var(--forest); }
+.ill .c-forest-deep { fill: var(--forest-deep); }
+.ill .c-tint { fill: var(--forest-tint); }
+.ill .c-sun { fill: var(--sunshine); }
+.ill .c-sun-soft { fill: var(--sunshine-soft); }
+.ill .c-cream { fill: var(--cream); }
+.ill .c-paper { fill: var(--paper); }
+.ill .c-ink { fill: var(--ink); }
+.ill .c-rule { fill: var(--rule); }
+.ill .c-muted { fill: var(--ink-muted); }
+.ill .s-forest { fill: none; stroke: var(--forest); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+.ill .s-paper { fill: none; stroke: var(--paper); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.ill .s-sun { fill: none; stroke: var(--sunshine); stroke-width: 6; stroke-linecap: round; }
+.ill .s-rule { stroke: var(--rule); stroke-width: 3; }
+.ill .s-dash { fill: none; stroke: var(--forest); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 2 12; }
+
+/* Home: the hero */
+.hero {
+  padding-top: var(--space-6);
+}
+
+@media (min-width: 960px) {
+  .hero {
+    padding-top: var(--space-7);
+  }
+}
+
+/* A row of short facts, each with an icon in a sunshine circle. */
+.fact-strip {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 760px) {
+  .fact-strip {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+.fact-strip li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.fact-strip strong {
+  display: block;
+  color: var(--forest-deep);
+}
+
+.icon-circle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-pill);
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+.icon-circle--tint {
+  background: var(--forest-tint);
+  color: var(--forest);
+}
+
+/* "How a visit works" cards with a small picture on top. */
+.visit-card .spot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--forest-tint);
+}
+
+.visit-card .step-line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.visit-card .step-line .step-number {
+  margin: 0;
+}
+
+.visit-card h3 {
+  margin: 0;
+}
+
+/* A full-width colored band, for a change of pace down the page. */
+.band {
+  margin-top: var(--space-7);
+  padding-block: var(--space-7);
+  background: var(--forest-tint);
+}
+
+.band + .section {
+  padding-top: var(--space-7);
+}
+
+/* A white card that sits on a band or beside text. */
+.sheet {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.sheet > :last-child {
+  margin-bottom: 0;
+}
+
+/* Tiles: an icon and a sentence each, two by two on wide screens. */
+.tile-grid {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 760px) {
+  .tile-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.tile-grid li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  font-weight: 700;
+}
+
+/* A timeline of the 45-minute lesson: across on wide screens, down on phones. */
+.timeline {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 900px) {
+  .timeline {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.timeline li {
+  position: relative;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.timeline .step-number {
+  margin-bottom: var(--space-2);
+}
+
+.timeline .minutes {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--forest-tint);
+  color: var(--forest-deep);
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 700;
+}
+
+.timeline p {
+  margin: 0;
+}
+
+/* Reading pages: the text, with an "On this page" list and a helpful card beside it. */
+.with-aside {
+  display: grid;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1000px) {
+  .with-aside {
+    grid-template-columns: minmax(0, 44rem) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .aside-sticky {
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+
+.aside-stack > * + * {
+  margin-top: var(--space-4);
+}
+
+.toc {
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--forest-tint);
+}
+
+.toc h2 {
+  margin: 0 0 var(--space-2);
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.toc ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc a {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-block: 2px;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.toc a:hover {
+  text-decoration: underline;
+}
+
+/* Numbered "what happens next" steps in a side panel. */
+.next-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: next;
+}
+
+.next-steps li {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+  margin-bottom: var(--space-3);
+  counter-increment: next;
+}
+
+.next-steps li::before {
+  content: counter(next);
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: var(--sunshine);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Page headers with a small picture beside the title. */
+.page-head {
+  display: grid;
+  gap: var(--space-5);
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .page-head {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+.page-head .ill {
+  max-width: 440px;
+  margin-inline: auto;
+}
+.ill .t-display { font-family: var(--font-display); }
+
+/* A short line above a big title. */
+.kicker {
+  margin: 0 0 var(--space-2);
+  color: var(--forest-deep);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.section-head {
+  max-width: 44rem;
+}
+
+/* A calm "coming soon" card with an icon beside the words. */
+.soon-card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+}
+
+.soon-card h3 {
+  margin-bottom: var(--space-2);
+}
+
+.soon-card p:last-child {
+  margin-bottom: 0;
+}

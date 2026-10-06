@@ -2,6 +2,7 @@ import { useEffect, useState } from 'preact/hooks';
 import { fetchPublishedLessons, type Lesson } from '../../lib/lessons';
 import { isConfigured } from '../../lib/config';
 import { LessonCard } from './LessonCard';
+import { Icon } from '../forms/Icon';
 import { copy } from '../../content/copy';
 
 const t = copy.home.lessons;
@@ -18,9 +19,14 @@ export default function HomeLessons() {
   if (lessons === null) return <p role="status">{copy.lessons.loading}</p>;
   if (lessons.length === 0) {
     return (
-      <div class="card">
-        <h3>{t.emptyTitle}</h3>
-        <p>{t.emptyText}</p>
+      <div class="card soon-card">
+        <span class="icon-circle">
+          <Icon name="book" size={26} />
+        </span>
+        <div>
+          <h3>{t.emptyTitle}</h3>
+          <p>{t.emptyText}</p>
+        </div>
       </div>
     );
   }

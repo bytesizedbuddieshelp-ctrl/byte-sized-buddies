@@ -4,22 +4,48 @@ import Button from '../components/Button.astro';
 import Card from '../components/Card.astro';
 import Icon from '../components/Icon.astro';
 import HomeLessons from '../components/lessons/HomeLessons';
+import HeroScene from '../components/illustrations/HeroScene.astro';
+import VisitSpot from '../components/illustrations/VisitSpot.astro';
+import HandoutStack from '../components/illustrations/HandoutStack.astro';
+import type { IconName } from '../lib/icons';
 import { copy } from '../content/copy';
 
 const t = copy.home;
+const spots = ['learn', 'try', 'keep'] as const;
 ---
 
 <Base title={t.title} description={t.description}>
-  <!-- 1. Hero -->
-  <section class="container section" aria-labelledby="hero-title">
-    <div class="prose">
-      <h1 id="hero-title" class="hero-title">{copy.tagline}</h1>
-      <p class="lead">{copy.mission}</p>
-      <div class="actions">
-        <Button href="/for-senior-homes#contact">{t.heroButtons.visit}</Button>
-        <Button variant="secondary" href="/lessons">{t.heroButtons.lessons}</Button>
+  <!-- 1. Hero: the words on the left, a picture of a lesson on the right -->
+  <section class="container hero" aria-labelledby="hero-title">
+    <div class="split">
+      <div>
+        <p class="kicker">{t.heroKicker}</p>
+        <h1 id="hero-title" class="hero-title">{copy.tagline}</h1>
+        <p class="lead">{copy.mission}</p>
+        <div class="actions">
+          <Button href="/for-senior-homes#contact">{t.heroButtons.visit}</Button>
+          <Button variant="secondary" href="/lessons">{t.heroButtons.lessons}</Button>
+        </div>
+      </div>
+      <div class="ill-frame">
+        <HeroScene />
       </div>
     </div>
+    <ul class="fact-strip">
+      {
+        t.facts.map((fact) => (
+          <li>
+            <span class="icon-circle">
+              <Icon name={fact.icon as IconName} size={26} />
+            </span>
+            <span>
+              <strong>{fact.title}</strong>
+              {fact.text}
+            </span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 
   <!-- 2. How a visit works -->
@@ -28,9 +54,12 @@ const t = copy.home;
     <ol class="grid clean-list">
       {
         t.visit.steps.map((step, index) => (
-          <Card as="li">
-            <div class="step-number" aria-hidden="true">{index + 1}</div>
-            <h3><span class="visually-hidden">Step {index + 1}: </span>{step.title}</h3>
+          <Card as="li" class="visit-card">
+            <VisitSpot kind={spots[index]} />
+            <div class="step-line">
+              <div class="step-number" aria-hidden="true">{index + 1}</div>
+              <h3><span class="visually-hidden">Step {index + 1}: </span>{step.title}</h3>
+            </div>
             <p>{step.text}</p>
           </Card>
         ))
@@ -40,53 +69,74 @@ const t = copy.home;
 
   <!-- 3. What you can learn: published lessons from the database, or a calm card when there are none -->
   <section class="container section" aria-labelledby="learn-title">
-    <h2 id="learn-title">{t.lessons.heading}</h2>
+    <div class="section-head">
+      <div>
+        <h2 id="learn-title">{t.lessons.heading}</h2>
+        <p>{t.lessons.intro}</p>
+      </div>
+    </div>
     <HomeLessons client:idle />
   </section>
 
-  <!-- 4. For senior homes -->
-  <section class="container section" aria-labelledby="homes-title">
-    <div class="panel">
-      <h2 id="homes-title">{t.homes.heading}</h2>
-      <p>{t.homes.text}</p>
-      <h3>{t.homes.needHeading}</h3>
-      <ul class="check-list">
-        {
-          t.homes.needs.map((need) => (
-            <li>
-              <Icon name="check" size={24} />
-              <span>{need}</span>
-            </li>
-          ))
-        }
-      </ul>
-      <Button href="/for-senior-homes#contact">{t.homes.button}</Button>
+  <!-- 4. For senior homes: a full-width band, words beside a checklist card -->
+  <section class="band" aria-labelledby="homes-title">
+    <div class="container split split--even">
+      <div>
+        <h2 id="homes-title">{t.homes.heading}</h2>
+        <p class="lead">{t.homes.text}</p>
+        <div class="actions">
+          <Button href="/for-senior-homes#contact">{t.homes.button}</Button>
+          <Button variant="secondary" href="/for-senior-homes">{t.homes.more}</Button>
+        </div>
+      </div>
+      <div class="sheet">
+        <h3>{t.homes.needHeading}</h3>
+        <ul class="check-list">
+          {
+            t.homes.needs.map((need) => (
+              <li>
+                <Icon name="check" size={24} />
+                <span>{need}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
     </div>
   </section>
 
-  <!-- 5. Free for everyone -->
+  <!-- 5. Free for everyone: a picture of handouts beside the words -->
   <section class="container section" aria-labelledby="free-title">
-    <div class="prose">
-      <h2 id="free-title">{t.free.heading}</h2>
-      <p>{t.free.text}</p>
-      <Button variant="secondary" href="/teach">{t.free.button}</Button>
+    <div class="split split--reverse">
+      <div>
+        <h2 id="free-title">{t.free.heading}</h2>
+        <p class="lead">{t.free.text}</p>
+        <div class="actions">
+          <Button variant="secondary" href="/teach">{t.free.button}</Button>
+          <Button variant="secondary" href="/lessons">{t.heroButtons.lessons}</Button>
+        </div>
+      </div>
+      <div class="ill-frame">
+        <HandoutStack />
+      </div>
     </div>
   </section>
 
-  <!-- 6. A promise to families and staff -->
+  <!-- 6. A promise to families and staff: four tiles -->
   <section class="container section" aria-labelledby="promise-title">
-    <Card>
-      <h2 id="promise-title">{t.promise.heading}</h2>
-      <ul class="check-list">
-        {
-          t.promise.items.map((item) => (
-            <li>
-              <Icon name="check" size={24} />
-              <span>{item}</span>
-            </li>
-          ))
-        }
-      </ul>
-    </Card>
+    <h2 id="promise-title">{t.promise.heading}</h2>
+    <p>{t.promise.intro}</p>
+    <ul class="tile-grid">
+      {
+        t.promise.items.map((item, index) => (
+          <li>
+            <span class="icon-circle icon-circle--tint">
+              <Icon name={t.promise.icons[index] as IconName} size={26} />
+            </span>
+            <span>{item}</span>
+          </li>
+        ))
+      }
+    </ul>
   </section>
 </Base>

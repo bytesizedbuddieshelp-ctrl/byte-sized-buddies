@@ -20,6 +20,10 @@ export const copy = {
   footer: {
     line: 'Byte-Sized Buddies · Free to print and share · [YOUR WEBSITE]',
     studentLed: 'Student-led volunteer project.',
+    mission: 'Free, patient technology lessons for older adults, and free materials for anyone who wants to teach them.',
+    exploreHeading: 'Explore',
+    exploreLabel: 'Explore the site',
+    linksHeading: 'About this site',
     linksLabel: 'About this site',
     links: [
       { label: 'Privacy', href: '/privacy' },
@@ -50,6 +54,12 @@ export const copy = {
     description:
       'Free, patient, hands-on technology lessons for older adults, and free materials for anyone who wants to teach them.',
     heroButtons: { visit: 'Request a visit', lessons: 'Get free lessons' },
+    heroKicker: 'Free technology lessons for older adults',
+    facts: [
+      { icon: 'check', title: 'Free, always', text: 'No cost for senior homes, learners, or teachers.' },
+      { icon: 'play', title: 'About 45 minutes', text: 'One small, useful skill each visit.' },
+      { icon: 'book', title: 'Large print', text: 'A handout for every learner to keep.' },
+    ],
     visit: {
       heading: 'How a visit works',
       steps: [
@@ -60,6 +70,8 @@ export const copy = {
     },
     lessons: {
       heading: 'What you can learn',
+      intro: 'Each lesson teaches one real thing, like calling a friend or sharing a photo. Every lesson is free to download, print, and teach.',
+      all: 'See all lessons',
       emptyTitle: 'Our first lessons are on the way',
       emptyText: 'Every lesson will be free to download, print, and share. Please check back soon.',
     },
@@ -69,6 +81,7 @@ export const copy = {
       needHeading: 'What we need from you',
       needs: ['A room', 'A screen or TV (optional)', 'Wi-Fi, if you have it', 'A staff contact person'],
       button: 'Ask about a visit',
+      more: 'How a visit works',
     },
     free: {
       heading: 'Free for everyone',
@@ -77,6 +90,8 @@ export const copy = {
     },
     promise: {
       heading: 'A promise to families and staff',
+      intro: 'Learning should feel safe. These rules are part of every lesson we teach.',
+      icons: ['alert', 'phone', 'video', 'check'],
       items: [
         'We never ask learners to type a real password in class.',
         'We use practice accounts.',
