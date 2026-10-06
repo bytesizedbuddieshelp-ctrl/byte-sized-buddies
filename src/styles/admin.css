@@ -1215,3 +1215,12 @@ body.annotate-live .annotate-page {
 .draw-tabbar .button:hover {
   background: var(--paper);
 }
+
+/* Lesson editor: the photos on the chosen slide */
+.photos-panel {
+  margin-top: var(--space-4);
+}
+
+.photos-panel h3 {
+  margin-top: 0;
+}

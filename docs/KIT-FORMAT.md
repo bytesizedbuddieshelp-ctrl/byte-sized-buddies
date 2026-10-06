@@ -86,6 +86,7 @@ Slides are data. The website draws them in the brand style, so every lesson look
 { "layout": "title",  "title": "Calling a friend", "subtitle": "Week 1", "notes": "Welcome everyone." }
 { "layout": "idea",   "title": "The green phone", "body": ["It opens your calls."], "image": { "file": "phone-home.png", "alt": "A phone home screen with the green phone circled" } }
 { "layout": "step",   "step": 1, "title": "Tap Contacts", "body": ["Find Contacts at the bottom."], "image": { "file": "contacts.png", "alt": "The Contacts screen" } }
+{ "layout": "step",   "step": 2, "title": "Compare the screens", "body": ["Find the plus button."], "images": [{ "file": "iphone-contacts.png", "alt": "Contacts on an iPhone" }, { "file": "android-contacts.png", "alt": "Contacts on an Android phone" }] }
 { "layout": "tryit",  "title": "Try it now", "body": ["Find a name. Tap it."], "timer_minutes": 5 }
 { "layout": "recap",  "title": "Today you learned", "bullets": ["Open Contacts.", "Tap a name.", "Tap the green phone."] }
 { "layout": "keepit", "title": "Keep it", "body": ["Take your handout home."] }
@@ -99,6 +100,8 @@ Slides are data. The website draws them in the brand style, so every lesson look
 | `tryit` | A yellow "Try it" panel, and an optional countdown. | `title`, `body`. Optional `timer_minutes` (1 to 60). |
 | `recap` | Up to four checked lines. | `title`, `bullets` (one to four). |
 | `keepit` | A soft green panel for the take-home. | `title`, `body`. |
+
+**Photos:** `idea` and `step` slides have a photo spot. Use `"image"` for one photo, or `"images"` for up to **four** (a list of `{"file", "alt"}`). One photo fills the spot, two sit side by side, and three or four make a grid. Every photo needs `alt` text and must be in the kit's `images` list. You can also add and order photos in the lesson editor (**Photos on this slide**, under the slide preview).
 
 Every slide may have `notes`: your speaker notes. The audience never sees them.
 

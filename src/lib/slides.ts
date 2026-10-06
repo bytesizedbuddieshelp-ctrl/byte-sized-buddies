@@ -16,7 +16,10 @@ export interface Slide {
   body?: string[];
   bullets?: string[];
   step?: number;
+  /** One photo. */
   image?: SlideImage;
+  /** Several photos (up to four), shown side by side or in a grid in the photo spot. */
+  images?: SlideImage[];
   timer_minutes?: number;
   notes?: string;
 }
@@ -33,6 +36,7 @@ export interface DeckResult {
 }
 
 export const MAX_SLIDES = 60;
+export const MAX_SLIDE_IMAGES = 4;
 export const BODY_WORD_LIMIT = 25;
 const IMAGE_FILE = /^[A-Za-z0-9][A-Za-z0-9._-]{0,95}\.(png|jpe?g|webp|svg)$/i;
 
@@ -40,9 +44,14 @@ export function countWords(lines: string[] | undefined): number {
   return (lines ?? []).join(' ').trim().split(/\s+/).filter(Boolean).length;
 }
 
+/** Every photo on a slide, in order: the single "image" (if any), then the "images" list. */
+export function slideImages(slide: Pick<Slide, 'image' | 'images'>): SlideImage[] {
+  return [...(slide.image ? [slide.image] : []), ...(slide.images ?? [])];
+}
+
 /** Slide images named in a deck, in order, without repeats. */
 export function imageFilesIn(deck: SlideDeck): string[] {
-  return [...new Set(deck.slides.flatMap((slide) => (slide.image ? [slide.image.file] : [])))];
+  return [...new Set(deck.slides.flatMap((slide) => slideImages(slide).map((image) => image.file)))];
 }
 
 export function emptyDeck(): SlideDeck {
@@ -136,18 +145,35 @@ export function validateDeck(input: unknown): DeckResult {
       } else slide.timer_minutes = s.timer_minutes;
     }
 
-    if (s.image !== undefined) {
-      const image = s.image as Record<string, unknown> | null;
-      if (typeof image !== 'object' || image === null || !isText(image.file)) {
-        errors.push(`${where}: "image" should look like {"file": "phone.png", "alt": "A phone home screen"}.`);
-      } else if (!IMAGE_FILE.test(image.file)) {
-        errors.push(`${where}: the image name "${image.file}" isn't allowed. Use letters, numbers, dots, and dashes, ending in .png, .jpg, .webp, or .svg.`);
-      } else if (layout !== 'idea' && layout !== 'step') {
-        warnings.push(`${where}: images only show on "idea" and "step" slides, so this one will be ignored.`);
-      } else {
-        const alt = isText(image.alt) ? image.alt.trim() : '';
-        if (!alt) warnings.push(`${where}: the image "${image.file}" has no alt text. Describe it in a few words for people who can't see it.`);
-        slide.image = { file: image.file, alt };
+    // Photos: "image" for one, "images" for several (up to four). Both may be used; "image" comes first.
+    const given: unknown[] = [];
+    if (s.image !== undefined) given.push(s.image);
+    if (s.images !== undefined) {
+      if (!Array.isArray(s.images)) errors.push(`${where}: "images" should be a list, like [{"file": "a.png", "alt": "..."}, {"file": "b.png", "alt": "..."}].`);
+      else given.push(...s.images);
+    }
+    if (given.length > MAX_SLIDE_IMAGES) {
+      errors.push(`${where} has ${given.length} photos. The most that fit on one slide is ${MAX_SLIDE_IMAGES}.`);
+    } else if (given.length) {
+      const photos: SlideImage[] = [];
+      for (const entry of given) {
+        const image = entry as Record<string, unknown> | null;
+        if (typeof image !== 'object' || image === null || !isText(image.file)) {
+          errors.push(`${where}: each photo should look like {"file": "phone.png", "alt": "A phone home screen"}.`);
+        } else if (!IMAGE_FILE.test(image.file)) {
+          errors.push(`${where}: the image name "${image.file}" isn't allowed. Use letters, numbers, dots, and dashes, ending in .png, .jpg, .webp, or .svg.`);
+        } else {
+          const alt = isText(image.alt) ? image.alt.trim() : '';
+          if (!alt) warnings.push(`${where}: the image "${image.file}" has no alt text. Describe it in a few words for people who can't see it.`);
+          photos.push({ file: image.file, alt });
+        }
+      }
+      if (layout !== 'idea' && layout !== 'step') {
+        warnings.push(`${where}: photos only show on "idea" and "step" slides, so ${photos.length === 1 ? 'this one' : 'these'} will be ignored.`);
+      } else if (photos.length === 1) {
+        slide.image = photos[0];
+      } else if (photos.length > 1) {
+        slide.images = photos;
       }
     }
 

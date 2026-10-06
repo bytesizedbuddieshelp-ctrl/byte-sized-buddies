@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countWords, imageFilesIn, parseDeckText, validateDeck } from '../src/lib/slides';
+import { countWords, imageFilesIn, parseDeckText, slideImages, validateDeck } from '../src/lib/slides';
 
 const ok = (slides: unknown[]) => validateDeck({ version: 1, slides });
 
@@ -87,4 +87,44 @@ describe('parseDeckText', () => {
 describe('countWords', () => {
   it('counts across lines', () => expect(countWords(['one two', ' three  '])).toBe(3));
   it('handles nothing', () => expect(countWords(undefined)).toBe(0));
+});
+
+describe('several photos on one slide', () => {
+  const deckWith = (extra: Record<string, unknown>, layout = 'step') => ({ version: 1, slides: [{ layout, step: 1, title: 'Tap Contacts', body: ['Find it.'], ...extra }] });
+  const photo = (file: string) => ({ file, alt: `A picture called ${file}` });
+
+  it('accepts up to four photos and keeps their order', () => {
+    const r = validateDeck(deckWith({ images: [photo('a.png'), photo('b.png'), photo('c.png')] }));
+    expect(r.errors).toEqual([]);
+    expect(slideImages(r.deck!.slides[0]).map((i) => i.file)).toEqual(['a.png', 'b.png', 'c.png']);
+    expect(imageFilesIn(r.deck!)).toEqual(['a.png', 'b.png', 'c.png']);
+  });
+
+  it('puts the single "image" first when both are used', () => {
+    const r = validateDeck(deckWith({ image: photo('first.png'), images: [photo('second.png')] }));
+    expect(slideImages(r.deck!.slides[0]).map((i) => i.file)).toEqual(['first.png', 'second.png']);
+  });
+
+  it('stores one photo the old way, so older tools still read it', () => {
+    const r = validateDeck(deckWith({ images: [photo('only.png')] }));
+    expect(r.deck!.slides[0].image?.file).toBe('only.png');
+    expect(r.deck!.slides[0].images).toBeUndefined();
+  });
+
+  it('refuses more than four, and names the slide', () => {
+    const r = validateDeck(deckWith({ images: ['a', 'b', 'c', 'd', 'e'].map((n) => photo(`${n}.png`)) }));
+    expect(r.errors.join()).toContain('Slide 1 has 5 photos');
+  });
+
+  it('checks every photo, and warns about missing alt text', () => {
+    expect(validateDeck(deckWith({ images: 'a.png' })).errors.join()).toContain('"images" should be a list');
+    expect(validateDeck(deckWith({ images: [photo('ok.png'), { file: 'bad name.png', alt: 'x' }] })).errors.join()).toContain('bad name.png');
+    expect(validateDeck(deckWith({ images: [photo('a.png'), { file: 'b.png' }] })).warnings.join()).toContain('"b.png" has no alt text');
+  });
+
+  it('ignores photos on layouts that have no photo spot', () => {
+    const r = validateDeck(deckWith({ images: [photo('a.png'), photo('b.png')] }, 'tryit'));
+    expect(r.warnings.join()).toContain('these will be ignored');
+    expect(slideImages(r.deck!.slides[0])).toEqual([]);
+  });
 });

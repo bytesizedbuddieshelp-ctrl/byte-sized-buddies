@@ -8,7 +8,7 @@ import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
 import { renderMarkdown } from '../../lib/markdown';
 import { parseYouTubeId } from '../../lib/youtube';
-import { parseDeckText, type Layout, type Slide } from '../../lib/slides';
+import { MAX_SLIDE_IMAGES, parseDeckText, slideImages, type Layout, type Slide, type SlideImage } from '../../lib/slides';
 import { FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
 import { extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
 import { filesRecord, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
@@ -147,6 +147,63 @@ function moveItem<T>(list: T[], from: number, to: number): T[] {
   const [item] = copy.splice(from, 1);
   copy.splice(to, 0, item);
   return copy;
+}
+
+/** Sets a slide's photos: one as "image", several as "images", none removes both. */
+function withPhotos(slide: Slide, photos: SlideImage[]): Slide {
+  const { image: _one, images: _many, ...rest } = slide;
+  if (photos.length === 1) return { ...rest, image: photos[0] };
+  if (photos.length > 1) return { ...rest, images: photos };
+  return rest;
+}
+
+// "Photos on this slide": choose up to four of the lesson's pictures for the chosen slide, with alt text.
+function PhotosPanel({ slide, pictures, onChange }: { slide: Slide; pictures: string[]; onChange: (photos: SlideImage[]) => void }) {
+  const photos = slideImages(slide);
+  if (slide.layout !== 'idea' && slide.layout !== 'step') return <p class="caption">{t.photosOnly}</p>;
+  const set = (i: number, change: Partial<SlideImage>) => onChange(photos.map((p, j) => (j === i ? { ...p, ...change } : p)));
+  const unused = pictures.find((name) => !photos.some((p) => p.file === name)) ?? pictures[0];
+  return (
+    <div class="photos-panel">
+      <h3>{t.photosHeading}</h3>
+      <p class="field-helper">{t.photosHelp}</p>
+      {photos.length === 0 && <p>{t.photosNone}</p>}
+      {photos.map((photo, i) => (
+        <div class="editor-row" key={`${i}-${photo.file}`}>
+          <p class="label">{t.photo(i + 1)}</p>
+          <div class="field">
+            <label class="field-label" for={`photo-file-${i}`}>{t.photoFile(i + 1)}</label>
+            <select id={`photo-file-${i}`} class="field-control" value={photo.file} onChange={(e) => set(i, { file: e.currentTarget.value })}>
+              {[...new Set([photo.file, ...pictures])].map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for={`photo-alt-${i}`}>{t.photoAlt(i + 1)}</label>
+            <p class="field-helper" id={`photo-alt-help-${i}`}>{t.photoAltHelp}</p>
+            <input id={`photo-alt-${i}`} class="field-control" value={photo.alt} aria-describedby={`photo-alt-help-${i}`} onInput={(e) => set(i, { alt: e.currentTarget.value })} />
+          </div>
+          <MoveButtons
+            index={i}
+            count={photos.length}
+            label={t.photo(i + 1)}
+            onMove={(to) => onChange(moveItem(photos, i, to))}
+            onRemove={() => onChange(photos.filter((_, j) => j !== i))}
+          />
+        </div>
+      ))}
+      {photos.length >= MAX_SLIDE_IMAGES ? (
+        <p class="caption">{t.photosMax}</p>
+      ) : pictures.length === 0 ? (
+        <p class="caption">{t.noPictures}</p>
+      ) : (
+        <button type="button" class="button button-secondary" onClick={() => onChange([...photos, { file: unused, alt: '' }])}>
+          {t.addPhoto}
+        </button>
+      )}
+    </div>
+  );
 }
 
 interface ExtraRow {
@@ -542,6 +599,11 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
                 <SlideFrame>
                   <SlideCanvas slide={current} lessonName={form.title || t.titleNew} imageUrl={imageUrl} />
                 </SlideFrame>
+                <PhotosPanel
+                  slide={current}
+                  pictures={[...new Set([...(lesson?.files.images ?? []).filter((i) => !imageRemove.includes(i.name)).map((i) => i.name), ...newImages.map((f) => f.name)])]}
+                  onChange={(photos) => changeSlides((list) => list.map((s, j) => (j === Math.min(chosen, list.length - 1) ? withPhotos(s, photos) : s)))}
+                />
               </div>
             )}
           </div>

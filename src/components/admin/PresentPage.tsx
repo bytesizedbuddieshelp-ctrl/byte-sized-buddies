@@ -7,7 +7,7 @@ import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { Stage } from '../slides/Stage';
 import { adminCopy as a } from '../../content/adminCopy';
 import { imageUrlFor, sortByWeek, type Lesson } from '../../lib/lessons';
-import { validateDeck, type Slide } from '../../lib/slides';
+import { slideImages, validateDeck, type Slide } from '../../lib/slides';
 import {
   EVENTS,
   clockMood,
@@ -174,7 +174,7 @@ function Controls({ supabase, lesson }: { supabase: SupabaseClient; lesson: Less
 
   const images = useMemo(() => {
     const map: Record<string, string> = {};
-    for (const s of slides) if (s.image) map[s.image.file] = imageUrlFor(lesson, s.image.file);
+    for (const s of slides) for (const image of slideImages(s)) map[image.file] = imageUrlFor(lesson, image.file);
     return map;
   }, [lesson]);
   const imageUrl = (file: string) => images[file] ?? '';

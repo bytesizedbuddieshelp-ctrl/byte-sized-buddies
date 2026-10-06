@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
-import type { Slide } from '../../lib/slides';
+import { slideImages, type Slide, type SlideImage } from '../../lib/slides';
 import { Icon } from '../forms/Icon';
 import { copy } from '../../content/copy';
 import '../../styles/slides.css';
@@ -15,16 +15,26 @@ interface CanvasProps {
   timerText?: string;
 }
 
-function Picture({ slide, imageUrl }: Pick<CanvasProps, 'slide' | 'imageUrl'>) {
+function Photo({ image, imageUrl }: { image: SlideImage; imageUrl: CanvasProps['imageUrl'] }) {
   const [failed, setFailed] = useState(false);
-  if (!slide.image) return null;
+  return failed ? (
+    <p class="slide-picture-missing">{copy.viewer.missingImage}: {image.file}</p>
+  ) : (
+    <img src={imageUrl(image.file)} alt={image.alt} onError={() => setFailed(true)} />
+  );
+}
+
+// The photo spot: one photo fills it; two sit side by side; three or four make a grid.
+function Picture({ slide, imageUrl }: Pick<CanvasProps, 'slide' | 'imageUrl'>) {
+  const photos = slideImages(slide);
+  if (!photos.length) return null;
   return (
-    <div class="slide-picture">
-      {failed ? (
-        <p class="slide-picture-missing">{copy.viewer.missingImage}: {slide.image.file}</p>
-      ) : (
-        <img src={imageUrl(slide.image.file)} alt={slide.image.alt} onError={() => setFailed(true)} />
-      )}
+    <div class={`slide-picture photos-${Math.min(photos.length, 4)}`}>
+      {photos.map((image, i) => (
+        <div class="slide-photo" key={`${i}-${image.file}`}>
+          <Photo image={image} imageUrl={imageUrl} />
+        </div>
+      ))}
     </div>
   );
 }
@@ -47,7 +57,7 @@ function Footer({ lessonName, reversed }: { lessonName: string; reversed: boolea
 // One slide, drawn at 1920 x 1080. Wrap it in <SlideFrame> to scale it to fit.
 export function SlideCanvas({ slide, lessonName, imageUrl, mode = 'screen', timerText }: CanvasProps) {
   const lines = slide.body ?? [];
-  const hasImage = Boolean(slide.image) && (slide.layout === 'idea' || slide.layout === 'step');
+  const hasImage = slideImages(slide).length > 0 && (slide.layout === 'idea' || slide.layout === 'step');
 
   if (slide.layout === 'title') {
     const print = mode === 'print';
