@@ -1,10 +1,10 @@
 // Full-page screenshots of the admin pages, without signing in to the real database.
 // Run: npm run screenshots:admin   (it builds first). Pictures go to test-results/admin-*.png.
 //
-// How: Playwright opens the built site in your Chrome, puts a pretend signed-in session in that test browser,
+// How: Playwright opens the built site in WebKit (the engine inside Safari), puts a pretend signed-in session in that test browser,
 // and answers every database request itself with made-up sample data (below). Nothing reaches your real
 // Supabase project, and the sample data is never part of the website.
-import { chromium } from '@playwright/test';
+import { webkit } from '@playwright/test';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
@@ -109,7 +109,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 mkdirSync(out, { recursive: true });
 const axePath = createRequire(import.meta.url).resolve('axe-core/axe.min.js');
 const problems = [];
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await webkit.launch();
 try {
   for (const width of WIDTHS) {
     // bypassCSP lets the test tool add axe to the page. It applies to this test browser only, never to the website.

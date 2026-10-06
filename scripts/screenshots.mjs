@@ -1,7 +1,7 @@
-// Full-page screenshots of every public page, with Playwright and the Chrome on this computer.
+// Full-page screenshots of every public page, with Playwright and WebKit (the engine inside Safari).
 // Run: npm run screenshots   (it builds first). Pictures go to test-results/ (not saved to git).
 // Add widths as arguments to choose them, for example: npm run screenshots -- 1440 390
-import { chromium } from '@playwright/test';
+import { webkit } from '@playwright/test';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
@@ -35,7 +35,7 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const base = `http://127.0.0.1:${server.address().port}`;
 
 mkdirSync(out, { recursive: true });
-const browser = await chromium.launch({ channel: 'chrome' });
+const browser = await webkit.launch();
 try {
   for (const width of WIDTHS) {
     const page = await browser.newPage({ viewport: { width, height: 900 } });

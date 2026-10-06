@@ -52,7 +52,7 @@ Run `npm run check`. It does five things:
 4. Checks every page's security policy covers its scripts.
 5. Opens every public page in an invisible Chrome window and runs an accessibility check (axe), at phone and laptop widths. It is skipped if Chrome isn't installed.
 
-`npm run screenshots` builds the site and uses Playwright (with the Chrome on your computer) to save full-page pictures of every public page at 390, 768, 1280, 1440, and 1920 pixels wide in `test-results/` (not saved to git). Choose widths with `npm run screenshots -- 1440 390`.
+`npm run screenshots` builds the site and uses Playwright (with WebKit, the engine inside Safari) to save full-page pictures of every public page at 390, 768, 1280, 1440, and 1920 pixels wide in `test-results/` (not saved to git). Choose widths with `npm run screenshots -- 1440 390`.
 
 Run it before every commit.
 
