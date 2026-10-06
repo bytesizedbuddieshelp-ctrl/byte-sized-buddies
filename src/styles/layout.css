@@ -251,7 +251,7 @@ h2 {
 
 @media (min-width: 1000px) {
   .with-aside {
-    grid-template-columns: minmax(0, 44rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 52rem) minmax(0, 1fr);
     gap: var(--space-7);
     align-items: start;
   }

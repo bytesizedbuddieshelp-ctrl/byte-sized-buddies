@@ -40,3 +40,18 @@
   background: var(--forest-tint);
   color: var(--forest-deep);
 }
+
+/* A row of buttons that wraps on small screens. */
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+/* One PDF: a "Read" button and a "Save" button side by side. */
+.pdf-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}

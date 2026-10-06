@@ -320,6 +320,8 @@ export const copy = {
     downloads: 'Downloads',
     downloadsNone: 'The downloads for this lesson are not ready yet.',
     pdf: 'PDF',
+    read: 'Read',
+    save: 'Save',
     extrasHeading: 'Extra practice',
     extrasIntro: 'For when there is time left over, or for learners who want more. Each one is a printable page.',
     slidesHeading: 'Preview the slides',

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'preact/hooks';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AdminShell } from './AdminShell';
+import { Icon } from '../forms/Icon';
 import { LessonView } from '../lessons/LessonView';
 import type { Lesson } from '../../lib/lessons';
 import { adminCopy as a } from '../../content/adminCopy';
@@ -34,9 +35,16 @@ function Preview({ supabase }: { supabase: SupabaseClient }) {
 
   return (
     <div>
-      <a class="button button-secondary" href="/admin/lessons">
-        {a.lessonEdit.back}
-      </a>
+      <div class="button-row">
+        <a class="button button-secondary" href="/admin/lessons">
+          {a.lessonEdit.back}
+        </a>
+        {state === 'ready' && lesson && (
+          <a class="button button-primary" href={`/admin/present?slug=${encodeURIComponent(lesson.slug)}`}>
+            <Icon name="play" size={24} /> {a.lessonEdit.present}
+          </a>
+        )}
+      </div>
       {state === 'loading' && <p role="status">{a.lessonEdit.loading}</p>}
       {state === 'missing' && <p class="admin-message is-error" role="alert">{a.lessonEdit.notFound}</p>}
       {state === 'ready' && lesson && <LessonView lesson={lesson} draftNote={lesson.status === 'draft'} embedded />}

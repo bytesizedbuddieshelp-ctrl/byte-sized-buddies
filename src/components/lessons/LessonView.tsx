@@ -8,6 +8,26 @@ import { PlaylistPlayer } from '../video/PlaylistPlayer';
 
 const t = copy.lesson;
 
+// One PDF, two big buttons: "Read" opens it in the browser's own PDF reader (phone or computer), "Save" downloads it.
+function PdfButtons({ label, file, primary = false }: { label: string; file: { path: string; bytes: number }; primary?: boolean }) {
+  const url = fileUrl(file.path);
+  const name = file.path.split('/').pop() ?? 'lesson.pdf';
+  return (
+    <span class="pdf-buttons">
+      <a class={`button ${primary ? 'button-primary' : 'button-secondary'}`} href={url} target="_blank" rel="noopener noreferrer">
+        <Icon name="book" size={24} />
+        <span>
+          {t.read} {label} ({t.pdf}, {formatBytes(file.bytes)})
+        </span>
+      </a>
+      <a class="button button-secondary" href={`${url}?download=${encodeURIComponent(name)}`} aria-label={`${t.save} ${label}`}>
+        <Icon name="download" size={24} />
+        <span>{t.save}</span>
+      </a>
+    </span>
+  );
+}
+
 // A whole lesson page. The public page and the owner's preview both use this.
 export function LessonView({ lesson, draftNote = false, embedded = false }: { lesson: Lesson; draftNote?: boolean; embedded?: boolean }) {
   // Inside the admin shell the page already has an h1, so the lesson title becomes an h2.
@@ -59,12 +79,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
           ) : (
             <div class="button-row">
               {downloads.map((download) => (
-                <a class="button button-primary" key={download.key} href={fileUrl(download.file.path)} target="_blank" rel="noopener noreferrer">
-                  <Icon name="download" size={24} />
-                  <span>
-                    {download.label} ({t.pdf}, {formatBytes(download.file.bytes)})
-                  </span>
-                </a>
+                <PdfButtons key={download.key} label={download.label} file={download.file} primary />
               ))}
               {slides.length > 0 && (
                 <button type="button" class="button button-secondary" onClick={() => void printSlides()}>
@@ -81,12 +96,7 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
             <p>{t.extrasIntro}</p>
             <div class="button-row">
               {extras.map((extra) => (
-                <a class="button button-secondary" key={extra.path} href={fileUrl(extra.path)} target="_blank" rel="noopener noreferrer">
-                  <Icon name="download" size={24} />
-                  <span>
-                    {extra.title} ({t.pdf}, {formatBytes(extra.bytes)})
-                  </span>
-                </a>
+                <PdfButtons key={extra.path} label={extra.title} file={extra} />
               ))}
             </div>
           </section>
