@@ -25,6 +25,8 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `supabase/` | The database: `schema.sql` builds it, `seed.sql` adds starter data. |
 | `docs/` | `ADMIN-GUIDE.md` (your weekly routine), `TEACHING-GUIDE.md` (running a visit), `LAUNCH-CHECKLIST.md`, `LIMITS.md` (free-plan limits), `DEPLOY.md` (setup steps), `SECURITY.md` (the rules and how to test them), `KIT-FORMAT.md` (the lesson kit format), and `sample-kit/` (a kit to try). |
 | `scripts/check-csp.mjs`, `scripts/check-a11y.mjs` | Check the built site's security policy and accessibility (part of `npm run check`). |
+| `src/components/illustrations/` | The flat brand pictures on the public pages (devices, slides, handouts). Colors come from the brand tokens. |
+| `scripts/screenshots.mjs` | Full-page screenshots with Playwright (`npm run screenshots`). |
 | `scripts/check-launch.mjs` | Lists placeholders still to fill in before launch (`npm run check:launch`). |
 | `tests/` | Small automatic tests for the helper code. |
 | `wrangler.jsonc` | Tells Cloudflare to publish the finished site from the `dist` folder. |
@@ -49,7 +51,7 @@ Run `npm run check`. It does five things:
 4. Checks every page's security policy covers its scripts.
 5. Opens every public page in an invisible Chrome window and runs an accessibility check (axe), at phone and laptop widths. It is skipped if Chrome isn't installed.
 
-`npm run screenshots` saves pictures of every public page at 320, 768, and 1280 pixels wide in `test-results/` (not saved to git).
+`npm run screenshots` builds the site and uses Playwright (with the Chrome on your computer) to save full-page pictures of every public page at 390, 768, 1280, 1440, and 1920 pixels wide in `test-results/` (not saved to git). Choose widths with `npm run screenshots -- 1440 390`.
 
 Run it before every commit.
 
