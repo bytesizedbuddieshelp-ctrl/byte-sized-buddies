@@ -1099,61 +1099,26 @@
   overscroll-behavior: none;
 }
 
-/* The floating drawing pad window: tools on top, the screen filling the rest. It never scrolls. */
-html.draw-pip-root,
-body.draw-pip {
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-}
-
-body.draw-pip {
-  box-sizing: border-box;
-  margin: 0;
-  padding: var(--space-2);
-  background: var(--cream);
-}
-
-body.draw-pip > div {
-  height: 100%;
-}
-
-.draw-pad.is-floating {
+/* Drawing full screen: the screen picture fills the space, the tools sit in a bar along the bottom. */
+.draw-pad:fullscreen {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  box-sizing: border-box;
+  width: 100vw;
+  height: 100vh;
   margin: 0;
+  padding: var(--space-3);
+  background: var(--forest-deep);
+  overflow: hidden;
 }
 
-.draw-pad.is-floating .draw-toolbar {
-  flex: none;
-  margin: var(--space-2) 0 0;
-}
-
-/* The empty strip at the top of the floating pad, where Chrome lets you move the window. */
-.draw-grab {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 40px;
-  margin: 0 0 var(--space-2);
-  border-radius: var(--radius-sm);
-  background: var(--forest-tint);
-  color: var(--forest-deep);
-  font-size: 18px;
-  font-weight: 700;
-  cursor: grab;
-}
-
-/* The picture sits in a fixed box that fills the rest of the window. Nothing else can push it around. */
-.draw-pad.is-floating .draw-holder {
+.draw-pad:fullscreen .draw-holder {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
 }
 
-.draw-pad.is-floating .draw-picture {
+.draw-pad:fullscreen .draw-picture {
   position: absolute;
   inset: 0;
   margin: auto;
@@ -1163,179 +1128,24 @@ body.draw-pip > div {
   max-height: 100%;
 }
 
-/* The keys line is always exactly one line high. */
-.draw-pad.is-floating .draw-keys {
+.draw-pad:fullscreen .draw-toolbar {
   flex: none;
-  height: 26px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-/* Studio: picking the wall color by clicking the preview */
-.studio-preview.is-picking {
-  cursor: crosshair;
-  outline: 4px solid var(--sunshine);
-  outline-offset: 2px;
-}
-
-.studio-wall {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-}
-
-.studio-swatch {
-  display: inline-block;
-  flex: none;
-  width: 32px;
-  height: 32px;
-  border: 2px solid var(--ink);
-  border-radius: var(--radius-sm);
-}
-
-/* Studio: drawing on the screen recording */
-.draw-board {
-  margin: var(--space-4) 0;
-  padding: var(--space-4);
+  margin: var(--space-3) 0 0;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
   background: var(--forest-tint);
 }
 
-.draw-board h3 {
-  margin-top: 0;
-}
-
-.draw-steps {
-  margin: 0 0 var(--space-3);
-  padding-left: 1.4em;
-}
-
-.draw-floating {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  font-weight: 700;
-}
-
-.draw-pad {
-  margin-top: var(--space-3);
+.draw-pad:fullscreen .draw-keys {
+  flex: none;
+  height: 26px;
+  margin-top: var(--space-2);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--cream);
 }
 
 .draw-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin-bottom: var(--space-3);
+  margin-top: var(--space-3);
 }
-
-.draw-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-
-.draw-button {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  min-width: 64px;
-  min-height: 56px;
-  padding: var(--space-1) var(--space-2);
-  border: 3px solid var(--forest);
-  border-radius: var(--radius-sm);
-  background: var(--paper);
-  color: var(--forest-deep);
-  font-family: var(--font-sans);
-  font-size: 18px;
-  line-height: 20px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.draw-button[aria-pressed='true'] {
-  background: var(--forest);
-  color: var(--paper);
-}
-
-.draw-button:disabled {
-  cursor: not-allowed;
-  border-color: var(--ink-muted);
-  color: var(--ink-muted);
-}
-
-.draw-fade {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 48px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.draw-fade input {
-  width: 28px;
-  height: 28px;
-  accent-color: var(--forest);
-}
-
-.draw-holder .draw-picture {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: var(--radius-sm);
-  background: var(--ink);
-  cursor: crosshair;
-  touch-action: none;
-}
-
-.draw-keys {
-  margin: var(--space-2) 0 0;
-}
-
-.draw-dot {
-  display: inline-block;
-  width: 22px;
-  height: 22px;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-}
-
-/* The floating drawing pad window: tools on top, the screen filling the rest. */
-body.draw-pip {
-  margin: 0;
-  padding: var(--space-2);
-  background: var(--cream);
-}
-
-.draw-pad.is-floating {
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 16px);
-  margin: 0;
-}
-
-.draw-pad.is-floating .draw-toolbar {
-  margin-bottom: var(--space-2);
-}
-
-.draw-pad.is-floating .draw-holder {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.draw-pad.is-floating .draw-picture {
-  width: auto;
-  max-width: 100%;
-  max-height: 100%;
-}
-

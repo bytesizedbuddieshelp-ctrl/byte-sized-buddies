@@ -27,7 +27,7 @@ export const iconPaths = {
   pointer: '<path d="M5 19L18 6"/><path d="M10 6h8v8"/>',
   oval: '<ellipse cx="12" cy="12" rx="9" ry="6.5"/>',
   undo: '<path d="M9 5L4 10l5 5"/><path d="M4 10h10a5 5 0 0 1 0 10h-3"/>',
-  float: '<rect x="3" y="4" width="18" height="16" rx="3"/><rect x="11" y="11" width="7" height="6" rx="1.5"/>',
+  expand: '<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
 } as const;
 
 export type IconName = keyof typeof iconPaths;

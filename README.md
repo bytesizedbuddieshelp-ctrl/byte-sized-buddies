@@ -101,7 +101,7 @@ Open **Admin, Studio** in Chrome or Edge on a computer.
 
 **No green screen needed:** sit in front of a plain wall, open **Background** under the camera preview, choose **Replace my wall**, and click the wall in the preview. Pick Garden, Forest, plain cream, or your own picture. **Download this background** saves it as a picture too.
 
-**Drawing:** when you record the main part, keep **Let me draw on the recording** ticked. Press **Float on top**: a small drawing pad stays above every window while you use your app. Draw on it with the pen, highlighter, arrow, or circle, and it shows in the video. Lines fade away after 3 seconds (you can turn that off). Keys: P pen, H highlighter, A arrow, C circle, 1 to 3 for colors, Z undo, X clear. Share a window, not your whole screen.
+**Drawing:** when you record the main part, keep **Let me draw on the recording** ticked. Put the studio window beside the window you share (or on a second screen). When you want to point at something, press **Draw full screen** (or **F**): your screen fills the studio window, and you draw on it with the pen, highlighter, arrow, or circle. It shows in the video. Press **Esc** or **F** to go back. Lines fade away after 3 seconds (you can turn that off). Keys: F full screen, P pen, H highlighter, A arrow, C circle, 1 to 3 for colors, Z undo, X clear. Share a window, not your whole screen.
 
 Record your opener and closer once, tick **Make this my standard opener** (or closer), and reuse them next time. Video answers to questions play your standard opener and closer around the answer.
 

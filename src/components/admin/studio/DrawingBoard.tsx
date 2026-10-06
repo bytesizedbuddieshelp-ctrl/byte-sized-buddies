@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
-import { createPortal } from 'preact/compat';
 import { Icon } from '../../forms/Icon';
 import { adminCopy as a } from '../../../content/adminCopy';
 import { brandColor } from '../../../lib/backgrounds';
@@ -9,47 +8,18 @@ import type { IconName } from '../../../lib/icons';
 const t = a.studio.board;
 const toolIcons: Record<Tool, IconName> = { pen: 'pen', highlighter: 'highlighter', arrow: 'pointer', circle: 'oval' };
 
-// Chrome and Edge can open a small window that stays on top of every other window ("Document Picture-in-Picture").
-interface PipApi {
-  requestWindow(options: { width: number; height: number; preferInitialWindowPlacement?: boolean; disallowReturnToOpener?: boolean }): Promise<Window>;
-}
-
-/** A good size for the floating pad: about half the screen wide, with room for the picture (16:9) and the tools. */
-function padSize(): { width: number; height: number } {
-  const width = Math.round(Math.max(640, Math.min(screen.availWidth * 0.5, 1200)));
-  const height = Math.round(Math.min(screen.availHeight * 0.85, width * (9 / 16) + 190));
-  return { width, height };
-}
-const pipApi = (): PipApi | undefined => (window as unknown as { documentPictureInPicture?: PipApi }).documentPictureInPicture;
-
-/** Copies the page's styles into the floating window, so the pad looks the same there. */
-function copyStyles(to: Document) {
-  for (const sheet of Array.from(document.styleSheets)) {
-    try {
-      const style = to.createElement('style');
-      style.textContent = Array.from(sheet.cssRules).map((rule) => rule.cssText).join('\n');
-      to.head.appendChild(style);
-    } catch {
-      if (sheet.href) {
-        const link = to.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = sheet.href;
-        to.head.appendChild(link);
-      }
-    }
-  }
-}
-
 // While the main part records: the owner's screen as it is being recorded, to draw on.
 // `picture` is the recording itself (drawn by the studio). `layer` is the see-through drawing layer that the
 // recording copies on top of the screen 30 times a second.
+// It all stays in this page (no extra window). "Draw full screen" makes the pad fill the screen; Esc goes back.
 export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; layer: HTMLCanvasElement }) {
   const holder = useRef<HTMLDivElement>(null);
+  const padRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<Tool>('pen');
   const [color, setColor] = useState<InkColor>('sunshine');
   const [fade, setFade] = useState(true);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
-  const [pip, setPip] = useState<{ win: Window; root: HTMLElement } | null>(null);
+  const [full, setFull] = useState(false);
   const drawing = useRef<Stroke | null>(null);
   const strokesRef = useRef<Stroke[]>([]);
   strokesRef.current = strokes;
@@ -62,7 +32,6 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
   fadeRef.current = fade;
   const [colors] = useState(() => ({ sunshine: brandColor('sunshine'), forest: brandColor('forest'), paper: brandColor('paper') }));
   const [outline] = useState(() => brandColor('ink'));
-  const canFloat = Boolean(pipApi());
 
   // Paints the finished strokes (fading the old ones) plus the one being drawn.
   const paint = () => {
@@ -89,7 +58,7 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     return () => clock.terminate();
   }, [fade]);
 
-  // Put the recording's picture in the pad (on this page, or in the floating window).
+  // Put the recording's picture in the pad.
   useEffect(() => {
     const box = holder.current;
     if (!box) return;
@@ -97,7 +66,7 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     picture.setAttribute('role', 'img');
     picture.setAttribute('aria-label', t.label);
     box.appendChild(picture);
-  }, [picture, pip]);
+  }, [picture]);
 
   // Drawing with the mouse, trackpad, or pen.
   useEffect(() => {
@@ -141,7 +110,22 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     };
   }, [picture]);
 
-  // Keyboard shortcuts, on this page and in the floating window. Typing in a box is left alone.
+  function toggleFull() {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void padRef.current?.requestFullscreen().catch(() => {});
+  }
+
+  // Follow full screen on and off (Esc also leaves full screen).
+  useEffect(() => {
+    const onChange = () => setFull(document.fullscreenElement === padRef.current);
+    document.addEventListener('fullscreenchange', onChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', onChange);
+      if (document.fullscreenElement === padRef.current) void document.exitFullscreen();
+    };
+  }, []);
+
+  // Keyboard shortcuts. Typing in a box is left alone.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -152,125 +136,69 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
       if (TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
       else if (key === 'z') setStrokes((list) => list.slice(0, -1));
       else if (key === 'x') setStrokes([]);
+      else if (key === 'f') toggleFull();
       else if (['1', '2', '3'].includes(key)) setColor(INK_COLORS[Number(key) - 1]);
       else return;
       e.preventDefault();
     };
-    const windows = pip ? [window, pip.win] : [window];
-    windows.forEach((w) => w.addEventListener('keydown', onKey));
-    return () => windows.forEach((w) => w.removeEventListener('keydown', onKey));
-  }, [pip]);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
-  async function float() {
-    const api = pipApi();
-    if (!api) return;
-    // Every time: the same, roomy size (not whatever size the last pad was left at).
-    const size = padSize();
-    const win = await api.requestWindow({ ...size, preferInitialWindowPlacement: true });
-    try {
-      win.resizeTo(size.width, size.height);
-    } catch {
-      // Chrome may keep its own size; the pad still works.
-    }
-    copyStyles(win.document);
-    win.document.title = t.heading;
-    // The floating window must never scroll or select text, or the picture would slide while drawing.
-    win.document.documentElement.classList.add('draw-pip-root');
-    win.document.body.classList.add('draw-pip');
-    win.document.addEventListener('selectstart', (e) => e.preventDefault());
-    win.document.addEventListener('dragstart', (e) => e.preventDefault());
-    const root = win.document.createElement('div');
-    win.document.body.appendChild(root);
-    // When the floating window closes, bring the picture home first, then the pad.
-    win.addEventListener('pagehide', () => {
-      document.adoptNode(picture);
-      setPip(null);
-    });
-    setPip({ win, root });
-  }
-
-  function bringBack() {
-    pip?.win.close();
-  }
-
-  // The floating window closes when recording stops.
-  useEffect(() => () => pip?.win.close(), [pip]);
   // The drawings leave the recording when the board closes.
   useEffect(() => () => layer.getContext('2d')!.clearRect(0, 0, layer.width, layer.height), [layer]);
-
-  const pad = (
-    <div class={`draw-pad${pip ? ' is-floating' : ''}`}>
-      {/* Chrome moves a floating window by its top edge, so the top is a clear strip, not buttons. */}
-      {pip && <p class="draw-grab">{t.grab}</p>}
-      {pip && <div class="draw-holder" ref={holder} />}
-      <div class="draw-toolbar">
-        <div class="draw-group" role="group" aria-label={t.tools}>
-          {TOOLS.map((x) => (
-            <button key={x} type="button" class="draw-button" aria-pressed={tool === x} aria-keyshortcuts={t.toolKey[x]} onClick={() => setTool(x)}>
-              <Icon name={toolIcons[x]} size={24} />
-              <span>{t.tool[x]}</span>
-            </button>
-          ))}
-        </div>
-        <div class="draw-group" role="group" aria-label={t.colors}>
-          {INK_COLORS.map((c, i) => (
-            <button key={c} type="button" class="draw-button" aria-pressed={color === c} aria-keyshortcuts={String(i + 1)} onClick={() => setColor(c)}>
-              <span class="draw-dot" style={{ background: colors[c] }} aria-hidden="true" />
-              <span>{t.color[c]}</span>
-            </button>
-          ))}
-        </div>
-        <div class="draw-group">
-          <button type="button" class="draw-button" disabled={strokes.length === 0} aria-keyshortcuts="Z" onClick={() => setStrokes((list) => list.slice(0, -1))}>
-            <Icon name="undo" size={24} />
-            <span>{t.undo}</span>
-          </button>
-          <button type="button" class="draw-button" disabled={strokes.length === 0} aria-keyshortcuts="X" onClick={() => setStrokes([])}>
-            <Icon name="close" size={24} />
-            <span>{t.clear}</span>
-          </button>
-        </div>
-        <label class="draw-fade">
-          <input type="checkbox" checked={fade} onChange={(e) => setFade(e.currentTarget.checked)} />
-          <span>{t.fade}</span>
-        </label>
-      </div>
-      {!pip && <div class="draw-holder" ref={holder} />}
-      {/* One fixed line, so the picture above never moves when this text changes. */}
-      <p class="caption draw-keys">
-        <span class="draw-keys-text">{t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
-      </p>
-    </div>
-  );
 
   return (
     <section class="draw-board" aria-labelledby="draw-title">
       <h3 id="draw-title">{t.heading}</h3>
-      {canFloat ? (
-        <>
-          <ol class="draw-steps">
-            {t.steps.map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-          {pip ? (
-            <p class="draw-floating">
-              <Icon name="float" size={24} /> {t.floating}{' '}
-              <button type="button" class="button button-secondary" onClick={bringBack}>{t.bringBack}</button>
-            </p>
-          ) : (
-            <>
-              <button type="button" class="button button-primary" onClick={() => void float()}>
-                <Icon name="float" size={24} /> {t.float}
+      <ol class="draw-steps">
+        {t.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      <div class={`draw-pad${full ? ' is-full' : ''}`} ref={padRef}>
+        <div class="draw-holder" ref={holder} />
+        <div class="draw-toolbar">
+          <button type="button" class="draw-button draw-full-button" aria-keyshortcuts="F" onClick={toggleFull}>
+            <Icon name="expand" size={24} />
+            <span>{full ? t.exitFull : t.full}</span>
+          </button>
+          <div class="draw-group" role="group" aria-label={t.tools}>
+            {TOOLS.map((x) => (
+              <button key={x} type="button" class="draw-button" aria-pressed={tool === x} aria-keyshortcuts={t.toolKey[x]} onClick={() => setTool(x)}>
+                <Icon name={toolIcons[x]} size={24} />
+                <span>{t.tool[x]}</span>
               </button>
-              <p class="caption">{t.floatHelp}</p>
-            </>
-          )}
-        </>
-      ) : (
-        <p class="caption">{t.noFloat}</p>
-      )}
-      {pip ? createPortal(pad, pip.root) : pad}
+            ))}
+          </div>
+          <div class="draw-group" role="group" aria-label={t.colors}>
+            {INK_COLORS.map((c, i) => (
+              <button key={c} type="button" class="draw-button" aria-pressed={color === c} aria-keyshortcuts={String(i + 1)} onClick={() => setColor(c)}>
+                <span class="draw-dot" style={{ background: colors[c] }} aria-hidden="true" />
+                <span>{t.color[c]}</span>
+              </button>
+            ))}
+          </div>
+          <div class="draw-group">
+            <button type="button" class="draw-button" disabled={strokes.length === 0} aria-keyshortcuts="Z" onClick={() => setStrokes((list) => list.slice(0, -1))}>
+              <Icon name="undo" size={24} />
+              <span>{t.undo}</span>
+            </button>
+            <button type="button" class="draw-button" disabled={strokes.length === 0} aria-keyshortcuts="X" onClick={() => setStrokes([])}>
+              <Icon name="close" size={24} />
+              <span>{t.clear}</span>
+            </button>
+          </div>
+          <label class="draw-fade">
+            <input type="checkbox" checked={fade} onChange={(e) => setFade(e.currentTarget.checked)} />
+            <span>{t.fade}</span>
+          </label>
+        </div>
+        {/* One fixed line, so the picture never moves when this text changes. */}
+        <p class="caption draw-keys">
+          <span>{t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
+        </p>
+      </div>
     </section>
   );
 }
