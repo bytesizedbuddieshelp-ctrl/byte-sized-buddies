@@ -1,6 +1,7 @@
 ---
 import Base from './Base.astro';
 import Button from '../components/Button.astro';
+import ReadAloud from '../components/reading/ReadAloud';
 import { copy } from '../content/copy';
 
 // A reading page (About, Teach, Privacy, License): the text, with an "On this page" list of its sections
@@ -11,9 +12,11 @@ interface Props {
   /** The page's headings (from the markdown file's getHeadings()). Only the main sections are listed. */
   headings?: { depth: number; slug: string; text: string }[];
   card?: { heading: string; text: string; button: string; href: string };
+  /** Show the "Read this aloud" button. */
+  readAloud?: boolean;
 }
 
-const { title, description, headings = [], card } = Astro.props;
+const { title, description, headings = [], card, readAloud = true } = Astro.props;
 const sections = headings.filter((h) => h.depth === 2);
 ---
 
@@ -22,7 +25,10 @@ const sections = headings.filter((h) => h.depth === 2);
     <div class="with-aside">
       <div class="prose">
         <h1>{title}</h1>
-        <slot />
+        {readAloud && <ReadAloud target="#page-text" client:idle />}
+        <div id="page-text">
+          <slot />
+        </div>
       </div>
       {
         (sections.length > 0 || card) && (

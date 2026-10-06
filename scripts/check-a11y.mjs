@@ -31,6 +31,10 @@ const PAGES = [
   '/teach',
   '/privacy',
   '/license',
+  '/faq',
+  '/stay-safe',
+  '/visit-checklist',
+  '/consent-form',
   '/no-such-page',
   '/admin',
 ];

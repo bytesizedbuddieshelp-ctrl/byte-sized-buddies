@@ -1,0 +1,9 @@
+---
+import TextPage from '../layouts/TextPage.astro';
+import { Content, getHeadings } from '../content/faq.md';
+import { copy } from '../content/copy';
+---
+
+<TextPage title={copy.faq.title} description={copy.faq.description} headings={getHeadings()} card={copy.faq.card}>
+  <Content />
+</TextPage>

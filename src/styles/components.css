@@ -174,3 +174,136 @@
   background: var(--forest);
   color: var(--paper);
 }
+
+/* Read aloud: a row of buttons with a reading-speed picker */
+.read-aloud {
+  margin-bottom: var(--space-4);
+}
+
+.read-aloud-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.read-aloud-speed .field-control {
+  width: auto;
+  min-width: 140px;
+}
+
+/* Library: the search box and the sort picker sit side by side on wide screens */
+.library-controls {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 760px) {
+  .library-controls {
+    grid-template-columns: 2fr 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.lesson-card--featured {
+  border: 3px solid var(--forest);
+}
+
+.lesson-card .badge + .badge {
+  margin-left: var(--space-2);
+}
+
+/* Lesson page: the "at a glance" box and the next/previous links */
+.glance {
+  margin-bottom: var(--space-5);
+}
+
+.glance-list {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+@media (min-width: 760px) {
+  .glance-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.glance-list dt {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: var(--forest-deep);
+}
+
+.glance-list dd {
+  margin: 0;
+}
+
+.lesson-nav {
+  margin-top: var(--space-6);
+}
+
+@media print {
+  .glance,
+  .lesson-nav {
+    display: none;
+  }
+}
+
+/* Tick lists: printable checklists with real checkboxes */
+  .tick-list {
+    list-style: none;
+    margin: 0 0 var(--space-4);
+    padding: 0;
+  }
+
+  .tick-list li {
+    border-bottom: 2px solid var(--rule);
+  }
+
+  .tick-list label {
+    display: flex;
+    gap: var(--space-3);
+    align-items: flex-start;
+    min-height: 56px;
+    padding: var(--space-3) 0;
+    cursor: pointer;
+  }
+
+  .tick-list input[type='checkbox'] {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    margin-top: 2px;
+    accent-color: var(--forest);
+  }
+
+  .tick-list input[type='checkbox']:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  .tick-list input:checked + span {
+    text-decoration: line-through;
+    text-decoration-thickness: 2px;
+    color: var(--ink-muted);
+  }
+
+  @media print {
+    .checklist-group {
+      break-inside: avoid;
+    }
+
+    .tick-list input:checked + span {
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .tick-list label {
+      min-height: 0;
+      padding: 8px 0;
+    }
+  }

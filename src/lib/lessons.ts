@@ -121,6 +121,20 @@ export function sortByWeek<T extends { week_number: number | null; title: string
   return [...lessons].sort((a, b) => (a.week_number ?? 999) - (b.week_number ?? 999) || a.title.localeCompare(b.title));
 }
 
+/** The light version of a lesson: enough for cards, filters, and next/previous links, without the slides or the guide. */
+export type LessonSummary = Pick<
+  Lesson,
+  'id' | 'slug' | 'week_number' | 'title' | 'summary' | 'topic' | 'devices' | 'level' | 'duration_minutes' | 'objectives' | 'published_at'
+>;
+
+const summaryColumns = 'id,slug,week_number,title,summary,topic,devices,level,duration_minutes,objectives,published_at';
+
+/** Every published lesson, in light form. Much smaller than fetchPublishedLessons, so lists load fast. */
+export async function fetchLessonIndex(limit = 200): Promise<LessonSummary[]> {
+  const rows = await restGet<LessonSummary[]>(`lessons?select=${summaryColumns}&status=eq.published&order=week_number.asc&limit=${limit}`);
+  return sortByWeek(rows);
+}
+
 /** Published lessons, as a stranger sees them. */
 export async function fetchPublishedLessons(limit = 200): Promise<Lesson[]> {
   const rows = await restGet<Lesson[]>(`lessons?select=*&status=eq.published&order=week_number.asc&limit=${limit}`);
@@ -135,4 +149,37 @@ export async function fetchPublishedLesson(slug: string): Promise<Lesson | null>
 /** Lessons whose devices include this one (a lesson for "any" device matches every device). */
 export function matchesDevice(lesson: Pick<Lesson, 'devices'>, device: string): boolean {
   return lesson.devices.includes(device) || lesson.devices.includes('any');
+}
+
+/** What is still missing before a lesson is ready to teach. Words for the owner, in the order to fix them. */
+export function missingParts(
+  lesson: Pick<Lesson, 'summary' | 'objectives' | 'teacher_guide_md' | 'files'> & { slides?: SlideDeck | null },
+): string[] {
+  const missing: string[] = [];
+  if (!lesson.summary?.trim()) missing.push('a one-line summary');
+  if (!lesson.objectives || lesson.objectives.length === 0) missing.push('"What you\'ll be able to do" list');
+  if (!lesson.slides?.slides?.length) missing.push('slides');
+  if (!lesson.teacher_guide_md?.trim()) missing.push('a teacher guide');
+  if (!lesson.files?.handout) missing.push('a handout');
+  if (!lesson.files?.worksheet) missing.push('a worksheet');
+  return missing;
+}
+
+/** A web address for a copy of a lesson that nothing else uses: week-01-copy, then week-01-copy-2, and so on. */
+export function copySlug(slug: string, taken: string[]): string {
+  const base = `${slug.replace(/-copy(-\d+)?$/, '')}-copy`.slice(0, 70);
+  if (!taken.includes(base)) return base;
+  for (let n = 2; n < 1000; n++) if (!taken.includes(`${base}-${n}`)) return `${base}-${n}`;
+  return `${base}-${Date.now()}`;
+}
+
+/** The same files record, pointing at a different lesson folder. */
+export function moveFilePaths(files: LessonFiles, from: string, to: string): LessonFiles {
+  const folder = (slug: string) => `lessons/${slug}/`;
+  const move = <T extends StoredFile>(file: T): T => ({ ...file, path: file.path.startsWith(folder(from)) ? folder(to) + file.path.slice(folder(from).length) : file.path });
+  const out: LessonFiles = {};
+  for (const key of ['worksheet', 'handout', 'answer_key', 'teacher_guide_pdf'] as const) if (files[key]) out[key] = move(files[key]!);
+  if (files.images) out.images = files.images.map(move);
+  if (files.extras) out.extras = files.extras.map(move);
+  return out;
 }

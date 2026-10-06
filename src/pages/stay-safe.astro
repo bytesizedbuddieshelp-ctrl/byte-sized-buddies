@@ -1,0 +1,16 @@
+---
+import TextPage from '../layouts/TextPage.astro';
+import { Content, getHeadings } from '../content/stay-safe.md';
+import { copy } from '../content/copy';
+---
+
+<TextPage title={copy.staySafe.title} description={copy.staySafe.description} headings={getHeadings()} card={copy.staySafe.card}>
+  <Content />
+  <div class="actions screen-only no-read">
+    <button type="button" class="button button-secondary" data-print>{copy.staySafe.printButton}</button>
+  </div>
+</TextPage>
+
+<script>
+  document.querySelectorAll('[data-print]').forEach((b) => b.addEventListener('click', () => window.print()));
+</script>

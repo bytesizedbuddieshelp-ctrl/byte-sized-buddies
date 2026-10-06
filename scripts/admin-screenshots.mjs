@@ -28,6 +28,7 @@ const PAGES = [
   '/admin/inbox',
   '/admin/inbox#requests',
   '/admin/lessons',
+  '/admin/visits',
   '/admin/lesson-edit?slug=week-01-calling-a-friend',
   '/admin/present',
   '/admin/remote',
@@ -60,7 +61,12 @@ const data = {
     { id: 'l2', slug: 'week-02-sample-draft', week_number: 2, title: 'Sample draft lesson', summary: 'A draft for the screenshots.', topic: 'Photos', devices: ['any'], level: 'beginner', duration_minutes: 45, objectives: [], slides: { version: 1, slides: [] }, teacher_guide_md: null, video_script_md: null, files: {}, video_ids: [], license: 'CC BY-SA 4.0', status: 'draft', published_at: null, created_at: ago(30), updated_at: ago(2) },
   ],
   videos: [],
-  settings: [],
+  settings: [
+    { key: 'visit_log', is_public: false, updated_at: ago(10), value: { version: 1, visits: [
+      { id: 'v1', date: '2026-09-28', facility: 'Sample Gardens', lesson_slug: 'week-01-calling-a-friend', lesson_title: 'Calling a friend', learners: 8, went_well: 'Everyone made a call.', to_change: 'Bring a longer cable.', next_step: 'Print two extra handouts.', created_at: ago(200) },
+      { id: 'v2', date: '2026-09-21', facility: 'Sample Court', lesson_slug: null, lesson_title: '', learners: 5, went_well: '', to_change: '', next_step: '', created_at: ago(370) },
+    ] } },
+  ],
 };
 
 // A tiny filter for the database's query words (status=eq.new, status=in.(a,b)).

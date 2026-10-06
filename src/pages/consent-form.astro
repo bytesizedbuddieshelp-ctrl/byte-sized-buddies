@@ -1,0 +1,108 @@
+---
+import Base from '../layouts/Base.astro';
+import { copy } from '../content/copy';
+
+const t = copy.consent;
+---
+
+<Base title={t.title} description={t.description}>
+  <!-- [REVIEW BEFORE LAUNCH] The owner should have a parent or guardian, and the facility, read this template before it is used. -->
+  <div class="container section">
+    <div class="prose consent-page">
+      <h1>{t.title}</h1>
+      <p class="lead">{t.intro}</p>
+      <p class="callout callout-remember">{t.notLegal}</p>
+      <div class="actions screen-only">
+        <button type="button" class="button button-primary" data-print>{t.print}</button>
+      </div>
+
+      <dl class="consent-fields">
+        <div>
+          <dt>{t.fields.project}</dt>
+          <dd>{t.fields.projectValue}</dd>
+        </div>
+        <div>
+          <dt>{t.fields.facility}</dt>
+          <dd class="write-line"></dd>
+        </div>
+        <div>
+          <dt>{t.fields.name}</dt>
+          <dd class="write-line"></dd>
+        </div>
+        <div>
+          <dt>{t.fields.date}</dt>
+          <dd class="write-line"></dd>
+        </div>
+      </dl>
+
+      <h2>{t.chooseHeading}</h2>
+      <ul class="tick-list">
+        {
+          t.choices.map((choice) => (
+            <li>
+              <label>
+                <input type="checkbox" />
+                <span>{choice}</span>
+              </label>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h2>{t.promisesHeading}</h2>
+      <ul>
+        {t.promises.map((p) => <li>{p}</li>)}
+      </ul>
+
+      <h2>{t.signHeading}</h2>
+      <dl class="consent-fields">
+        {
+          Object.values(t.sign).map((label) => (
+            <div>
+              <dt>{label}</dt>
+              <dd class="write-line"></dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</Base>
+
+<script>
+  document.querySelectorAll('[data-print]').forEach((b) => b.addEventListener('click', () => window.print()));
+</script>
+
+<style is:global>
+  .consent-fields {
+    display: grid;
+    gap: var(--space-4);
+    margin: var(--space-4) 0 var(--space-5);
+  }
+
+  .consent-fields dt {
+    font-weight: 700;
+    color: var(--forest-deep);
+  }
+
+  .consent-fields dd {
+    margin: 0;
+  }
+
+  /* A line to write on, once printed. */
+  .write-line {
+    min-height: 44px;
+    border-bottom: 3px solid var(--ink);
+  }
+
+  .consent-page .callout {
+    margin-bottom: var(--space-4);
+  }
+
+  @media print {
+    .consent-page h2,
+    .consent-fields > div {
+      break-inside: avoid;
+    }
+  }
+</style>

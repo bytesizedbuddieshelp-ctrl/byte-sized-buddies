@@ -1633,3 +1633,46 @@ body.annotate-live .annotate-page {
     align-items: start;
   }
 }
+
+/* Visit log form: two columns on wide screens, notes across the full width */
+.visit-form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+@media (min-width: 900px) {
+  .visit-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-5);
+  }
+
+  .visit-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Weekly routine: the tick list with an "Open" link beside each step */
+.admin-box .tick-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.routine-link {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.ready-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.ready-line svg {
+  flex: none;
+}

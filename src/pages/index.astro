@@ -138,5 +138,8 @@ const spots = ['learn', 'try', 'keep'] as const;
         ))
       }
     </ul>
+    <div class="actions">
+      {t.promise.moreLinks.map((link, i) => <Button variant="secondary" href={link.href}>{link.label}</Button>)}
+    </div>
   </section>
 </Base>

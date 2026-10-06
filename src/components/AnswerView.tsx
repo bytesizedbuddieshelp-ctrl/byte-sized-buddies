@@ -6,6 +6,7 @@ import { renderMarkdown } from '../lib/markdown';
 import { settingVideoId } from '../lib/studio';
 import type { VideoSegment } from '../lib/lessons';
 import { PlaylistPlayer } from './video/PlaylistPlayer';
+import ReadAloud from './reading/ReadAloud';
 
 interface Ticket {
   status: 'new' | 'in_progress' | 'answered' | 'closed';
@@ -93,7 +94,8 @@ export default function AnswerView() {
       {answered ? (
         <section aria-labelledby="answer-title">
           <h2 id="answer-title">{t.answerHeading}</h2>
-          {ticket.answer_md && <div dangerouslySetInnerHTML={{ __html: renderMarkdown(ticket.answer_md) }} />}
+          {ticket.answer_md && <ReadAloud target="#answer-body" />}
+          {ticket.answer_md && <div id="answer-body" dangerouslySetInnerHTML={{ __html: renderMarkdown(ticket.answer_md) }} />}
           {segments.length > 0 && (
             <div>
               <h3>{t.videoTitle}</h3>

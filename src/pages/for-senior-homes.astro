@@ -45,6 +45,14 @@ const t = copy.homes;
     </ol>
   </section>
 
+  <!-- Helpful pages for staff and families -->
+  <section class="container section-tight" aria-labelledby="more-title">
+    <h2 id="more-title">{t.moreHeading}</h2>
+    <div class="actions">
+      {t.moreLinks.map((link) => <Button variant="secondary" href={link.href}>{link.label}</Button>)}
+    </div>
+  </section>
+
   <!-- What we need, and what we bring -->
   <section class="container section" aria-labelledby="need-title">
     <div class="split split--even need-bring">

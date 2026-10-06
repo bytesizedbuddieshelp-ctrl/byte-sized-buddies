@@ -2,12 +2,14 @@ import { useEffect, useState } from 'preact/hooks';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { AdminShell } from './AdminShell';
 import { Notices } from './Notices';
+import { WeeklyRoutine } from './WeeklyRoutine';
 import { Icon } from '../forms/Icon';
 import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
 import { fileUrl, imageUrlFor, type LessonFiles } from '../../lib/lessons';
 import { saveBlob } from '../../lib/lessonAdmin';
 import { backupEverything } from '../../lib/backup';
+import { loadVisits, visitStats, type Visit } from '../../lib/visitLog';
 import type { SlideDeck } from '../../lib/slides';
 import type { IconName } from '../../lib/icons';
 
@@ -61,6 +63,7 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
   const [week, setWeek] = useState<ThisWeek | null | undefined>(undefined);
   const [tickets, setTickets] = useState<RecentTicket[] | null>(null);
   const [requests, setRequests] = useState<RecentRequest[] | null>(null);
+  const [visitList, setVisitList] = useState<Visit[] | null>(null);
   const [backingUp, setBackingUp] = useState(false);
   const [ok, setOk] = useState('');
   const [problem, setProblem] = useState('');
@@ -93,6 +96,8 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
       .order('published_at', { ascending: false, nullsFirst: false })
       .limit(1)
       .then(({ data }) => setWeek((data?.[0] as ThisWeek) ?? null));
+
+    loadVisits(supabase).then(setVisitList).catch(() => setVisitList([]));
 
     supabase
       .from('tickets')
@@ -217,6 +222,8 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
               <p>{d.nextNothing}</p>
             )}
           </section>
+
+          <WeeklyRoutine />
         </div>
 
         <div class="dash-col">
@@ -264,6 +271,21 @@ function Dashboard({ supabase }: { supabase: SupabaseClient }) {
                   </li>
                 ))}
               </ul>
+            )}
+          </section>
+
+          <section class="admin-box" aria-labelledby="visits-title">
+            <div class="box-head">
+              <h2 id="visits-title">{d.visitsHeading}</h2>
+              <a href="/admin/visits">{d.openLog}</a>
+            </div>
+            {visitList === null ? null : visitList.length === 0 ? (
+              <p>{d.visitsNone}</p>
+            ) : (
+              <>
+                <p>{d.visitsSummary(visitStats(visitList).visits, visitStats(visitList).learners)}</p>
+                <p class="caption">{d.lastVisit(visitList[0].facility, new Date(`${visitList[0].date}T12:00:00`).toLocaleDateString(undefined, { dateStyle: 'long' }))}</p>
+              </>
             )}
           </section>
         </div>

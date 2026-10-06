@@ -16,6 +16,8 @@ Every lesson follows the same shape, so you always know what comes next.
 
 ## What to bring
 
+Print our [visit-day checklist](/visit-checklist) to tick things off as you go.
+
 - A large-print handout and worksheet for every learner.
 - The slideshow, on a laptop. A TV or projector helps if the room has one.
 - A phone or tablet signed in to a practice account, so you can show each step.

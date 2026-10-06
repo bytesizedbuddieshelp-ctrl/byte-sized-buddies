@@ -80,10 +80,20 @@ To set it on Cloudflare: open your project, go to **Settings**, find **Variables
 | `/teach` | "Teach it yourself" (words live in `src/content/teach-it-yourself.md`) |
 | `/about` | About (write your story in `src/content/about.md`) |
 | `/privacy`, `/license` | Plain-language privacy and license pages |
+| `/faq`, `/stay-safe` | Questions and answers, and calm scam-safety rules to print (words in `src/content/faq.md` and `src/content/stay-safe.md`) |
+| `/visit-checklist`, `/consent-form` | A printable visit-day checklist for volunteers, and a photo and video consent form template (words in `src/content/copy.ts`) |
 | `/answer?t=...` | The private page where someone reads the answer to their question |
 | `/admin/studio` | The video studio: record an opener, a screen demo, and a closer, then attach the YouTube links to a lesson or an answer |
 | `/admin/present`, `/admin/remote` | Presenter mode (two windows) and the phone remote (needs `docs/DEPLOY.md` Step 12) |
+| `/admin/visits` | The Visit log: what happened at each visit, with counts and a spreadsheet download. Stored in the private `settings` table, so it needs no database change |
 | `/admin` | Owner sign-in. Then `/admin/dashboard`, `/admin/tickets`, `/admin/inbox` (Contact exchange: Gmail emails and senior-home requests), and `/admin/lessons` |
+
+## Reading tools and finding lessons
+
+- Every public page has **Text size**, **High contrast**, and **Roomy spacing** buttons at the top. The choice is kept in the visitor's own browser. The code is `src/components/ReadingTools.astro`.
+- Lessons, the teach and FAQ pages, and answers have a **Read this aloud** button. It uses the voice already on the device (`src/components/reading/ReadAloud.tsx`). Nothing is sent anywhere.
+- The lesson library can sort, filter by topic, and search the summary and goals. The choices are kept in the web address, so a link shares the same list (`src/lib/lessonFilters.ts`).
+- Each lesson page shows the lesson at a glance, a minute-by-minute visit plan that fits the lesson length, a **Download everything** zip, a share button, and next and related lessons.
 
 ## Email
 

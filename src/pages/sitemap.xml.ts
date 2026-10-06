@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
 // Public pages only. Lesson pages join the list in Phase 3.
-const paths = ['/', '/lessons', '/for-senior-homes', '/ask', '/teach', '/about', '/privacy', '/license'];
+const paths = ['/', '/lessons', '/for-senior-homes', '/ask', '/teach', '/about', '/privacy', '/license', '/faq', '/stay-safe', '/visit-checklist', '/consent-form'];
 
 export const GET: APIRoute = ({ site }) => {
   // Sitemaps need full web addresses. Until PUBLIC_SITE_URL is set, the list stays empty.

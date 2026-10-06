@@ -5,12 +5,13 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { Notices } from './Notices';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
-import { formatBytes, imageUrlFor, lessonBytes, sortByWeek, STORAGE_LIMIT_BYTES, type Lesson } from '../../lib/lessons';
+import { formatBytes, imageUrlFor, lessonBytes, missingParts, sortByWeek, STORAGE_LIMIT_BYTES, type Lesson } from '../../lib/lessons';
 import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { FILE_NAME, inspectFile, validateKit, type KitFileInfo, type KitResult } from '../../lib/kit';
 import { safeFileName } from '../../lib/pictureNames';
 import {
   buildKitZip,
+  duplicateLesson,
   filesRecord,
   pathsIn,
   removeStaleFiles,
@@ -22,9 +23,9 @@ import {
 import { FILE_SLOTS, type FileSlot } from '../../lib/kit';
 import type { ExtraFile, StoredFile } from '../../lib/lessons';
 
-type Row = Pick<Lesson, 'id' | 'slug' | 'week_number' | 'title' | 'summary' | 'status' | 'published_at' | 'updated_at' | 'files' | 'slides'>;
+type Row = Pick<Lesson, 'id' | 'slug' | 'week_number' | 'title' | 'summary' | 'status' | 'published_at' | 'updated_at' | 'files' | 'slides' | 'objectives' | 'teacher_guide_md'>;
 const t = a.lessons;
-const listColumns = 'id, slug, week_number, title, summary, status, published_at, updated_at, files, slides';
+const listColumns = 'id, slug, week_number, title, summary, status, published_at, updated_at, files, slides, objectives, teacher_guide_md';
 
 export default function LessonsPage() {
   return (
@@ -195,6 +196,23 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
     }
   }
 
+  async function duplicate(row: Row) {
+    setBusy(row.id);
+    say(t.duplicating);
+    try {
+      const { data, error } = await supabase.from('lessons').select('*').eq('id', row.id).single();
+      if (error || !data) throw error;
+      const copy = data as Lesson;
+      await duplicateLesson(supabase, copy, (rows ?? []).map((r) => r.slug));
+      say(t.duplicated(copy.title));
+      await load();
+    } catch {
+      say(t.duplicateFailed, true);
+    } finally {
+      setBusy('');
+    }
+  }
+
   async function backup() {
     setBusy('backup');
     const { data, error } = await supabase.from('lessons').select('*');
@@ -351,6 +369,18 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
               <p class="caption">
                 {t.slideCount(row.slides?.slides?.length ?? 0)} · {t.updated} {formatWhen(row.updated_at)}
               </p>
+              {(() => {
+                const missing = missingParts(row);
+                return missing.length === 0 ? (
+                  <p class="caption ready-line">
+                    <Icon name="check" size={24} /> <strong>{t.readyHeading}</strong> {t.ready}
+                  </p>
+                ) : (
+                  <p class="caption ready-line">
+                    <Icon name="alert" size={24} /> <strong>{t.readyHeading}</strong> {t.missing(missing)}
+                  </p>
+                );
+              })()}
               <div class="lesson-row-actions">
                 <a class="button button-secondary" href={`/admin/lesson-edit?slug=${encodeURIComponent(row.slug)}`}>
                   {t.edit}
@@ -368,6 +398,9 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
                 )}
                 <button type="button" class="button button-primary" disabled={busy !== ''} onClick={() => setStatus(row, row.status === 'published' ? 'draft' : 'published')}>
                   {row.status === 'published' ? t.unpublish : t.publish}
+                </button>
+                <button type="button" class="button button-secondary" disabled={busy !== ''} onClick={() => duplicate(row)}>
+                  {t.duplicate}
                 </button>
                 <button type="button" class="button button-secondary" disabled={busy !== ''} onClick={() => exportKit(row)}>
                   {t.exportKit}

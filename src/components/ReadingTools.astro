@@ -1,0 +1,201 @@
+---
+import { copy } from '../content/copy';
+
+const t = copy.readingTools;
+---
+
+<div class="reading-tools">
+  <div class="container reading-tools-inner" role="group" aria-label={t.label}>
+    <span id="text-size-label" class="reading-tools-label">{t.textSize}</span>
+    <div class="reading-tools-group" role="group" aria-labelledby="text-size-label">
+      {
+        t.sizes.map((o) => (
+          <button type="button" class="reading-tools-button" data-size={o.value} aria-pressed={o.value === 'normal' ? 'true' : 'false'}>
+            {o.label}
+          </button>
+        ))
+      }
+    </div>
+    <button type="button" class="reading-tools-button" id="tool-contrast" aria-pressed="false">
+      {t.contrast}: <span data-state>{t.off}</span>
+    </button>
+    <button type="button" class="reading-tools-button" id="tool-spacing" aria-pressed="false">
+      {t.spacing}: <span data-state>{t.off}</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // These choices are kept in this browser only, so the next visit matches. They are never sent anywhere.
+  const SIZES = ['normal', 'larger', 'largest'];
+  const root = document.documentElement;
+  const sizeButtons = document.querySelectorAll<HTMLButtonElement>('.reading-tools-button[data-size]');
+  const contrast = document.querySelector<HTMLButtonElement>('#tool-contrast');
+  const spacing = document.querySelector<HTMLButtonElement>('#tool-spacing');
+  const words = { on: 'On', off: 'Off' };
+
+  function read(key: string): string {
+    try {
+      return localStorage.getItem(key) || '';
+    } catch {
+      return ''; // Private windows may block storage. The page still works.
+    }
+  }
+  function write(key: string, value: string) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Not saved, but the choice still changes on this page.
+    }
+  }
+
+  function applySize(size: string) {
+    root.dataset.textSize = size;
+    sizeButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.size === size)));
+  }
+  function applyToggle(button: HTMLButtonElement | null, attribute: string, on: boolean) {
+    if (!button) return;
+    if (on) root.setAttribute(attribute, 'on');
+    else root.removeAttribute(attribute);
+    button.setAttribute('aria-pressed', String(on));
+    const state = button.querySelector('[data-state]');
+    if (state) state.textContent = on ? words.on : words.off;
+  }
+
+  const savedSize = read('bsb-text-size');
+  applySize(SIZES.includes(savedSize) ? savedSize : 'normal');
+  applyToggle(contrast, 'data-contrast', read('bsb-contrast') === 'on');
+  applyToggle(spacing, 'data-spacing', read('bsb-spacing') === 'on');
+
+  sizeButtons.forEach((b) =>
+    b.addEventListener('click', () => {
+      const size = b.dataset.size || 'normal';
+      applySize(size);
+      write('bsb-text-size', size);
+    }),
+  );
+  contrast?.addEventListener('click', () => {
+    const on = contrast.getAttribute('aria-pressed') !== 'true';
+    applyToggle(contrast, 'data-contrast', on);
+    write('bsb-contrast', on ? 'on' : 'off');
+  });
+  spacing?.addEventListener('click', () => {
+    const on = spacing.getAttribute('aria-pressed') !== 'true';
+    applyToggle(spacing, 'data-spacing', on);
+    write('bsb-spacing', on ? 'on' : 'off');
+  });
+</script>
+
+<style is:global>
+  .reading-tools {
+    background: var(--forest-tint);
+  }
+
+  .reading-tools-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    padding-block: var(--space-2);
+  }
+
+  .reading-tools-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .reading-tools-label {
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .reading-tools-button {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0 var(--space-3);
+    font: inherit;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--forest);
+    background: var(--cream);
+    border: 3px solid var(--forest);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+  }
+
+  .reading-tools-button[aria-pressed='true'] {
+    background: var(--forest);
+    color: var(--paper);
+  }
+
+  .reading-tools-button:focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+
+  /* Text size. Zooming the page content keeps every fixed pixel size in proportion. The header stays put so its menu layout holds. */
+  html[data-text-size='larger'] main,
+  html[data-text-size='larger'] .site-footer {
+    zoom: 1.2;
+  }
+
+  html[data-text-size='largest'] main,
+  html[data-text-size='largest'] .site-footer {
+    zoom: 1.45;
+  }
+
+  /* Roomy spacing: more space between lines, words, and paragraphs, for tired eyes. */
+  html[data-spacing='on'] main,
+  html[data-spacing='on'] .site-footer {
+    line-height: 1.9;
+    word-spacing: 0.16em;
+    letter-spacing: 0.02em;
+  }
+
+  html[data-spacing='on'] main p,
+  html[data-spacing='on'] main li {
+    line-height: 1.9;
+    margin-bottom: 1.2em;
+  }
+
+  /* High contrast: black on white, a thick dark outline on every card, and underlined links. */
+  html[data-contrast='on'] {
+    --cream: #ffffff;
+    --paper: #ffffff;
+    --ink: #000000;
+    --ink-muted: #000000;
+    --forest: #123226;
+    --forest-deep: #0b1f17;
+    --forest-tint: #eef4f1;
+    --sunshine-soft: #ffffff;
+    --rule: #000000;
+    --shadow-card: 0 0 0 3px #000000;
+  }
+
+  html[data-contrast='on'] main a:not(.button),
+  html[data-contrast='on'] .site-footer a {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+  }
+
+  html[data-contrast='on'] .card,
+  html[data-contrast='on'] .sheet,
+  html[data-contrast='on'] .callout,
+  html[data-contrast='on'] .field-control {
+    border: 3px solid #000000;
+  }
+
+  @media print {
+    .reading-tools {
+      display: none;
+    }
+
+    html[data-text-size] main,
+    html[data-text-size] .site-footer,
+    html[data-spacing] main {
+      zoom: 1;
+    }
+  }
+</style>

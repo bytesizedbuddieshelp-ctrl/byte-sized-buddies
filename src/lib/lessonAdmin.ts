@@ -1,7 +1,7 @@
 // Owner-only helpers for lessons: uploads, deletes, and the kit zip. They use the signed-in client,
 // and the database rules (and storage rules) decide what is allowed.
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { BUCKET, extrasFor, fileUrl, lessonFolder, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from './lessons';
+import { BUCKET, copySlug, extrasFor, fileUrl, lessonFolder, moveFilePaths, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from './lessons';
 import { FILE_SLOTS, type FileSlot, type NormalizedLesson } from './kit';
 import { makeZip } from './zip';
 
@@ -140,4 +140,26 @@ export function rowFromKit(lesson: NormalizedLesson, files: LessonFiles) {
     status: 'draft' as const,
     published_at: null,
   };
+}
+
+/** Makes a draft copy of a lesson, with its own copy of every file, so changing or deleting one never touches the other. */
+export async function duplicateLesson(supabase: SupabaseClient, lesson: Lesson, takenSlugs: string[]): Promise<string> {
+  const slug = copySlug(lesson.slug, takenSlugs);
+  const files = moveFilePaths(lesson.files ?? {}, lesson.slug, slug);
+  const before = pathsIn(lesson.files ?? {});
+  const after = pathsIn(files);
+  for (const [i, from] of before.entries()) {
+    const { error } = await supabase.storage.from(BUCKET).copy(from, after[i]);
+    if (error) {
+      await removeStoragePaths(supabase, after.slice(0, i)).catch(() => undefined);
+      throw new Error('Could not copy the files.');
+    }
+  }
+  const { id: _id, created_at: _c, updated_at: _u, ...rest } = lesson;
+  const { error } = await supabase.from('lessons').insert({ ...rest, slug, title: `Copy of ${lesson.title}`.slice(0, 120), files, status: 'draft', published_at: null });
+  if (error) {
+    await removeStoragePaths(supabase, after).catch(() => undefined);
+    throw error;
+  }
+  return slug;
 }
