@@ -81,11 +81,29 @@ describe('validateKit', () => {
     expect(r.lesson).toBeNull();
   });
 
-  it('needs a slide image to be in the images list and the files', () => {
-    expect(validateKit(kit({ images: [] }), goodFiles()).errors.join()).toContain('"contacts.png", but it isn\'t in the kit\'s "images" list');
-    const missing = validateKit(kit(), [pdf('w.pdf'), pdf('h.pdf')]).errors;
-    expect(missing.join()).toContain('lists the image "contacts.png"');
-    expect(missing.join()).not.toContain("isn't in the kit's");
+  it('needs every picture a slide uses to be dropped in, once', () => {
+    // Not in the images list, but dropped in: it is used.
+    const relaxed = validateKit(kit({ images: [] }), goodFiles());
+    expect(relaxed.errors).toEqual([]);
+    expect(relaxed.lesson?.images).toEqual(['contacts.png']);
+    // Not dropped in: a plain message, reported once.
+    const missing = validateKit(kit(), [pdf('w.pdf'), pdf('h.pdf')]).errors.filter((e) => e.includes('contacts.png'));
+    expect(missing).toHaveLength(1);
+    expect(missing[0]).toContain('no selected picture has that name');
+  });
+
+  it('matches pictures by name, even with different capitals or file type', () => {
+    const jpg = classifyFile('Contacts.JPG', 500, bytes(0xff, 0xd8, 0xff, 0xe0));
+    const r = validateKit(kit(), [pdf('w.pdf'), pdf('h.pdf'), jpg]);
+    expect(r.errors).toEqual([]);
+    expect(r.lesson?.images).toEqual(['Contacts.JPG']);
+    expect(r.lesson?.slides.slides[1].image?.file).toBe('Contacts.JPG');
+    expect(r.warnings.join()).toContain('Using the picture "Contacts.JPG" for "contacts.png"');
+  });
+
+  it('says when a dropped picture is not used', () => {
+    const r = validateKit(kit(), [...goodFiles(), png('spare.png')]);
+    expect(r.warnings.join()).toContain('"spare.png" was selected, but nothing in the kit uses it');
   });
 
   it('turns slide problems into errors that name the slide', () => {

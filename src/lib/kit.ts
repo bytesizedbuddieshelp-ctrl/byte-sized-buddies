@@ -1,6 +1,7 @@
 // The kit format (docs/KIT-FORMAT.md): one kit.json plus the PDFs and images it names.
 // validateKit() is a pure function: it gets the parsed JSON and a list of the files that were dropped.
-import { validateDeck, imageFilesIn, type SlideDeck } from './slides';
+import { validateDeck, imageFilesIn, renameDeckImages, type SlideDeck } from './slides';
+import { matchPictures } from './pictureNames';
 
 export type FileKind = 'pdf' | 'png' | 'jpg' | 'webp' | 'svg' | 'json' | 'unknown';
 
@@ -220,26 +221,33 @@ export function validateKit(kit: unknown, droppedFiles: KitFileInfo[]): KitResul
     });
   }
 
+  // Pictures. Every picture the kit lists, and every picture a slide uses, is looked up among the dropped
+  // pictures by name. A loose match counts ("Contacts.jpg" for "contacts.png"), and the slides are pointed at it.
   const listedImages = k.images ?? [];
   const images: string[] = [];
+  let deck = slideResult.deck;
   if (!Array.isArray(listedImages) || !listedImages.every(text)) errors.push('"images" should be a list of file names.');
   else {
     for (const name of listedImages) {
-      const found = byName.get(name);
-      if (!found) errors.push(`The kit lists the image "${name}", but that file wasn't selected. Drop it in along with kit.json.`);
-      else if (found.kind === 'pdf' || found.kind === 'json' || found.kind === 'unknown') errors.push(`"${name}" is listed as an image, but it isn't one.`);
-      else images.push(name);
+      const exact = byName.get(name);
+      if (exact && (exact.kind === 'pdf' || exact.kind === 'json' || exact.kind === 'unknown')) errors.push(`"${name}" is listed as an image, but it isn't one.`);
     }
-  }
-
-  if (slideResult.deck) {
-    // Compare with what the kit says, not with what was found, so one missing file is reported once.
-    const named = Array.isArray(listedImages) ? (listedImages as unknown[]) : [];
-    for (const used of imageFilesIn(slideResult.deck)) {
-      if (!named.includes(used)) errors.push(`A slide uses the image "${used}", but it isn't in the kit's "images" list.`);
+    const pictures = droppedFiles.filter((f) => !f.problem && ['png', 'jpg', 'webp', 'svg'].includes(f.kind)).map((f) => f.name);
+    const used = deck ? imageFilesIn(deck) : [];
+    const wanted = [...new Set([...(listedImages as string[]), ...used])];
+    const match = matchPictures(wanted, pictures);
+    for (const name of match.missing) {
+      errors.push(`The kit uses the image "${name}", but no selected picture has that name. Drop it in along with kit.json (the name can differ in capital letters or end in .jpg instead of .png).`);
     }
-    for (const listed of images) {
-      if (!imageFilesIn(slideResult.deck).includes(listed)) warnings.push(`The image "${listed}" is in the kit, but no slide uses it.`);
+    for (const [name, file] of Object.entries(match.found)) {
+      if (name !== file) warnings.push(`Using the picture "${file}" for "${name}".`);
+      if (!images.includes(file)) images.push(file);
+    }
+    for (const file of match.unused) warnings.push(`The picture "${file}" was selected, but nothing in the kit uses it. It won't be uploaded.`);
+    if (deck) {
+      deck = renameDeckImages(deck, match.found);
+      const onSlides = imageFilesIn(deck);
+      for (const file of images) if (!onSlides.includes(file)) warnings.push(`The image "${file}" is in the kit, but no slide uses it.`);
     }
   }
 
@@ -256,7 +264,7 @@ export function validateKit(kit: unknown, droppedFiles: KitFileInfo[]): KitResul
         duration_minutes: duration as number,
         objectives: (objectives as string[]).map((o) => o.trim()).filter(Boolean),
         license: (license as string).trim(),
-        slides: slideResult.deck!,
+        slides: deck!,
         teacher_guide_md: guide as string,
         video_script_md: script as string,
         files: fileSlots,

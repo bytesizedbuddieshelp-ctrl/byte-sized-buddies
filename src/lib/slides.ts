@@ -49,6 +49,19 @@ export function slideImages(slide: Pick<Slide, 'image' | 'images'>): SlideImage[
   return [...(slide.image ? [slide.image] : []), ...(slide.images ?? [])];
 }
 
+/** The same deck with photo file names swapped (old name -> new name), for pictures matched by name. */
+export function renameDeckImages(deck: SlideDeck, names: Record<string, string>): SlideDeck {
+  const swap = (image: SlideImage): SlideImage => ({ ...image, file: names[image.file] ?? image.file });
+  return {
+    ...deck,
+    slides: deck.slides.map((slide) => ({
+      ...slide,
+      ...(slide.image ? { image: swap(slide.image) } : {}),
+      ...(slide.images ? { images: slide.images.map(swap) } : {}),
+    })),
+  };
+}
+
 /** Slide images named in a deck, in order, without repeats. */
 export function imageFilesIn(deck: SlideDeck): string[] {
   return [...new Set(deck.slides.flatMap((slide) => slideImages(slide).map((image) => image.file)))];

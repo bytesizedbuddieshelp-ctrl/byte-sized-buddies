@@ -1224,3 +1224,30 @@ body.annotate-live .annotate-page {
 .photos-panel h3 {
   margin-top: 0;
 }
+
+/* Lesson editor: which slide uses which picture */
+.picture-match {
+  margin-top: var(--space-4);
+}
+
+.picture-match li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.picture-match li svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--forest);
+}
+
+.picture-match li.is-missing {
+  color: var(--brick);
+  font-weight: 700;
+}
+
+.picture-match li.is-missing svg {
+  color: var(--brick);
+}

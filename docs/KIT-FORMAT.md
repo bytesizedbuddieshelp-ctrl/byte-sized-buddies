@@ -75,7 +75,8 @@ Select **kit.json and every file it names, all at once**, when you import.
 - File names use letters, numbers, dots, and dashes. **No spaces.**
 - Each file is under 10 MB. A PDF over 5 MB gets a warning.
 - SVG pictures must be plain drawings. Ones with code or links to other websites are refused.
-- Every picture a slide uses must be in the `images` list.
+- Every picture a slide uses must be selected with `kit.json`. Names are matched loosely: `Contacts.JPG` counts for `contacts.png`, and `contacts_screen.png` for `contacts-screen.png`. The importer says which picture it used for which name. If two pictures could match, it doesn't guess.
+- Names with spaces or odd characters (like Mac screenshots) are cleaned automatically: spaces become dashes.
 - Each extra worksheet in `extras` needs a `file` (a PDF that is selected with `kit.json`) and a `title` of 80 characters or fewer. Each one needs its own file. Up to 10.
 
 ## Slides

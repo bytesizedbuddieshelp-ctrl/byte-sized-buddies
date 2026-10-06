@@ -8,8 +8,9 @@ import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
 import { renderMarkdown } from '../../lib/markdown';
 import { parseYouTubeId } from '../../lib/youtube';
-import { MAX_SLIDE_IMAGES, parseDeckText, slideImages, type Layout, type Slide, type SlideImage } from '../../lib/slides';
-import { FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
+import { imageFilesIn, MAX_SLIDE_IMAGES, parseDeckText, renameDeckImages, slideImages, type Layout, type Slide, type SlideImage } from '../../lib/slides';
+import { matchPictures, safeFileName } from '../../lib/pictureNames';
+import { FILE_NAME, FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
 import { extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
 import { filesRecord, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
 
@@ -158,7 +159,7 @@ function withPhotos(slide: Slide, photos: SlideImage[]): Slide {
 }
 
 // "Photos on this slide": choose up to four of the lesson's pictures for the chosen slide, with alt text.
-function PhotosPanel({ slide, pictures, onChange }: { slide: Slide; pictures: string[]; onChange: (photos: SlideImage[]) => void }) {
+function PhotosPanel({ slide, pictures, onChange, onUpload }: { slide: Slide; pictures: string[]; onChange: (photos: SlideImage[]) => void; onUpload: (files: File[]) => void }) {
   const photos = slideImages(slide);
   if (slide.layout !== 'idea' && slide.layout !== 'step') return <p class="caption">{t.photosOnly}</p>;
   const set = (i: number, change: Partial<SlideImage>) => onChange(photos.map((p, j) => (j === i ? { ...p, ...change } : p)));
@@ -195,12 +196,31 @@ function PhotosPanel({ slide, pictures, onChange }: { slide: Slide; pictures: st
       ))}
       {photos.length >= MAX_SLIDE_IMAGES ? (
         <p class="caption">{t.photosMax}</p>
-      ) : pictures.length === 0 ? (
-        <p class="caption">{t.noPictures}</p>
       ) : (
-        <button type="button" class="button button-secondary" onClick={() => onChange([...photos, { file: unused, alt: '' }])}>
-          {t.addPhoto}
-        </button>
+        <>
+          {pictures.length > 0 && (
+            <button type="button" class="button button-secondary" onClick={() => onChange([...photos, { file: unused, alt: '' }])}>
+              {t.addPhoto}
+            </button>
+          )}
+          <div class="field" style="margin-top: 16px;">
+            <label class="field-label" for="photo-upload">{t.addFromComputer}</label>
+            <p class="field-helper" id="photo-upload-help">{t.addFromComputerHelp}</p>
+            <input
+              id="photo-upload"
+              class="field-control"
+              type="file"
+              multiple
+              accept=".png,.jpg,.jpeg,.webp,.svg"
+              aria-describedby="photo-upload-help"
+              onChange={(e) => {
+                const files = Array.from(e.currentTarget.files ?? []);
+                e.currentTarget.value = '';
+                if (files.length) onUpload(files);
+              }}
+            />
+          </div>
+        </>
       )}
     </div>
   );
@@ -276,6 +296,10 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
   const current = slides[Math.min(chosen, slides.length - 1)];
   const draftLesson = { slug: form.slug || 'new', files: lesson?.files ?? {} };
   const imageUrl = (file: string) => previewUrls[file] ?? imageUrlFor(draftLesson, file);
+  // Every picture this lesson will have after saving: the uploaded ones still kept, plus the new ones.
+  const pictureNames = [...new Set([...(lesson?.files.images ?? []).filter((i) => !imageRemove.includes(i.name)).map((i) => i.name), ...newImages.map((f) => f.name)])];
+  const slidePictures = slides.flatMap((slide, i) => slideImages(slide).map((image) => ({ n: i + 1, file: image.file, ok: pictureNames.includes(image.file) })));
+  const unusedPictures = pictureNames.filter((name) => !slidePictures.some((p) => p.file === name));
 
   function changeSlides(change: (list: Slide[]) => Slide[]) {
     if (!deck.deck) return;
@@ -298,18 +322,39 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
     setFileProblems(issues);
   }
 
-  async function chooseImages(list: FileList | null) {
+  // Adds pictures to the lesson (more each time, never replacing), cleans names the website would refuse,
+  // then points any slide still waiting for a picture at the one whose name matches.
+  async function addPictures(list: File[], matchSlides = true): Promise<string[]> {
     const issues = { ...fileProblems };
     for (const key of Object.keys(issues)) if (key.startsWith('image:')) delete issues[key];
     const accepted: File[] = [];
-    for (const file of Array.from(list ?? [])) {
+    for (const raw of list) {
+      const file = FILE_NAME.test(raw.name) ? raw : new File([raw], safeFileName(raw.name), { type: raw.type, lastModified: raw.lastModified });
       const info = await inspectFile(file);
       if (info.problem) issues[`image:${file.name}`] = info.problem;
       else if (info.kind === 'pdf' || info.kind === 'json' || info.kind === 'unknown') issues[`image:${file.name}`] = `"${file.name}" should be a picture.`;
       else accepted.push(file);
     }
-    setNewImages(accepted);
+    const added = accepted.map((f) => f.name);
+    setNewImages((old) => [...old.filter((f) => !added.includes(f.name)), ...accepted]);
+    setImageRemove((old) => old.filter((name) => !added.includes(name)));
     setFileProblems(issues);
+
+    if (matchSlides && deck.deck && added.length) {
+      const all = [...new Set([...pictureNames, ...added])];
+      const waiting = imageFilesIn(deck.deck).filter((name) => !all.includes(name));
+      const { found } = matchPictures(waiting, all);
+      if (Object.keys(found).length) set('deckText', JSON.stringify(renameDeckImages(deck.deck, found), null, 2));
+    }
+    return added;
+  }
+
+  function chooseImages(list: FileList | null) {
+    const files = Array.from(list ?? []);
+    // Clear the picker, so choosing the same picture again still counts.
+    const picker = document.getElementById('images') as HTMLInputElement | null;
+    if (picker) picker.value = '';
+    void addPictures(files);
   }
 
   async function chooseExtra(id: number, file: File | undefined) {
@@ -601,8 +646,15 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
                 </SlideFrame>
                 <PhotosPanel
                   slide={current}
-                  pictures={[...new Set([...(lesson?.files.images ?? []).filter((i) => !imageRemove.includes(i.name)).map((i) => i.name), ...newImages.map((f) => f.name)])]}
+                  pictures={pictureNames}
                   onChange={(photos) => changeSlides((list) => list.map((s, j) => (j === Math.min(chosen, list.length - 1) ? withPhotos(s, photos) : s)))}
+                  onUpload={async (files) => {
+                    const room = MAX_SLIDE_IMAGES - slideImages(current).length;
+                    // These go straight onto this slide, so no name matching here.
+                    const added = await addPictures(files.slice(0, Math.max(0, room)), false);
+                    const index = Math.min(chosen, slides.length - 1);
+                    changeSlides((list) => list.map((s, j) => (j === index ? withPhotos(s, [...slideImages(s), ...added.map((file) => ({ file, alt: '' }))].slice(0, MAX_SLIDE_IMAGES)) : s)));
+                  }}
                 />
               </div>
             )}
@@ -681,8 +733,25 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
               ))}
             </ul>
           )}
-          <input id="images" class="field-control" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" onChange={(e) => void chooseImages(e.currentTarget.files)} />
+          <input id="images" class="field-control" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" onChange={(e) => { const files = e.currentTarget.files; chooseImages(files); }} />
           {newImages.length > 0 && <p class="caption">{t.chosen}: {newImages.map((f) => f.name).join(', ')}</p>}
+          {(slidePictures.length > 0 || unusedPictures.length > 0) && (
+            <div class="picture-match">
+              <h3>{t.matchHeading}</h3>
+              <ul class="clean-list">
+                {slidePictures.map((p, i) => (
+                  <li key={`${i}-${p.file}`} class={p.ok ? '' : 'is-missing'}>
+                    <Icon name={p.ok ? 'check' : 'alert'} size={24} /> <span>{p.ok ? t.matchFound(p.n, p.file) : t.matchMissing(p.n, p.file)}</span>
+                  </li>
+                ))}
+                {unusedPictures.map((file) => (
+                  <li key={`unused-${file}`}>
+                    <Icon name="info" size={24} /> <span>{t.matchUnused(file)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {Object.entries(fileProblems).filter(([k]) => k.startsWith('image:')).map(([k, m]) => (
             <p class="field-error" key={k}><Icon name="alert" size={24} /><span>{m}</span></p>
           ))}

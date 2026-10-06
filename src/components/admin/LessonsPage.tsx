@@ -6,7 +6,8 @@ import { Notices } from './Notices';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
 import { formatBytes, lessonBytes, sortByWeek, STORAGE_LIMIT_BYTES, type Lesson } from '../../lib/lessons';
-import { inspectFile, validateKit, type KitFileInfo, type KitResult } from '../../lib/kit';
+import { FILE_NAME, inspectFile, validateKit, type KitFileInfo, type KitResult } from '../../lib/kit';
+import { safeFileName } from '../../lib/pictureNames';
 import {
   buildKitZip,
   filesRecord,
@@ -85,7 +86,13 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
     } catch {
       return setKitProblems([t.kitUnreadable]);
     }
-    const others = files.filter((file) => file !== kitFile);
+    // Names the website would refuse (spaces, odd characters) are cleaned, so a Mac screenshot still works.
+    const others = files
+      .filter((file) => file !== kitFile)
+      .map((file) => (FILE_NAME.test(file.name) ? file : new File([file], safeFileName(file.name), { type: file.type, lastModified: file.lastModified })));
+    const cleaned = others.map((file) => file.name);
+    const clash = cleaned.find((name, i) => cleaned.indexOf(name) !== i);
+    if (clash) return setKitProblems([`Two files are both named "${clash}". Please keep only one.`]);
     const infos: KitFileInfo[] = await Promise.all(others.map(inspectFile));
     const result = validateKit(json, infos);
     let existing: { id: string } | null = null;
