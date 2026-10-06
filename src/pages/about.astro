@@ -1,11 +1,13 @@
 ---
 import TextPage from '../layouts/TextPage.astro';
 import Logo from '../components/Logo.astro';
-import { Content } from '../content/about.md';
+import { Content, getHeadings } from '../content/about.md';
 import { copy } from '../content/copy';
 ---
 
-<TextPage title={copy.about.title} description={copy.about.description}>
-  <p><Logo variant="stacked" width={240} /></p>
+<TextPage title={copy.about.title} description={copy.about.description} headings={getHeadings()} card={copy.about.card}>
   <Content />
+  <div slot="aside" class="sheet about-logo">
+    <Logo variant="stacked" width={240} />
+  </div>
 </TextPage>

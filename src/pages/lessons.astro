@@ -1,15 +1,23 @@
 ---
 import Base from '../layouts/Base.astro';
 import LessonLibrary from '../components/lessons/LessonLibrary';
+import HandoutStack from '../components/illustrations/HandoutStack.astro';
 import { copy } from '../content/copy';
 
 const t = copy.lessons;
 ---
 
 <Base title={t.title} description={t.description}>
-  <div class="container section">
-    <h1>{t.title}</h1>
-    <p class="lead prose">{t.intro}</p>
-    <LessonLibrary client:only="preact" />
+  <div class="container hero">
+    <div class="page-head page-head--short">
+      <div>
+        <h1>{t.title}</h1>
+        <p class="lead">{t.intro}</p>
+      </div>
+      <HandoutStack />
+    </div>
+    <div class="section-tight">
+      <LessonLibrary client:only="preact" />
+    </div>
   </div>
 </Base>

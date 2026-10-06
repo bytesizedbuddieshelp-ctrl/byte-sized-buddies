@@ -335,20 +335,25 @@ export const copy = {
   about: {
     title: 'About',
     description: 'Byte-Sized Buddies is a student-led volunteer project that teaches technology to older adults.',
+    card: { heading: 'Want a visit?', text: 'We bring everything, and there is no cost, ever.', button: 'Request a visit', href: '/for-senior-homes#contact' },
   },
+  textPage: { toc: 'On this page' },
   teach: {
     title: 'Teach it yourself',
     description: 'Free, ready-to-use guidance for teaching technology to older adults in your own community.',
     lessonsButton: 'See the free lessons',
     tellButton: 'Tell us how it went',
+    card: { heading: 'Get the free lessons', text: 'Every lesson has slides, a teacher guide, a worksheet, and a large-print handout.', button: 'See the free lessons', href: '/lessons' },
   },
   privacy: {
     title: 'Privacy',
     description: 'What Byte-Sized Buddies collects, why, who sees it, and how long we keep it.',
+    card: { heading: 'A question about your information?', text: 'Ask us. Your answer appears at a private link only you have.', button: 'Ask a question', href: '/ask' },
   },
   license: {
     title: 'License',
     description: 'How you may use, print, adapt, and share Byte-Sized Buddies lessons.',
+    card: { heading: 'Use the lessons', text: 'Print them, adapt them for your learners, and share them. Please credit Byte-Sized Buddies.', button: 'See the free lessons', href: '/lessons' },
   },
   notFound: {
     title: "We can't find that page",

@@ -3,6 +3,7 @@ import { fetchPublishedLessons, matchesDevice, type Lesson } from '../../lib/les
 import { isConfigured } from '../../lib/config';
 import { LessonCard } from './LessonCard';
 import { copy } from '../../content/copy';
+import { Icon } from '../forms/Icon';
 
 const t = copy.lessons;
 type Chip = 'iphone' | 'android' | 'beginner' | 'intermediate';
@@ -36,12 +37,17 @@ export default function LessonLibrary() {
   if (lessons === null) return <p role="status">{t.loading}</p>;
   if (lessons.length === 0) {
     return (
-      <div class="card">
-        <h2>{t.emptyTitle}</h2>
-        <p>{t.emptyText}</p>
-        <a class="button button-secondary" href="/teach">
-          {t.teachButton}
-        </a>
+      <div class="card soon-card">
+        <span class="icon-circle">
+          <Icon name="book" size={26} />
+        </span>
+        <div>
+          <h2>{t.emptyTitle}</h2>
+          <p>{t.emptyText}</p>
+          <a class="button button-secondary" href="/teach">
+            {t.teachButton}
+          </a>
+        </div>
       </div>
     );
   }

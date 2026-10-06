@@ -1,9 +1,9 @@
 ---
 import TextPage from '../layouts/TextPage.astro';
-import { Content } from '../content/privacy.md';
+import { Content, getHeadings } from '../content/privacy.md';
 import { copy } from '../content/copy';
 ---
 
-<TextPage title={copy.privacy.title} description={copy.privacy.description}>
+<TextPage title={copy.privacy.title} description={copy.privacy.description} headings={getHeadings()} card={copy.privacy.card}>
   <Content />
 </TextPage>

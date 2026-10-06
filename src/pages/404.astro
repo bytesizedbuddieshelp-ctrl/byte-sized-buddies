@@ -1,19 +1,24 @@
 ---
 import Base from '../layouts/Base.astro';
 import Button from '../components/Button.astro';
+import LostScene from '../components/illustrations/LostScene.astro';
 import { copy } from '../content/copy';
 
 const t = copy.notFound;
 ---
 
 <Base title={t.title} description={t.text} noindex>
-  <div class="container section">
-    <div class="prose">
-      <h1>{t.title}</h1>
-      <p class="lead">{t.text}</p>
-      <div class="actions">
-        <Button href="/">{t.button}</Button>
+  <div class="container hero">
+    <div class="page-head">
+      <div>
+        <h1>{t.title}</h1>
+        <p class="lead">{t.text}</p>
+        <div class="actions">
+          <Button href="/">{t.button}</Button>
+          <Button variant="secondary" href="/lessons">{copy.home.heroButtons.lessons}</Button>
+        </div>
       </div>
+      <LostScene />
     </div>
   </div>
 </Base>

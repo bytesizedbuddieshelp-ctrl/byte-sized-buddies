@@ -403,3 +403,22 @@ h2 {
   max-width: 340px;
   margin-inline: auto;
 }
+
+.aside-heading {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.about-logo {
+  display: grid;
+  place-items: center;
+  padding-block: var(--space-6);
+}
+
+.page-head--short .ill {
+  max-width: 320px;
+}
+
+.section-tight {
+  padding-top: var(--space-5);
+}

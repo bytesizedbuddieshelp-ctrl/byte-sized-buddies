@@ -1,20 +1,57 @@
 ---
 import Base from './Base.astro';
+import Button from '../components/Button.astro';
+import { copy } from '../content/copy';
 
-// A plain page with a title and readable text, used for About, Teach, Privacy, and License.
+// A reading page (About, Teach, Privacy, License): the text, with an "On this page" list of its sections
+// and a helpful card beside it on wide screens. On phones, the list and card come after the title.
 interface Props {
   title: string;
   description: string;
+  /** The page's headings (from the markdown file's getHeadings()). Only the main sections are listed. */
+  headings?: { depth: number; slug: string; text: string }[];
+  card?: { heading: string; text: string; button: string; href: string };
 }
 
-const { title, description } = Astro.props;
+const { title, description, headings = [], card } = Astro.props;
+const sections = headings.filter((h) => h.depth === 2);
 ---
 
 <Base title={title} description={description}>
   <div class="container section">
-    <div class="prose">
-      <h1>{title}</h1>
-      <slot />
+    <div class="with-aside">
+      <div class="prose">
+        <h1>{title}</h1>
+        <slot />
+      </div>
+      {
+        (sections.length > 0 || card) && (
+          <aside class="aside-sticky aside-stack" aria-label={copy.textPage.toc}>
+            {sections.length > 0 && (
+              <nav class="toc" aria-labelledby="toc-title">
+                <h2 id="toc-title">{copy.textPage.toc}</h2>
+                <ol>
+                  {sections.map((h) => (
+                    <li>
+                      <a href={`#${h.slug}`}>{h.text}</a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )}
+            <slot name="aside" />
+            {card && (
+              <div class="sheet">
+                <h2 class="aside-heading">{card.heading}</h2>
+                <p>{card.text}</p>
+                <Button variant="secondary" href={card.href}>
+                  {card.button}
+                </Button>
+              </div>
+            )}
+          </aside>
+        )
+      }
     </div>
   </div>
 </Base>
