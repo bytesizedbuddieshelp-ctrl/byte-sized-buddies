@@ -1,32 +1,53 @@
 ---
 import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
 import Icon from '../components/Icon.astro';
 import ContactForm from '../components/forms/ContactForm';
+import TvScene from '../components/illustrations/TvScene.astro';
 import { copy } from '../content/copy';
 
 const t = copy.homes;
 ---
 
 <Base title={t.title} description={t.description}>
-  <div class="container section">
-    <div class="prose">
-      <h1>{t.title}</h1>
-      <p class="lead">{t.intro}</p>
+  <!-- Title and a picture of a lesson on a TV -->
+  <div class="container hero">
+    <div class="page-head">
+      <div>
+        <h1>{t.title}</h1>
+        <p class="lead">{t.intro}</p>
+        <div class="actions">
+          <Button href="#contact">{t.jump}</Button>
+        </div>
+      </div>
+      <TvScene />
     </div>
   </div>
 
+  <!-- The 45-minute lesson, as a timeline -->
   <section class="container section" aria-labelledby="flow-title">
-    <div class="prose">
-      <h2 id="flow-title">{t.flowHeading}</h2>
-      <p>{t.flowIntro}</p>
-      <ol>
-        {t.flow.map((step) => <li>{step}</li>)}
-      </ol>
-    </div>
+    <h2 id="flow-title">{t.flowHeading}</h2>
+    <p>{t.flowIntro}</p>
+    <ol class="timeline">
+      {
+        t.timeline.map((step, index) => (
+          <li>
+            <div class="step-number" aria-hidden="true">{index + 1}</div>
+            <h3>
+              <span class="visually-hidden">Step {index + 1}: </span>
+              {step.title}
+            </h3>
+            <span class="minutes">{step.minutes}</span>
+            <p>{step.text}</p>
+          </li>
+        ))
+      }
+    </ol>
   </section>
 
+  <!-- What we need, and what we bring -->
   <section class="container section" aria-labelledby="need-title">
-    <div class="grid">
+    <div class="split split--even need-bring">
       <div class="panel">
         <h2 id="need-title">{t.needHeading}</h2>
         <ul class="check-list">
@@ -40,7 +61,7 @@ const t = copy.homes;
           }
         </ul>
       </div>
-      <div class="panel">
+      <div class="panel panel--sun">
         <h2>{t.bringHeading}</h2>
         <ul class="check-list">
           {
@@ -56,11 +77,35 @@ const t = copy.homes;
     </div>
   </section>
 
+  <!-- The form, with what happens next beside it -->
   <section class="container section" id="contact" aria-labelledby="contact-title">
-    <div class="prose">
-      <h2 id="contact-title">{t.formHeading}</h2>
-      <p>{t.formIntro}</p>
-      <ContactForm client:load />
+    <div class="split split--form">
+      <div class="sheet">
+        <h2 id="contact-title">{t.formHeading}</h2>
+        <p>{t.formIntro}</p>
+        <ContactForm client:load />
+      </div>
+      <aside class="aside-sticky aside-stack" aria-label={t.nextHeading}>
+        <div class="panel">
+          <h2>{t.nextHeading}</h2>
+          <ol class="next-steps">
+            {t.next.map((step) => <li>{step}</li>)}
+          </ol>
+        </div>
+        <div class="sheet">
+          <h2>{t.safeHeading}</h2>
+          <ul class="check-list">
+            {
+              t.safe.map((item) => (
+                <li>
+                  <Icon name="check" size={24} />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </aside>
     </div>
   </section>
 </Base>

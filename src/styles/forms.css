@@ -228,3 +228,29 @@ textarea.field-control {
   height: 100%;
   border: 0;
 }
+
+/* Two short fields side by side on wide screens. */
+.field-row {
+  display: grid;
+  gap: 0 var(--space-4);
+}
+
+@media (min-width: 640px) {
+  .field-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: end;
+  }
+}
+
+/* Checkbox choices in a grid on wide screens. */
+@media (min-width: 640px) {
+  .choices-grid .choice-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 0 var(--space-3);
+  }
+
+  .choices-grid .choice-group .field-helper {
+    grid-column: 1 / -1;
+  }
+}

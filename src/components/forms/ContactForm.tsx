@@ -99,13 +99,22 @@ export default function ContactForm() {
   return (
     <form onSubmit={onSubmit} noValidate>
       <ErrorSummary problems={problems} focusSignal={focusSignal} />
-      <Field id="name" label={t.fields.name} required autoComplete="name" error={errors.name} />
-      <Field id="facility" label={t.fields.facility} required autoComplete="organization" error={errors.facility} />
-      <Field id="role" label={t.fields.role} optional autoComplete="organization-title" />
-      <Field id="email" label={t.fields.email} type="email" required autoComplete="email" error={errors.email} />
-      <Field id="phone" label={t.fields.phone} type="tel" optional autoComplete="tel" />
-      <Field id="learners" label={t.fields.learners} optional inputMode="numeric" />
-      <ChoiceGroup name="devices" legend={t.fields.devicesLegend} options={[...t.devices]} type="checkbox" />
+      {/* Short fields sit two to a row on wide screens, and stack on phones. */}
+      <div class="field-row">
+        <Field id="name" label={t.fields.name} required autoComplete="name" error={errors.name} />
+        <Field id="facility" label={t.fields.facility} required autoComplete="organization" error={errors.facility} />
+      </div>
+      <div class="field-row">
+        <Field id="role" label={t.fields.role} optional autoComplete="organization-title" />
+        <Field id="email" label={t.fields.email} type="email" required autoComplete="email" error={errors.email} />
+      </div>
+      <div class="field-row">
+        <Field id="phone" label={t.fields.phone} type="tel" optional autoComplete="tel" />
+        <Field id="learners" label={t.fields.learners} optional inputMode="numeric" />
+      </div>
+      <div class="choices-grid">
+        <ChoiceGroup name="devices" legend={t.fields.devicesLegend} options={[...t.devices]} type="checkbox" />
+      </div>
       <Field id="times" label={t.fields.times} as="textarea" rows={3} optional />
       <Field id="more" label={t.fields.more} as="textarea" rows={4} optional helper={copy.form.privacyHelper} />
       <div class="hp" aria-hidden="true">

@@ -375,3 +375,31 @@ h2 {
 .soon-card p:last-child {
   margin-bottom: 0;
 }
+
+/* A sunshine-soft panel, to pair with the green one. Ink text only. */
+.panel.panel--sun {
+  background: var(--sunshine-soft);
+}
+
+.need-bring {
+  align-items: stretch;
+}
+
+.need-bring .panel,
+.aside-stack .panel {
+  margin: 0;
+}
+
+.aside-stack h2 {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+.timeline h3 {
+  margin-bottom: var(--space-2);
+}
+
+.ask-picture .ill {
+  max-width: 340px;
+  margin-inline: auto;
+}

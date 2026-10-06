@@ -137,8 +137,10 @@ export default function AskForm() {
   return (
     <form onSubmit={onSubmit} noValidate>
       <ErrorSummary problems={problems} focusSignal={focusSignal} />
-      <Field id="name" label={t.fields.name} required autoComplete="name" error={errors.name} />
-      <Field id="facility" label={t.fields.facility} optional autoComplete="organization" />
+      <div class="field-row">
+        <Field id="name" label={t.fields.name} required autoComplete="name" error={errors.name} />
+        <Field id="facility" label={t.fields.facility} optional autoComplete="organization" />
+      </div>
       <Field
         id="email"
         label={t.fields.email}
@@ -148,8 +150,12 @@ export default function AskForm() {
         helper={t.fields.emailHelper}
         error={errors.email}
       />
-      <ChoiceGroup name="device" legend={t.fields.deviceLegend} options={[...t.devices]} type="radio" defaultValue="not_sure" />
-      <ChoiceGroup name="urgency" legend={t.fields.urgencyLegend} options={[...t.urgency]} type="radio" defaultValue="whenever" />
+      <div class="choices-grid">
+        <ChoiceGroup name="device" legend={t.fields.deviceLegend} options={[...t.devices]} type="radio" defaultValue="not_sure" />
+      </div>
+      <div class="choices-grid">
+        <ChoiceGroup name="urgency" legend={t.fields.urgencyLegend} options={[...t.urgency]} type="radio" defaultValue="whenever" />
+      </div>
       <Field
         id="question"
         label={t.fields.question}

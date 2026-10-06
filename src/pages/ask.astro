@@ -1,17 +1,47 @@
 ---
 import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
 import AskForm from '../components/forms/AskForm';
+import QuestionScene from '../components/illustrations/QuestionScene.astro';
 import { copy } from '../content/copy';
 
 const t = copy.ask;
 ---
 
 <Base title={t.title} description={t.description}>
-  <div class="container section">
-    <div class="prose">
-      <h1>{t.title}</h1>
-      <p class="lead">{t.intro}</p>
-      <AskForm client:load />
+  <div class="container hero">
+    <div class="split split--form">
+      <div>
+        <h1>{t.title}</h1>
+        <p class="lead">{t.intro}</p>
+        <div class="sheet">
+          <AskForm client:load />
+        </div>
+      </div>
+      <aside class="aside-sticky aside-stack" aria-label={t.nextHeading}>
+        <div class="ask-picture">
+          <QuestionScene />
+        </div>
+        <div class="panel">
+          <h2>{t.nextHeading}</h2>
+          <ol class="next-steps">
+            {t.next.map((step) => <li>{step}</li>)}
+          </ol>
+        </div>
+        <div class="sheet">
+          <h2>{t.tipsHeading}</h2>
+          <ul class="check-list">
+            {
+              t.tips.map((tip) => (
+                <li>
+                  <Icon name="check" size={24} />
+                  <span>{tip}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </aside>
     </div>
   </div>
 </Base>
