@@ -111,9 +111,9 @@ function Requests({ supabase, onChange }: { supabase: SupabaseClient; onChange: 
   }, [filter]);
 
   const open = rows?.find((r) => r.id === openId);
-  if (open) {
-    return (
+  const detail = open ? (
       <RequestDetail
+        key={open.id}
         supabase={supabase}
         request={open}
         onBack={(msg) => {
@@ -123,11 +123,12 @@ function Requests({ supabase, onChange }: { supabase: SupabaseClient; onChange: 
           onChange();
         }}
       />
-    );
-  }
+  ) : null;
 
+  // Wide screens show the list and the open item side by side. Phones show one at a time.
   return (
-    <div>
+    <div class={`master-detail${open ? ' has-open' : ''}`}>
+      <div class="md-list">
       <Notices ok={note} problem="" />
       <h2>{t.requestsHeading}</h2>
       <fieldset class="chips">
@@ -148,7 +149,7 @@ function Requests({ supabase, onChange }: { supabase: SupabaseClient; onChange: 
         <ul class="admin-list">
           {rows.map((row) => (
             <li key={row.id}>
-              <button type="button" class="admin-row" onClick={() => setOpenId(row.id)}>
+              <button type="button" class="admin-row" aria-current={row.id === openId ? 'true' : undefined} onClick={() => setOpenId(row.id)}>
                 <strong>{row.facility}</strong>
                 <span class="meta">
                   {row.contact_name} · {formatWhen(row.created_at)}
@@ -159,6 +160,14 @@ function Requests({ supabase, onChange }: { supabase: SupabaseClient; onChange: 
           ))}
         </ul>
       )}
+      </div>
+      <div class="md-detail">
+        {detail ?? (
+          <div class="md-empty">
+            <p class="md-empty-title">{t.pickRequest}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

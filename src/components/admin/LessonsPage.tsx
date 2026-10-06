@@ -5,7 +5,8 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { Notices } from './Notices';
 import { Icon } from '../forms/Icon';
 import { adminCopy as a, formatWhen } from '../../content/adminCopy';
-import { formatBytes, lessonBytes, sortByWeek, STORAGE_LIMIT_BYTES, type Lesson } from '../../lib/lessons';
+import { formatBytes, imageUrlFor, lessonBytes, sortByWeek, STORAGE_LIMIT_BYTES, type Lesson } from '../../lib/lessons';
+import { SlideCanvas, SlideFrame } from '../slides/SlideCanvas';
 import { FILE_NAME, inspectFile, validateKit, type KitFileInfo, type KitResult } from '../../lib/kit';
 import { safeFileName } from '../../lib/pictureNames';
 import {
@@ -21,9 +22,9 @@ import {
 import { FILE_SLOTS, type FileSlot } from '../../lib/kit';
 import type { ExtraFile, StoredFile } from '../../lib/lessons';
 
-type Row = Pick<Lesson, 'id' | 'slug' | 'week_number' | 'title' | 'status' | 'published_at' | 'updated_at' | 'files'>;
+type Row = Pick<Lesson, 'id' | 'slug' | 'week_number' | 'title' | 'summary' | 'status' | 'published_at' | 'updated_at' | 'files' | 'slides'>;
 const t = a.lessons;
-const listColumns = 'id, slug, week_number, title, status, published_at, updated_at, files';
+const listColumns = 'id, slug, week_number, title, summary, status, published_at, updated_at, files, slides';
 
 export default function LessonsPage() {
   return (
@@ -327,14 +328,28 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
       ) : (
         <ul class="admin-list">
           {rows.map((row) => (
-            <li key={row.id} class="admin-box" style="margin-bottom: 16px;">
+            <li key={row.id} class="admin-box lesson-row">
+              {/* The first slide, as a small picture of the lesson. */}
+              <div class="lesson-thumb" aria-hidden="true">
+                {row.slides?.slides?.[0] ? (
+                  <SlideFrame>
+                    <SlideCanvas slide={row.slides.slides[0]} lessonName={row.title} imageUrl={(file) => imageUrlFor(row, file)} />
+                  </SlideFrame>
+                ) : (
+                  <div class="lesson-thumb-empty">
+                    <Icon name="book" size={40} />
+                  </div>
+                )}
+              </div>
+              <div class="lesson-row-body">
               <p style="margin-bottom: 8px;">
                 <span class="badge badge-sunshine">{row.week_number === null ? 'No week' : `Week ${row.week_number}`}</span>{' '}
                 <span class="status-pill">{row.status === 'published' ? t.published : t.draft}</span>
               </p>
               <h2 style="margin: 0 0 8px;">{row.title}</h2>
+              {row.summary && <p class="lesson-row-summary">{row.summary}</p>}
               <p class="caption">
-                {t.updated} {formatWhen(row.updated_at)}
+                {t.slideCount(row.slides?.slides?.length ?? 0)} · {t.updated} {formatWhen(row.updated_at)}
               </p>
               <div class="lesson-row-actions">
                 <a class="button button-secondary" href={`/admin/lesson-edit?slug=${encodeURIComponent(row.slug)}`}>
@@ -360,6 +375,7 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
                 <button type="button" class="button button-danger" disabled={busy !== ''} onClick={() => setToDelete(row)}>
                   {t.delete}
                 </button>
+              </div>
               </div>
             </li>
           ))}

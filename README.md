@@ -27,6 +27,7 @@ This folder holds the website. It is built with [Astro](https://astro.build) and
 | `scripts/check-csp.mjs`, `scripts/check-a11y.mjs` | Check the built site's security policy and accessibility (part of `npm run check`). |
 | `src/components/illustrations/` | The flat brand pictures on the public pages (devices, slides, handouts). Colors come from the brand tokens. |
 | `scripts/screenshots.mjs` | Full-page screenshots with Playwright (`npm run screenshots`). |
+| `scripts/admin-screenshots.mjs` | Screenshots and an accessibility check of the admin pages, signed in with a pretend session and made-up sample data, without touching the real database (`npm run screenshots:admin`). |
 | `scripts/check-launch.mjs` | Lists placeholders still to fill in before launch (`npm run check:launch`). |
 | `tests/` | Small automatic tests for the helper code. |
 | `wrangler.jsonc` | Tells Cloudflare to publish the finished site from the `dist` folder. |

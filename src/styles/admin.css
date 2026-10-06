@@ -82,6 +82,14 @@
   max-width: 62rem;
 }
 
+/* On wide screens the admin pages use the room they have. */
+@media (min-width: 1200px) {
+  .admin-main {
+    max-width: 104rem;
+    padding-inline: var(--space-6);
+  }
+}
+
 .admin-main h1 {
   margin-bottom: var(--space-4);
 }
@@ -1250,4 +1258,378 @@ body.annotate-live .annotate-page {
 
 .picture-match li.is-missing svg {
   color: var(--brick);
+}
+
+
+/* List and detail side by side (Tickets, Contact exchange). Phones show one at a time. */
+.master-detail.has-open > .md-list,
+.master-detail:not(.has-open) > .md-detail {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .master-detail {
+    display: grid;
+    grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.5fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .master-detail.has-open > .md-list,
+  .master-detail:not(.has-open) > .md-detail {
+    display: block;
+  }
+
+  /* The list stays in view while you read the detail. */
+  .md-list {
+    position: sticky;
+    top: var(--space-4);
+    max-height: calc(100vh - var(--space-5));
+    overflow-y: auto;
+    padding: 2px 4px 2px 2px;
+  }
+
+  .md-detail > div > .button-secondary:first-child {
+    display: none;
+  }
+}
+
+.admin-row[aria-current='true'] {
+  background: var(--forest-tint);
+  box-shadow: inset 6px 0 0 var(--forest), var(--shadow-card);
+}
+
+.md-empty {
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  background: var(--forest-tint);
+}
+
+.md-empty-title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 36px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.md-counts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.md-counts li {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+
+.md-counts strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 46px;
+  color: var(--forest);
+}
+
+/* Writing beside its preview (ticket answers). */
+.compose-grid {
+  display: grid;
+  gap: 0 var(--space-4);
+}
+
+@media (min-width: 1300px) {
+  .compose-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .compose-grid h3 {
+    margin-top: 0;
+    font-size: 18px;
+    line-height: 24px;
+    font-family: var(--font-sans);
+    color: var(--ink);
+  }
+
+  .compose-grid .preview {
+    min-height: 260px;
+  }
+}
+
+/* Dashboard */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--space-4);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  list-style: none;
+}
+
+.stat-tile {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  height: 100%;
+  min-height: 96px;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.stat-tile:hover {
+  background: var(--forest-tint);
+}
+
+.stat-number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 44px;
+  color: var(--forest);
+}
+
+.stat-label {
+  display: block;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+.dash-columns {
+  display: grid;
+  gap: 0 var(--space-5);
+}
+
+@media (min-width: 1100px) {
+  .dash-columns {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.dash-slide {
+  margin: 0 0 var(--space-4);
+}
+
+.box-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.box-head a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.recent-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recent-list li {
+  padding: var(--space-3) 0;
+  border-top: 2px solid var(--rule);
+}
+
+.recent-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.recent-list p {
+  margin: 0 0 var(--space-1);
+}
+
+.recent-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.quick-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.quick-link {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-height: 96px;
+  padding: var(--space-3) var(--space-4);
+  border: 3px solid var(--forest);
+  border-radius: var(--radius-md);
+  background: var(--cream);
+  color: var(--forest-deep);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.quick-link:hover {
+  background: var(--forest-tint);
+}
+
+/* Lessons list: a picture of the first slide beside each lesson. */
+.lesson-row {
+  display: grid;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 900px) {
+  .lesson-row {
+    grid-template-columns: 300px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+.lesson-thumb {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.lesson-thumb-empty {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-md);
+  background: var(--forest-tint);
+  color: var(--forest);
+}
+
+.lesson-row h2 {
+  margin: 0 0 var(--space-2);
+}
+
+.lesson-row-summary {
+  margin: 0 0 var(--space-2);
+}
+
+.lesson-row .lesson-row-actions {
+  margin-top: var(--space-3);
+}
+
+/* Lesson editor on wide screens */
+@media (min-width: 1100px) {
+  .field-row--4 {
+    grid-template-columns: minmax(0, 2fr) repeat(3, minmax(0, 1fr));
+  }
+
+  .field-row--top {
+    align-items: start;
+  }
+
+  .slides-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.4fr);
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  .slides-preview {
+    position: sticky;
+    top: var(--space-4);
+  }
+
+  .files-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0 var(--space-5);
+  }
+
+  .compose-grid .preview--tall {
+    max-height: 640px;
+    overflow-y: auto;
+  }
+}
+
+.slides-preview {
+  margin: var(--space-3) 0;
+}
+
+.objectives-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 0 var(--space-3);
+}
+
+/* Present: choose a lesson (cards with the first slide), with a checklist beside them. */
+.present-picker {
+  max-width: 100rem;
+  margin-inline: auto;
+}
+
+.picker-layout {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 1100px) {
+  .picker-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+    align-items: start;
+  }
+
+  .picker-aside {
+    position: sticky;
+    top: var(--space-4);
+  }
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.picker-card {
+  margin: 0;
+}
+
+.picker-aside h2,
+.remote-help h2 {
+  font-size: 22px;
+  line-height: 30px;
+}
+
+/* Remote: the code form, with how-to steps beside it on a computer (below it on a phone). */
+.remote-connect {
+  display: grid;
+  gap: var(--space-5);
+}
+
+@media (min-width: 900px) {
+  .remote-connect {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+  }
 }

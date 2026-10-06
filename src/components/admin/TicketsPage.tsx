@@ -77,23 +77,10 @@ function Tickets({ supabase }: { supabase: SupabaseClient }) {
     loadList().catch(() => setLoadFailed(true));
   }, [filter]);
 
-  if (openId) {
-    return (
-      <TicketDetail
-        supabase={supabase}
-        id={openId}
-        siteBase={siteBase()}
-        onBack={(note) => {
-          setOpenId(null);
-          if (note) say(note);
-          loadList().catch(() => setLoadFailed(true));
-        }}
-      />
-    );
-  }
-
+  // Wide screens show the list and the open ticket side by side. Phones show one at a time.
   return (
-    <div>
+    <div class={`master-detail${openId ? ' has-open' : ''}`}>
+      <div class="md-list">
       <Notices ok={isError ? '' : message} problem={isError ? message : ''} />
       <fieldset class="chips">
         <legend>{t.filterLabel}</legend>
@@ -115,7 +102,7 @@ function Tickets({ supabase }: { supabase: SupabaseClient }) {
         <ul class="admin-list">
           {rows.map((row) => (
             <li key={row.id}>
-              <button type="button" class="admin-row" onClick={() => setOpenId(row.id)}>
+              <button type="button" class="admin-row" aria-current={row.id === openId ? 'true' : undefined} onClick={() => setOpenId(row.id)}>
                 <strong>{row.requester_name}</strong>
                 <span class="meta">
                   {row.facility || a.words.noFacility} · {a.words.urgency[row.urgency]} ·{' '}
@@ -127,6 +114,34 @@ function Tickets({ supabase }: { supabase: SupabaseClient }) {
           ))}
         </ul>
       )}
+      </div>
+      <div class="md-detail">
+        {openId ? (
+          <TicketDetail
+            key={openId}
+            supabase={supabase}
+            id={openId}
+            siteBase={siteBase()}
+            onBack={(note) => {
+              setOpenId(null);
+              if (note) say(note);
+              loadList().catch(() => setLoadFailed(true));
+            }}
+          />
+        ) : (
+          <div class="md-empty">
+            <p class="md-empty-title">{t.pickOne}</p>
+            <ul class="md-counts">
+              {statuses.map((s) => (
+                <li key={s}>
+                  <strong>{counts[s] ?? 0}</strong> {a.words.ticketStatus[s].toLowerCase()}
+                </li>
+              ))}
+            </ul>
+            <p class="caption">{t.pickHelp}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -338,10 +353,19 @@ function TicketDetail({
       <section class="admin-box" aria-labelledby="answer-title">
         <h2 id="answer-title">{t.answerHeading}</h2>
         {isAnswered && <p class="admin-message">{t.answeredWarning}</p>}
-        <div class="field">
-          <label class="field-label" for="answer">{t.answerLabel}</label>
-          <p class="field-helper">{t.answerHelp}</p>
-          <textarea id="answer" class="field-control" rows={9} value={answer} onInput={(e) => setAnswer(e.currentTarget.value)} />
+        {/* Writing and preview side by side on wide screens. */}
+        <div class="compose-grid">
+          <div class="field">
+            <label class="field-label" for="answer">{t.answerLabel}</label>
+            <p class="field-helper">{t.answerHelp}</p>
+            <textarea id="answer" class="field-control" rows={11} value={answer} onInput={(e) => setAnswer(e.currentTarget.value)} />
+          </div>
+          <div>
+            <h3>{t.previewHeading}</h3>
+            <div class="preview" aria-live="off">
+              {answer.trim() ? <div dangerouslySetInnerHTML={{ __html: preview }} /> : <p class="caption">{t.previewEmpty}</p>}
+            </div>
+          </div>
         </div>
         <div class="field">
           <label class="field-label" for="video">{t.videoLabel}</label>
@@ -362,10 +386,7 @@ function TicketDetail({
             </p>
           )}
         </div>
-        <h3>{t.previewHeading}</h3>
-        <div class="preview" aria-live="off">
-          {answer.trim() ? <div dangerouslySetInnerHTML={{ __html: preview }} /> : <p class="caption">{t.previewEmpty}</p>}
-        </div>
+
         <div class="button-row">
           <button type="button" class="button button-secondary" disabled={busy} onClick={saveDraft}>{t.saveDraft}</button>
           <button type="button" class="button button-primary" disabled={busy} onClick={askToSend}>{t.sendAnswer}</button>

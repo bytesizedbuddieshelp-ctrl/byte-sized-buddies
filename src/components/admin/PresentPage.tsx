@@ -71,40 +71,60 @@ function Present({ supabase }: { supabase: SupabaseClient }) {
 }
 
 // ---- Choose a lesson
+type PickRow = Pick<Lesson, 'id' | 'slug' | 'title' | 'week_number' | 'status' | 'slides' | 'files'>;
+
 function Picker({ supabase }: { supabase: SupabaseClient }) {
-  const [lessons, setLessons] = useState<Pick<Lesson, 'id' | 'slug' | 'title' | 'week_number' | 'status' | 'slides'>[] | null>(null);
+  const [lessons, setLessons] = useState<PickRow[] | null>(null);
   useEffect(() => {
     supabase
       .from('lessons')
-      .select('id, slug, title, week_number, status, slides')
-      .then(({ data }) => setLessons(sortByWeek((data ?? []) as never[]).filter((l: { slides?: { slides?: unknown[] } }) => (l.slides?.slides?.length ?? 0) > 0)));
+      .select('id, slug, title, week_number, status, slides, files')
+      .then(({ data }) => setLessons(sortByWeek((data ?? []) as PickRow[]).filter((l) => (l.slides?.slides?.length ?? 0) > 0)));
   }, []);
   return (
-    <div>
+    <div class="present-picker">
       <a class="button button-secondary" href="/admin/lessons">
         <Icon name="arrow-left" size={24} /> {t.back}
       </a>
       <p class="lead" style="margin-top: 16px;">{t.pickIntro}</p>
-      {lessons === null ? (
-        <p role="status">{t.loading}</p>
-      ) : lessons.length === 0 ? (
-        <p>{t.pickEmpty}</p>
-      ) : (
-        <ul class="admin-list">
-          {lessons.map((lesson) => (
-            <li key={lesson.id} class="admin-box" style="margin-bottom: 16px;">
-              <p style="margin-bottom: 8px;">
-                <span class="badge badge-sunshine">{lesson.week_number === null ? 'No week' : `Week ${lesson.week_number}`}</span>{' '}
-                <span class="status-pill">{lesson.status === 'published' ? a.lessons.published : a.lessons.draft}</span>
-              </p>
-              <h2 style="margin: 0 0 12px;">{lesson.title}</h2>
-              <a class="button button-primary" href={`/admin/present?slug=${encodeURIComponent(lesson.slug)}`}>
-                <Icon name="play" size={24} /> {t.pickButton}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div class="picker-layout">
+        <div>
+          {lessons === null ? (
+            <p role="status">{t.loading}</p>
+          ) : lessons.length === 0 ? (
+            <p>{t.pickEmpty}</p>
+          ) : (
+            <ul class="picker-grid">
+              {lessons.map((lesson) => (
+                <li key={lesson.id} class="admin-box picker-card">
+                  <div class="lesson-thumb" aria-hidden="true">
+                    <SlideFrame>
+                      <SlideCanvas slide={lesson.slides.slides[0]} lessonName={lesson.title} imageUrl={(file) => imageUrlFor(lesson, file)} />
+                    </SlideFrame>
+                  </div>
+                  <p style="margin: 16px 0 8px;">
+                    <span class="badge badge-sunshine">{lesson.week_number === null ? 'No week' : `Week ${lesson.week_number}`}</span>{' '}
+                    <span class="status-pill">{lesson.status === 'published' ? a.lessons.published : a.lessons.draft}</span>
+                  </p>
+                  <h2 style="margin: 0 0 4px;">{lesson.title}</h2>
+                  <p class="caption">{t.pickSlides(lesson.slides.slides.length)}</p>
+                  <a class="button button-primary" href={`/admin/present?slug=${encodeURIComponent(lesson.slug)}`}>
+                    <Icon name="play" size={24} /> {t.pickButton}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <aside class="panel picker-aside" aria-labelledby="before-title">
+          <h2 id="before-title">{t.checkHeading}</h2>
+          <ol class="next-steps">
+            {t.checklist.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        </aside>
+      </div>
     </div>
   );
 }

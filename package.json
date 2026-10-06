@@ -12,7 +12,8 @@
     "bridge:secret": "node scripts/make-bridge-secret.mjs",
     "check:a11y": "node scripts/check-a11y.mjs",
     "screenshots": "astro build && node scripts/screenshots.mjs",
-    "check:launch": "node scripts/check-launch.mjs"
+    "check:launch": "node scripts/check-launch.mjs",
+    "screenshots:admin": "astro build && node --env-file-if-exists=.env scripts/admin-screenshots.mjs"
   },
   "repository": {
     "type": "git",

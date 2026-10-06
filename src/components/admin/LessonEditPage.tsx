@@ -528,6 +528,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
 
       <section class="admin-box" aria-labelledby="about-title">
         <h2 id="about-title">{t.aboutHeading}</h2>
+        <div class="field-row">
         <Text
           id="title"
           label={t.fields.title}
@@ -549,9 +550,15 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
             set('slug', value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''));
           }}
         />
-        <Text id="week" label={t.fields.week} type="number" value={form.week} onInput={(v) => set('week', v)} />
+        </div>
         <Text id="summary" label={t.fields.summary} value={form.summary} onInput={(v) => set('summary', v)} />
-        <Text id="topic" label={t.fields.topic} value={form.topic} onInput={(v) => set('topic', v)} />
+        <div class="field-row field-row--4">
+          <Text id="topic" label={t.fields.topic} value={form.topic} onInput={(v) => set('topic', v)} />
+          <Text id="week" label={t.fields.week} type="number" value={form.week} onInput={(v) => set('week', v)} />
+          <Text id="duration" label={t.fields.duration} type="number" value={form.duration} onInput={(v) => set('duration', v)} />
+          <Text id="license" label={t.fields.license} value={form.license} onInput={(v) => set('license', v)} />
+        </div>
+        <div class="field-row field-row--top">
         <fieldset class="choice-group" id="devices">
           <legend>{t.fields.devices}</legend>
           {t.deviceOptions.map((o) => deviceBox(o.value, o.label))}
@@ -565,13 +572,13 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
             </label>
           ))}
         </fieldset>
-        <Text id="duration" label={t.fields.duration} type="number" value={form.duration} onInput={(v) => set('duration', v)} />
-        <Text id="license" label={t.fields.license} value={form.license} onInput={(v) => set('license', v)} />
+        </div>
       </section>
 
       <section class="admin-box" aria-labelledby="objectives-title">
         <h2 id="objectives-title">{t.objectivesHeading}</h2>
         <p class="field-helper">{t.objectivesHelp}</p>
+        <div class="objectives-grid">
         {form.objectives.map((objective, i) => (
           <div class="editor-row" key={i}>
             <Text id={`objective-${i}`} label={t.objective(i + 1)} value={objective} onInput={(v) => set('objectives', form.objectives.map((o, j) => (j === i ? v : o)))} />
@@ -584,6 +591,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
             />
           </div>
         ))}
+        </div>
         <button type="button" class="button button-secondary" onClick={() => set('objectives', [...form.objectives, ''])}>
           {t.addObjective}
         </button>
@@ -591,16 +599,24 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
 
       <section class="admin-box" aria-labelledby="guide-title">
         <h2 id="guide-title">{t.guideHeading}</h2>
-        <Text id="guide" as="textarea" rows={12} label={t.guideLabel} helper={t.guideHelp} value={form.guide} onInput={(v) => set('guide', v)} />
-        <h3>{t.preview}</h3>
-        <div class="preview">{form.guide.trim() ? <div class="prose" dangerouslySetInnerHTML={{ __html: guideHtml }} /> : <p class="caption">{t.previewEmpty}</p>}</div>
+        <div class="compose-grid">
+          <Text id="guide" as="textarea" rows={18} label={t.guideLabel} helper={t.guideHelp} value={form.guide} onInput={(v) => set('guide', v)} />
+          <div>
+            <h3>{t.preview}</h3>
+            <div class="preview preview--tall" tabIndex={0} role="region" aria-label={`${t.guideHeading}: ${t.preview}`}>{form.guide.trim() ? <div class="prose" dangerouslySetInnerHTML={{ __html: guideHtml }} /> : <p class="caption">{t.previewEmpty}</p>}</div>
+          </div>
+        </div>
       </section>
 
       <section class="admin-box" aria-labelledby="script-title">
         <h2 id="script-title">{t.scriptHeading}</h2>
-        <Text id="script" as="textarea" rows={8} label={t.scriptLabel} helper={t.scriptHelp} value={form.script} onInput={(v) => set('script', v)} />
-        <h3>{t.preview}</h3>
-        <div class="preview">{form.script.trim() ? <div class="prose" dangerouslySetInnerHTML={{ __html: scriptHtml }} /> : <p class="caption">{t.previewEmpty}</p>}</div>
+        <div class="compose-grid">
+          <Text id="script" as="textarea" rows={12} label={t.scriptLabel} helper={t.scriptHelp} value={form.script} onInput={(v) => set('script', v)} />
+          <div>
+            <h3>{t.preview}</h3>
+            <div class="preview preview--tall" tabIndex={0} role="region" aria-label={`${t.scriptHeading}: ${t.preview}`}>{form.script.trim() ? <div class="prose" dangerouslySetInnerHTML={{ __html: scriptHtml }} /> : <p class="caption">{t.previewEmpty}</p>}</div>
+          </div>
+        </div>
       </section>
 
       <section class="admin-box" aria-labelledby="slides-title">
@@ -618,7 +634,8 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
         )}
 
         {slides.length > 0 && (
-          <div>
+          <div class="slides-grid">
+            <div>
             <h3 id="slide-order">{t.slidesList}</h3>
             <ol class="clean-list" aria-labelledby="slide-order">
               {slides.map((slide, i) => (
@@ -638,8 +655,9 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
                 </li>
               ))}
             </ol>
+            </div>
             {current && (
-              <div style="margin: 16px 0;">
+              <div class="slides-preview">
                 <p class="label">{t.slidePreview}</p>
                 <SlideFrame>
                   <SlideCanvas slide={current} lessonName={form.title || t.titleNew} imageUrl={imageUrl} />
@@ -689,6 +707,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
       <section class="admin-box" aria-labelledby="files-title">
         <h2 id="files-title">{t.filesHeading}</h2>
         <p class="field-helper">{t.filesHelp}</p>
+        <div class="files-grid">
         {FILE_SLOTS.map((slot) => {
           const old = lesson?.files[slot];
           return (
@@ -715,6 +734,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
             </div>
           );
         })}
+        </div>
 
         <div class="field">
           <label class="field-label" for="images">{t.imagesLabel}</label>

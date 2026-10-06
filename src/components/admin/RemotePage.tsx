@@ -50,6 +50,7 @@ function Remote({ supabase }: { supabase: SupabaseClient }) {
 
   if (!code) {
     return (
+      <div class="remote-connect">
       <form onSubmit={onSubmit} noValidate>
         <p class="lead">{t.intro}</p>
         <div class="field">
@@ -77,6 +78,16 @@ function Remote({ supabase }: { supabase: SupabaseClient }) {
         </div>
         <button type="submit" class="button button-primary">{t.connect}</button>
       </form>
+      <aside class="panel remote-help" aria-labelledby="how-title">
+        <h2 id="how-title">{t.howHeading}</h2>
+        <ol class="next-steps">
+          {t.how.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <p class="caption">{t.howTip}</p>
+      </aside>
+      </div>
     );
   }
   return (

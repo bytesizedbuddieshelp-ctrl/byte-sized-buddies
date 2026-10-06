@@ -75,9 +75,9 @@ export function InboxEmails({ supabase, onChange }: { supabase: SupabaseClient; 
   }
 
   const open = rows?.find((r) => r.id === openId);
-  if (open) {
-    return (
+  const detail = open ? (
       <EmailDetail
+        key={open.id}
         supabase={supabase}
         email={open}
         onBack={(msg) => {
@@ -88,11 +88,12 @@ export function InboxEmails({ supabase, onChange }: { supabase: SupabaseClient; 
           onChange();
         }}
       />
-    );
-  }
+  ) : null;
 
+  // Wide screens show the list and the open item side by side. Phones show one at a time.
   return (
-    <div>
+    <div class={`master-detail${open ? ' has-open' : ''}`}>
+      <div class="md-list">
       <p class="caption">{t.gmailNote}</p>
       <Notices ok={ok} problem={problem} />
 
@@ -139,7 +140,7 @@ export function InboxEmails({ supabase, onChange }: { supabase: SupabaseClient; 
         <ul class="admin-list">
           {rows.map((row) => (
             <li key={row.id}>
-              <button type="button" class={`admin-row${row.is_read ? '' : ' is-unread'}`} onClick={() => setOpenId(row.id)}>
+              <button type="button" class={`admin-row${row.is_read ? '' : ' is-unread'}`} aria-current={row.id === openId ? 'true' : undefined} onClick={() => setOpenId(row.id)}>
                 {!row.is_read && <span class="status-pill is-unread">{t.unread}</span>} <strong>{row.subject || t.noSubject}</strong>
                 <span class="meta">
                   {row.from_name || row.from_email} · {formatWhen(row.received_at)}
@@ -150,6 +151,14 @@ export function InboxEmails({ supabase, onChange }: { supabase: SupabaseClient; 
           ))}
         </ul>
       )}
+      </div>
+      <div class="md-detail">
+        {detail ?? (
+          <div class="md-empty">
+            <p class="md-empty-title">{t.pickEmail}</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
