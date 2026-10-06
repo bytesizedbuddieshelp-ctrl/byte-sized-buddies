@@ -332,6 +332,10 @@ export const adminCopy = {
     ended: 'The presenter window was closed.',
     imagesPreloaded: 'Pictures are saved in this browser, so the slides still work if the Wi-Fi drops.',
   },
+  annotate: {
+    title: 'Drawing',
+    waiting: 'This tab is for drawing on your screen recording. It opens by itself from Admin, Studio, when you record the main part. You can close it.',
+  },
   audience: {
     waiting: 'Waiting for the presenter window.',
     waitingHelp: 'Open this screen from the presenter window: press Open audience window.',
@@ -450,10 +454,16 @@ export const adminCopy = {
     board: {
       heading: 'Draw on the recording',
       steps: [
-        'Put this studio window beside the window you share, or on a second screen.',
-        'When you want to point at something, press Draw full screen (or F). Your screen fills this window. Draw on it.',
-        'Press Esc or F to go back. Lines fade away after 3 seconds, so you can keep going.',
+        'The drawing tab opens by itself when you start recording the main part.',
+        'Switch to it (click the tab, or press Ctrl+Tab) and draw on your screen. It shows in the video.',
+        'Switch back to your app to keep going. Lines fade after 3 seconds. Stop recording from either tab.',
       ],
+      openTab: 'Open drawing tab',
+      tabOpen: 'The drawing tab is open. Switch to it to draw.',
+      goTab: 'Go to the drawing tab',
+      closeTab: 'Draw here instead',
+      tabBlocked: 'Your browser blocked the drawing tab. Press Open drawing tab. To have it open by itself next time, click the blocked pop-up icon in the address bar and choose "Always allow pop-ups" for this site.',
+      stop: 'Stop recording',
       label: 'Your screen, as it is being recorded. Draw here with a mouse, trackpad, or pen.',
       tools: 'Drawing tool',
       tool: { pen: 'Pen', highlighter: 'Highlighter', arrow: 'Arrow', circle: 'Circle' } as Record<string, string>,
@@ -464,6 +474,7 @@ export const adminCopy = {
       undo: 'Undo',
       clear: 'Clear',
       keys: 'Keys: F full screen, P pen, H highlighter, A arrow, C circle, Z undo, X clear.',
+      keysTab: 'Keys: P pen, H highlighter, A arrow, C circle, 1 to 3 colors, Z undo, X clear.',
       full: 'Draw full screen',
       exitFull: 'Exit full screen',
       count: (n: number) => (n === 0 ? 'Nothing drawn.' : `${n} ${n === 1 ? 'drawing' : 'drawings'} showing.`),

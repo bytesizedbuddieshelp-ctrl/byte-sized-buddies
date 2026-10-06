@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { createPortal } from 'preact/compat';
 import { Icon } from '../../forms/Icon';
 import { adminCopy as a } from '../../../content/adminCopy';
 import { brandColor } from '../../../lib/backgrounds';
@@ -11,9 +12,24 @@ const toolIcons: Record<Tool, IconName> = { pen: 'pen', highlighter: 'highlighte
 // While the main part records: the owner's screen as it is being recorded, to draw on.
 // `picture` is the recording itself (drawn by the studio). `layer` is the see-through drawing layer that the
 // recording copies on top of the screen 30 times a second.
-// It all stays in this page (no extra window). "Draw full screen" makes the pad fill the screen; Esc goes back.
-export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; layer: HTMLCanvasElement }) {
+// The pad opens in its own browser tab (/admin/annotate) as soon as the board appears, so the owner can switch
+// tabs to draw. The tab has no code of its own: this page puts the pad into it. If the tab is blocked or closed,
+// the pad stays here, where "Draw full screen" (F) makes it fill the screen.
+const TAB_NAME = 'bsb-drawing';
+
+interface Props {
+  picture: HTMLCanvasElement;
+  layer: HTMLCanvasElement;
+  /** Words about the recording (countdown, time), shown in the drawing tab. */
+  status: string;
+  /** Stops the recording. The drawing tab has its own Stop button. */
+  onStop: () => void;
+}
+
+export function DrawingBoard({ picture, layer, status, onStop }: Props) {
   const holder = useRef<HTMLDivElement>(null);
+  const [tab, setTab] = useState<{ win: Window; root: HTMLElement } | null>(null);
+  const [blocked, setBlocked] = useState(false);
   const padRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<Tool>('pen');
   const [color, setColor] = useState<InkColor>('sunshine');
@@ -66,7 +82,60 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     picture.setAttribute('role', 'img');
     picture.setAttribute('aria-label', t.label);
     box.appendChild(picture);
-  }, [picture]);
+  }, [picture, tab]);
+
+  // Open the drawing tab and wait for its page, then move the pad into it.
+  function openTab() {
+    const win = window.open('/admin/annotate', TAB_NAME);
+    if (!win) {
+      setBlocked(true);
+      return;
+    }
+    setBlocked(false);
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      tries++;
+      let root: HTMLElement | null = null;
+      try {
+        if (win.location.pathname.startsWith('/admin/annotate') && win.document.readyState === 'complete') root = win.document.getElementById('annotate-root');
+      } catch {
+        // still loading
+      }
+      if (root) {
+        window.clearInterval(timer);
+        root.replaceChildren();
+        win.document.title = `${t.heading} | Byte-Sized Buddies`;
+        win.document.body.classList.add('annotate-live');
+        // If the owner closes the tab, the picture comes home and the pad shows here again.
+        win.addEventListener('pagehide', () => {
+          if (picture.ownerDocument !== document) document.adoptNode(picture);
+          setTab(null);
+        });
+        setTab({ win, root });
+      } else if (tries > 150 || win.closed) {
+        window.clearInterval(timer);
+      }
+    }, 100);
+  }
+
+  // Right away: the tab opens as soon as the board appears (screen sharing has started).
+  useEffect(() => {
+    openTab();
+  }, []);
+
+  // If the tab is closed (Chrome doesn't always say so), bring the picture home and show the pad here again.
+  useEffect(() => {
+    if (!tab) return;
+    const check = window.setInterval(() => {
+      if (!tab.win.closed) return;
+      if (picture.ownerDocument !== document) document.adoptNode(picture);
+      setTab(null);
+    }, 500);
+    return () => window.clearInterval(check);
+  }, [tab]);
+
+  // The drawing tab closes when the recording stops.
+  useEffect(() => () => tab?.win.close(), [tab]);
 
   // Drawing with the mouse, trackpad, or pen.
   useEffect(() => {
@@ -75,7 +144,11 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
     const down = (e: PointerEvent) => {
       if (e.button !== 0) return;
       e.preventDefault();
-      el.setPointerCapture(e.pointerId);
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch {
+        // Drawing still works without it; the line only stops at the edge of the picture.
+      }
       drawing.current = { tool: toolRef.current, color: colorRef.current, points: [point(e), point(e)] };
     };
     const move = (e: PointerEvent) => {
@@ -136,33 +209,37 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
       if (TOOL_KEYS[key]) setTool(TOOL_KEYS[key]);
       else if (key === 'z') setStrokes((list) => list.slice(0, -1));
       else if (key === 'x') setStrokes([]);
-      else if (key === 'f') toggleFull();
+      else if (key === 'f' && e.view === window) toggleFull();
       else if (['1', '2', '3'].includes(key)) setColor(INK_COLORS[Number(key) - 1]);
       else return;
       e.preventDefault();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
+    const windows = tab ? [window, tab.win] : [window];
+    windows.forEach((w) => w.addEventListener('keydown', onKey));
+    return () => windows.forEach((w) => w.removeEventListener('keydown', onKey));
+  }, [tab]);
 
   // The drawings leave the recording when the board closes.
   useEffect(() => () => layer.getContext('2d')!.clearRect(0, 0, layer.width, layer.height), [layer]);
 
-  return (
-    <section class="draw-board" aria-labelledby="draw-title">
-      <h3 id="draw-title">{t.heading}</h3>
-      <ol class="draw-steps">
-        {t.steps.map((step) => (
-          <li key={step}>{step}</li>
-        ))}
-      </ol>
-      <div class={`draw-pad${full ? ' is-full' : ''}`} ref={padRef}>
+  const pad = (
+      <div class={`draw-pad${full ? ' is-full' : ''}${tab ? ' is-tab' : ''}`} ref={padRef}>
+        {tab && (
+          <div class="draw-tabbar">
+            <p class="draw-status" role="status">{status}</p>
+            <button type="button" class="button button-primary" onClick={onStop}>
+              <Icon name="stop" size={24} /> {t.stop}
+            </button>
+          </div>
+        )}
         <div class="draw-holder" ref={holder} />
         <div class="draw-toolbar">
-          <button type="button" class="draw-button draw-full-button" aria-keyshortcuts="F" onClick={toggleFull}>
-            <Icon name="expand" size={24} />
-            <span>{full ? t.exitFull : t.full}</span>
-          </button>
+          {!tab && (
+            <button type="button" class="draw-button draw-full-button" aria-keyshortcuts="F" onClick={toggleFull}>
+              <Icon name="expand" size={24} />
+              <span>{full ? t.exitFull : t.full}</span>
+            </button>
+          )}
           <div class="draw-group" role="group" aria-label={t.tools}>
             {TOOLS.map((x) => (
               <button key={x} type="button" class="draw-button" aria-pressed={tool === x} aria-keyshortcuts={t.toolKey[x]} onClick={() => setTool(x)}>
@@ -196,9 +273,36 @@ export function DrawingBoard({ picture, layer }: { picture: HTMLCanvasElement; l
         </div>
         {/* One fixed line, so the picture never moves when this text changes. */}
         <p class="caption draw-keys">
-          <span>{t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
+          <span>{tab ? t.keysTab : t.keys}</span> <span role="status">{t.count(strokes.length)}</span>
         </p>
       </div>
+  );
+
+  return (
+    <section class="draw-board" aria-labelledby="draw-title">
+      <h3 id="draw-title">{t.heading}</h3>
+      <ol class="draw-steps">
+        {t.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      {tab ? (
+        <div class="button-row draw-tab-row">
+          <p class="draw-tab-note">{t.tabOpen}</p>
+          <button type="button" class="button button-primary" onClick={() => tab.win.focus()}>{t.goTab}</button>
+          <button type="button" class="button button-secondary" onClick={() => tab.win.close()}>{t.closeTab}</button>
+        </div>
+      ) : (
+        <>
+          {blocked && (
+            <p class="admin-message is-error" role="alert">
+              <Icon name="alert" size={24} /> {t.tabBlocked}
+            </p>
+          )}
+          <button type="button" class="button button-primary" onClick={openTab}>{t.openTab}</button>
+        </>
+      )}
+      {tab ? createPortal(pad, tab.root) : pad}
     </section>
   );
 }

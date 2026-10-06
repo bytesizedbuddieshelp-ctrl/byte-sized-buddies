@@ -1,0 +1,15 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { adminCopy } from '../../content/adminCopy';
+
+// The drawing tab. It has no code of its own: the studio tab that opened it puts the drawing pad
+// (the live picture of the screen and the tools) inside #annotate-root while the main part records.
+---
+
+<AdminLayout title={adminCopy.annotate.title}>
+  <main id="main" class="annotate-page">
+    <div id="annotate-root">
+      <p class="annotate-waiting">{adminCopy.annotate.waiting}</p>
+    </div>
+  </main>
+</AdminLayout>

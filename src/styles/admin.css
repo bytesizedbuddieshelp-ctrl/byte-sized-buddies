@@ -1100,7 +1100,7 @@
 }
 
 /* Drawing full screen: the screen picture fills the space, the tools sit in a bar along the bottom. */
-.draw-pad:fullscreen {
+.draw-pad:fullscreen, .draw-pad.is-tab {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -1112,13 +1112,15 @@
   overflow: hidden;
 }
 
-.draw-pad:fullscreen .draw-holder {
+.draw-pad:fullscreen .draw-holder,
+.draw-pad.is-tab .draw-holder {
   position: relative;
   flex: 1 1 0;
   min-height: 0;
 }
 
-.draw-pad:fullscreen .draw-picture {
+.draw-pad:fullscreen .draw-picture,
+.draw-pad.is-tab .draw-picture {
   position: absolute;
   inset: 0;
   margin: auto;
@@ -1128,7 +1130,8 @@
   max-height: 100%;
 }
 
-.draw-pad:fullscreen .draw-toolbar {
+.draw-pad:fullscreen .draw-toolbar,
+.draw-pad.is-tab .draw-toolbar {
   flex: none;
   margin: var(--space-3) 0 0;
   padding: var(--space-2) var(--space-3);
@@ -1136,7 +1139,8 @@
   background: var(--forest-tint);
 }
 
-.draw-pad:fullscreen .draw-keys {
+.draw-pad:fullscreen .draw-keys,
+.draw-pad.is-tab .draw-keys {
   flex: none;
   height: 26px;
   margin-top: var(--space-2);
@@ -1148,4 +1152,66 @@
 
 .draw-toolbar {
   margin-top: var(--space-3);
+}
+
+/* The drawing tab (/admin/annotate): the pad fills the whole tab. */
+.annotate-page {
+  padding: var(--space-5) var(--space-4);
+}
+
+.annotate-waiting {
+  max-width: 40rem;
+}
+
+body.annotate-live {
+  margin: 0;
+  overflow: hidden;
+  background: var(--forest-deep);
+}
+
+body.annotate-live .annotate-page {
+  padding: 0;
+}
+
+.draw-pad.is-tab {
+  height: 100vh;
+}
+
+.draw-tabbar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+.draw-status {
+  margin: 0;
+  color: var(--cream);
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 700;
+}
+
+.draw-tab-row {
+  align-items: center;
+}
+
+.draw-tab-note {
+  flex-basis: 100%;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* On the dark drawing tab, the Stop button is cream so it stands out. */
+.draw-tabbar .button {
+  background: var(--cream);
+  border-color: var(--cream);
+  color: var(--forest-deep);
+}
+
+.draw-tabbar .button:hover {
+  background: var(--paper);
 }

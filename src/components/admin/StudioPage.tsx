@@ -478,7 +478,22 @@ function Recorder({ name, canShare, standards }: { name: string; canShare: boole
           )}
         </div>
         {phase.kind === 'idle' && <p class="caption">{t.beepNote}</p>}
-        {board && <DrawingBoard picture={board.picture} layer={board.layer} />}
+        {board && (
+          <DrawingBoard
+            picture={board.picture}
+            layer={board.layer}
+            onStop={stop}
+            status={
+              phase.kind === 'countdown'
+                ? `${t.getReady}: ${phase.count}`
+                : phase.kind === 'recording'
+                  ? phase.paused
+                    ? t.paused(formatDuration(elapsed))
+                    : t.recording(formatDuration(elapsed))
+                  : ''
+            }
+          />
+        )}
 
         <h3>{t.takesHeading}</h3>
         <p class="caption">{t.keepNote}</p>
