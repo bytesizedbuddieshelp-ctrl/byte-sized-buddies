@@ -12,6 +12,7 @@ import { imageFilesIn, MAX_SLIDE_IMAGES, parseDeckText, renameDeckImages, slideI
 import { matchPictures, safeFileName } from '../../lib/pictureNames';
 import { FILE_NAME, FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
 import { bucketForSlot, extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, PRIVATE_BUCKET, PRIVATE_SLOTS, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
+import { MAX_PDF_PAGES, pdfToPictures } from '../../lib/pdfPages';
 import { filesRecord, privateFileUrl, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
 
 const t = a.lessonEdit;
@@ -211,7 +212,7 @@ function PhotosPanel({ slide, pictures, onChange, onUpload }: { slide: Slide; pi
               class="field-control"
               type="file"
               multiple
-              accept=".png,.jpg,.jpeg,.webp,.svg"
+              accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,application/pdf"
               aria-describedby="photo-upload-help"
               onChange={(e) => {
                 const files = Array.from(e.currentTarget.files ?? []);
@@ -251,6 +252,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
   const [imageRemove, setImageRemove] = useState<string[]>([]);
   const [extraRows, setExtraRows] = useState<ExtraRow[]>([]);
   const [fileProblems, setFileProblems] = useState<Record<string, string>>({});
+  const [pdfNote, setPdfNote] = useState('');
   const [problems, setProblems] = useState<FormProblem[]>([]);
   const [focusSignal, setFocusSignal] = useState(0);
   const [ok, setOk] = useState('');
@@ -358,12 +360,39 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
     return added;
   }
 
-  function chooseImages(list: FileList | null) {
-    const files = Array.from(list ?? []);
+  // Swaps each PDF for a picture of every page (up to MAX_PDF_PAGES), so a PDF can go where a photo or svg goes.
+  async function picturesFrom(list: File[]): Promise<{ files: File[]; problems: Record<string, string> }> {
+    const files: File[] = [];
+    const problems: Record<string, string> = {};
+    const notes: string[] = [];
+    for (const file of list) {
+      if (!/\.pdf$/i.test(file.name)) {
+        files.push(file);
+        continue;
+      }
+      setPdfNote(t.pdfWorking(file.name));
+      try {
+        const info = await inspectFile(file);
+        if (info.problem) throw new Error(info.problem);
+        const pages = await pdfToPictures(file);
+        files.push(...pages.files);
+        notes.push(pages.skipped > 0 ? t.pdfSkipped(file.name, pages.files.length, pages.skipped, MAX_PDF_PAGES) : t.pdfDone(file.name, pages.files.length));
+      } catch (error) {
+        problems[`image:${file.name}`] = error instanceof Error ? error.message : t.pdfFailed(file.name);
+      }
+    }
+    setPdfNote(notes.join(' '));
+    return { files, problems };
+  }
+
+  async function chooseImages(list: FileList | null) {
+    const chosen = Array.from(list ?? []);
     // Clear the picker, so choosing the same picture again still counts.
     const picker = document.getElementById('images') as HTMLInputElement | null;
     if (picker) picker.value = '';
-    void addPictures(files);
+    const { files, problems } = await picturesFrom(chosen);
+    await addPictures(files);
+    setFileProblems((old) => ({ ...old, ...problems }));
   }
 
   async function chooseExtra(id: number, file: File | undefined) {
@@ -677,10 +706,12 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
                   onChange={(photos) => changeSlides((list) => list.map((s, j) => (j === Math.min(chosen, list.length - 1) ? withPhotos(s, photos) : s)))}
                   onUpload={async (files) => {
                     const room = MAX_SLIDE_IMAGES - slideImages(current).length;
-                    // These go straight onto this slide, so no name matching here.
-                    const added = await addPictures(files.slice(0, Math.max(0, room)), false);
                     const index = Math.min(chosen, slides.length - 1);
-                    changeSlides((list) => list.map((s, j) => (j === index ? withPhotos(s, [...slideImages(s), ...added.map((file) => ({ file, alt: '' }))].slice(0, MAX_SLIDE_IMAGES)) : s)));
+                    const { files: pictures, problems } = await picturesFrom(files);
+                    // Every picture is saved with the lesson. The first few fill this slide; the rest wait in the picture list.
+                    const added = await addPictures(pictures, false);
+                    setFileProblems((old) => ({ ...old, ...problems }));
+                    changeSlides((list) => list.map((s, j) => (j === index ? withPhotos(s, [...slideImages(s), ...added.slice(0, Math.max(0, room)).map((file) => ({ file, alt: '' }))].slice(0, MAX_SLIDE_IMAGES)) : s)));
                   }}
                 />
               </div>
@@ -763,7 +794,8 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
               ))}
             </ul>
           )}
-          <input id="images" class="field-control" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" onChange={(e) => { const files = e.currentTarget.files; chooseImages(files); }} />
+          <input id="images" class="field-control" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg,.pdf,application/pdf" onChange={(e) => { const files = e.currentTarget.files; void chooseImages(files); }} />
+          <p class="caption" role="status">{pdfNote}</p>
           {newImages.length > 0 && <p class="caption">{t.chosen}: {newImages.map((f) => f.name).join(', ')}</p>}
           {(slidePictures.length > 0 || unusedPictures.length > 0) && (
             <div class="picture-match">
