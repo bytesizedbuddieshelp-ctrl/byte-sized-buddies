@@ -1,0 +1,9 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import SitePage from '../../components/admin/SitePage';
+import { adminCopy } from '../../content/adminCopy';
+---
+
+<AdminLayout title={adminCopy.siteEdit.title}>
+  <SitePage client:only="preact" />
+</AdminLayout>

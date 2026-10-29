@@ -422,3 +422,33 @@ h2 {
 .section-tight {
   padding-top: var(--space-5);
 }
+
+/* Landing page blocks the owner builds in /admin/site -------------------- */
+/* Words with no picture beside them use the whole width. */
+@media (min-width: 960px) {
+  .split.split--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* A picture the owner uploaded. Same rounded, flat look as the drawings. */
+.home-photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.ill-frame--photo {
+  max-width: 720px;
+}
+
+.home-figure {
+  margin: 0;
+}
+
+.home-figure .caption {
+  margin-top: var(--space-3);
+  text-align: center;
+}

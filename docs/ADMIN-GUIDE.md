@@ -6,6 +6,7 @@ This is the week of a Byte-Sized Buddies lesson, step by step. Everything happen
 
 - **Dashboard, This week's routine** lists the steps below as boxes to tick. The boxes clear every Monday and are kept on that computer only.
 - **Visit log** (left menu): after each visit, write the date, the place, the lesson, how many learners came, what went well, and what to change. Write numbers and notes only. Never write the names or details of residents. **Download as a spreadsheet** gives you a CSV file. The log is private and sits in the database's `settings` table.
+- **Landing page** (Admin, Landing page) is the home page as blocks. Click any words to type over them. Use **Move up**, **Move down**, or drag a block by **Drag**. **Options** changes a block's pictures, buttons, and lists. **Add a block** at the bottom adds text, pictures, cards, and more. **Save and publish** puts it on the live site at once. **Undo** steps back, and **Go back to the original page** removes all your changes. If the saved page can't be read, visitors see the original page.
 - **Lessons** shows **Ready to teach?** under each lesson, listing anything still missing (summary, goals, slides, guide, handout, worksheet). **Make a copy** makes a draft copy of a lesson with its own copy of every file, so you can reuse a lesson for a new week.
 
 ## Once a week, a few days before the visit

@@ -6,7 +6,7 @@ import { Icon } from '../forms/Icon';
 import { adminCopy as a } from '../../content/adminCopy';
 import type { IconName } from '../../lib/icons';
 
-export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons' | 'visits' | 'present' | 'remote' | 'studio';
+export type AdminPage = 'dashboard' | 'tickets' | 'inbox' | 'lessons' | 'visits' | 'site' | 'present' | 'remote' | 'studio';
 
 const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[] = [
   { id: 'dashboard', href: '/admin/dashboard', label: a.nav.dashboard, icon: 'home' },
@@ -14,6 +14,7 @@ const navItems: { id: AdminPage; href: string; label: string; icon: IconName }[]
   { id: 'inbox', href: '/admin/inbox', label: a.nav.inbox, icon: 'mail' },
   { id: 'lessons', href: '/admin/lessons', label: a.nav.lessons, icon: 'book' },
   { id: 'visits', href: '/admin/visits', label: a.nav.visits, icon: 'pen' },
+  { id: 'site', href: '/admin/site', label: a.nav.site, icon: 'screen' },
   { id: 'present', href: '/admin/present', label: a.nav.present, icon: 'play' },
   { id: 'remote', href: '/admin/remote', label: a.nav.remote, icon: 'phone' },
   { id: 'studio', href: '/admin/studio', label: a.nav.studio, icon: 'video' },

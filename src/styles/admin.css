@@ -1676,3 +1676,186 @@ body.annotate-live .annotate-page {
 .ready-line svg {
   flex: none;
 }
+
+/* Landing page editor (/admin/site) ---------------------------------------- */
+.site-editor {
+  max-width: 1200px;
+}
+
+.edit-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  background: var(--cream);
+}
+
+/* The page being edited sits in a paper-colored frame so it reads as "the page". */
+.page-canvas {
+  margin-top: var(--space-4);
+  padding-bottom: var(--space-6);
+  border: 3px solid var(--rule);
+  border-radius: var(--radius-lg);
+  background: var(--cream);
+  overflow: hidden;
+}
+
+.edit-block {
+  position: relative;
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+}
+
+.edit-block + .edit-block {
+  border-top: 2px dashed var(--rule);
+}
+
+.edit-block.is-selected {
+  outline-color: var(--forest);
+}
+
+/* A hidden block keeps full-strength text (so it stays readable). A tint and a dashed edge mark it. */
+.edit-block.is-hidden .edit-body {
+  background: var(--forest-tint);
+  border-left: 8px dashed var(--forest);
+}
+
+.edit-block.is-dragging {
+  opacity: 0.5;
+}
+
+.edit-block.drop-before::before,
+.edit-block.drop-after::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: var(--sunshine);
+  z-index: 5;
+}
+
+.edit-block.drop-before::before {
+  top: -4px;
+}
+
+.edit-block.drop-after::after {
+  bottom: -4px;
+}
+
+.edit-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--forest-tint);
+  border-bottom: 2px solid var(--rule);
+}
+
+.edit-bar .button {
+  min-width: 0;
+  min-height: 48px;
+  padding-inline: var(--space-3);
+}
+
+.edit-bar-title {
+  flex: 1 1 160px;
+  font-weight: 700;
+  color: var(--forest-deep);
+}
+
+.edit-handle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  padding-inline: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--forest);
+  color: #fff;
+  font-weight: 700;
+  cursor: grab;
+  user-select: none;
+}
+
+/* Text you can type over. A box appears when you point at it or tab to it. */
+.editable {
+  cursor: text;
+  border-radius: var(--radius-sm);
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+  min-height: 1.2em;
+}
+
+.editable:hover {
+  outline-color: var(--rule);
+}
+
+.editable:focus {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}
+
+.editable:empty::before {
+  content: attr(data-placeholder);
+  color: var(--ink-muted);
+}
+
+.edit-options {
+  padding: var(--space-4);
+  border-top: 3px solid var(--forest);
+  background: var(--paper);
+}
+
+.edit-options-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.edit-options-head h3 {
+  margin: 0;
+}
+
+.options-group {
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4);
+  border: 2px solid var(--rule);
+  border-radius: var(--radius-md);
+}
+
+.options-group legend {
+  padding-inline: var(--space-2);
+  font-weight: 700;
+}
+
+.edit-add {
+  margin-top: var(--space-6);
+}
+
+.add-list {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  padding: 0;
+}
+
+.add-list .button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+}
+
+.add-list small {
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--ink-muted);
+}
