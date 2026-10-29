@@ -120,7 +120,7 @@ export const copy = {
     },
     free: {
       heading: 'Free for everyone',
-      text: 'Want to teach these lessons in your community? Everything here is free to download, print, and adapt. Read the teacher guide, bring a friend, and tell us how it went.',
+      text: 'Want to teach these lessons in your community? Everything here is free to download, print, and adapt. Go through the slides, bring a friend, and tell us how it went.',
       button: 'Teach it yourself',
     },
     promise: {
@@ -324,10 +324,10 @@ export const copy = {
   lessons: {
     title: 'Free lessons',
     description: 'Free technology lessons for older adults. Download, print, adapt, and share.',
-    intro: 'Every lesson comes with a teacher guide, a slideshow, a worksheet, and a large-print handout. All of it is free to download, print, and share.',
+    intro: 'Every lesson comes with a slideshow, a worksheet, and a large-print handout. All of it is free to download, print, and share.',
     emptyTitle: 'Our first lessons are on the way',
     emptyText:
-      'Each lesson will come with a teacher guide, a slideshow, a worksheet, and a large-print handout. All of it will be free to download, print, and share.',
+      'Each lesson will come with a slideshow, a worksheet, and a large-print handout. All of it will be free to download, print, and share.',
     teachButton: 'Teach it yourself',
     loading: 'Loading lessons',
     loadError: "We couldn't load the lessons. Please try again in a few minutes.",
@@ -389,8 +389,6 @@ export const copy = {
     extrasIntro: 'For when there is time left over, or for learners who want more. Each one is a printable page.',
     slidesHeading: 'Preview the slides',
     videoHeading: 'Video',
-    guideHeading: 'Teacher guide',
-    noGuide: 'The teacher guide for this lesson is not ready yet.',
     license: 'License',
     licenseLink: 'How you may use this lesson',
     tell: 'Tell us how it went',
@@ -416,7 +414,7 @@ export const copy = {
     shareFailed: 'Your browser could not copy it. Copy the address from the top of the window.',
     allFiles: 'Download everything (one zip file)',
     allFilesWorking: 'Collecting the files',
-    allFilesHelp: 'One zip file with the guide, worksheet, handout, pictures, and a kit.json so another teacher can import it.',
+    allFilesHelp: 'One zip file with the slides, worksheet, handout, pictures, and a kit.json so another teacher can import it.',
     allFilesFailed: 'We could not collect the files. Please try each download on its own.',
     moreHeading: 'Keep going',
     previousLesson: 'Previous lesson',
@@ -452,7 +450,7 @@ export const copy = {
         items: [
           'Confirm the day, time, and room with your staff contact.',
           'Ask how many learners are coming, and which devices they use.',
-          'Read the teacher guide for this lesson all the way through.',
+          'Go through the slides and handout for this lesson all the way.',
           'Try every step yourself on a practice account.',
           'Ask the facility about photo and video consent. Bring no camera if you do not have written consent.',
         ],
@@ -548,7 +546,7 @@ export const copy = {
     description: 'Free, ready-to-use guidance for teaching technology to older adults in your own community.',
     lessonsButton: 'See the free lessons',
     tellButton: 'Tell us how it went',
-    card: { heading: 'Get the free lessons', text: 'Every lesson has slides, a teacher guide, a worksheet, and a large-print handout.', button: 'See the free lessons', href: '/lessons' },
+    card: { heading: 'Get the free lessons', text: 'Every lesson has slides, a worksheet, and a large-print handout.', button: 'See the free lessons', href: '/lessons' },
   },
   privacy: {
     title: 'Privacy',

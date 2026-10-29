@@ -3,6 +3,14 @@ import { restGet } from './publicApi';
 import type { SlideDeck } from './slides';
 
 export const BUCKET = 'lesson-files';
+/** Owner-only files (the teacher guide PDF). Nothing here has a public web address. */
+export const PRIVATE_BUCKET = 'lesson-private';
+export const PRIVATE_SLOTS = ['teacher_guide_pdf'] as const;
+
+/** Which bucket a file slot lives in. */
+export function bucketForSlot(slot: string | undefined): string {
+  return (PRIVATE_SLOTS as readonly string[]).includes(slot ?? '') ? PRIVATE_BUCKET : BUCKET;
+}
 export const STORAGE_LIMIT_BYTES = 1024 * 1024 * 1024; // the free plan holds about 1 GB
 
 export interface StoredFile {
@@ -42,7 +50,8 @@ export interface Lesson {
   duration_minutes: number;
   objectives: string[];
   slides: SlideDeck;
-  teacher_guide_md: string | null;
+  /** Owner only. Missing when a stranger loads the lesson. */
+  teacher_guide_md?: string | null;
   video_script_md: string | null;
   files: LessonFiles;
   video_ids: VideoSegment[];
@@ -84,20 +93,20 @@ export function slugify(title: string): string {
 }
 
 export interface Download {
-  key: 'teacher_guide_pdf' | 'worksheet' | 'handout' | 'answer_key';
+  key: 'worksheet' | 'handout' | 'answer_key';
   label: string;
   file: StoredFile;
 }
 
 const downloadLabels: Record<Download['key'], string> = {
-  teacher_guide_pdf: 'Teacher guide',
   worksheet: 'Worksheet',
   handout: 'Handout',
   answer_key: 'Answer key',
 };
 
 export function downloadsFor(files: LessonFiles): Download[] {
-  return (['teacher_guide_pdf', 'worksheet', 'handout', 'answer_key'] as const).flatMap((key) =>
+  // The teacher guide PDF is private (owner only), so it is never a public download.
+  return (['worksheet', 'handout', 'answer_key'] as const).flatMap((key) =>
     files[key] ? [{ key, label: downloadLabels[key], file: files[key]! }] : [],
   );
 }
@@ -129,6 +138,10 @@ export type LessonSummary = Pick<
 
 const summaryColumns = 'id,slug,week_number,title,summary,topic,devices,level,duration_minutes,objectives,published_at';
 
+// Every column a stranger may read. teacher_guide_md is left out: the database refuses it (supabase/schema.sql).
+const publicColumns =
+  'id,slug,week_number,title,summary,topic,devices,level,duration_minutes,objectives,slides,video_script_md,files,video_ids,license,status,published_at,created_at,updated_at';
+
 /** Every published lesson, in light form. Much smaller than fetchPublishedLessons, so lists load fast. */
 export async function fetchLessonIndex(limit = 200): Promise<LessonSummary[]> {
   const rows = await restGet<LessonSummary[]>(`lessons?select=${summaryColumns}&status=eq.published&order=week_number.asc&limit=${limit}`);
@@ -137,12 +150,12 @@ export async function fetchLessonIndex(limit = 200): Promise<LessonSummary[]> {
 
 /** Published lessons, as a stranger sees them. */
 export async function fetchPublishedLessons(limit = 200): Promise<Lesson[]> {
-  const rows = await restGet<Lesson[]>(`lessons?select=*&status=eq.published&order=week_number.asc&limit=${limit}`);
+  const rows = await restGet<Lesson[]>(`lessons?select=${publicColumns}&status=eq.published&order=week_number.asc&limit=${limit}`);
   return sortByWeek(rows);
 }
 
 export async function fetchPublishedLesson(slug: string): Promise<Lesson | null> {
-  const rows = await restGet<Lesson[]>(`lessons?select=*&slug=eq.${encodeURIComponent(slug)}&status=eq.published&limit=1`);
+  const rows = await restGet<Lesson[]>(`lessons?select=${publicColumns}&slug=eq.${encodeURIComponent(slug)}&status=eq.published&limit=1`);
   return rows[0] ?? null;
 }
 

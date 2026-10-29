@@ -47,6 +47,23 @@ await check('Signed-out visitor sees only published lessons', async () => {
   return r.json.every((row) => row.status === 'published') ? null : 'a draft lesson was visible';
 });
 
+await check('Signed-out visitor cannot read teacher guides', async () => refused(await call('GET', '/rest/v1/lessons?select=teacher_guide_md&limit=1')));
+
+await check('Signed-out visitor cannot open teacher guide PDFs', async () => {
+  const r = await call('GET', '/rest/v1/lessons?select=slug,files&limit=50');
+  if (r.status !== 200) return `status ${r.status}`;
+  for (const row of r.json) {
+    const path = row.files?.teacher_guide_pdf?.path;
+    if (!path) continue;
+    const encoded = path.split('/').map(encodeURIComponent).join('/');
+    for (const bucket of ['lesson-files', 'lesson-private']) {
+      const res = await fetch(`${url}/storage/v1/object/public/${bucket}/${encoded}`);
+      if (res.ok) return `the guide for ${row.slug} opens from ${bucket}. Upload it again on the lesson's Edit page to move it`;
+    }
+  }
+  return null;
+});
+
 await check('Signed-out visitor sees only public settings', async () => {
   const r = await call('GET', '/rest/v1/settings?select=key,is_public');
   if (r.status !== 200) return `status ${r.status}`;

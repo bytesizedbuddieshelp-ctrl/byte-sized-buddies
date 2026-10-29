@@ -123,7 +123,7 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
       const extras: ExtraFile[] = [];
       for (const [i, item] of uploads.entries()) {
         setBusy(t.uploading(i + 1, uploads.length));
-        const stored = await uploadLessonFile(supabase, lesson.slug, byName.get(item.name)!);
+        const stored = await uploadLessonFile(supabase, lesson.slug, byName.get(item.name)!, item.slot);
         if (item.slot) slots[item.slot] = stored;
         else if (item.extraTitle !== undefined) extras.push({ name: item.name, title: item.extraTitle, ...stored });
         else images.push({ name: item.name, ...stored });
@@ -133,7 +133,7 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
       if (kit.existing) {
         const { error } = await supabase.from('lessons').update(row).eq('id', kit.existing.id);
         if (error) throw error;
-        await removeStaleFiles(supabase, lesson.slug, pathsIn(files));
+        await removeStaleFiles(supabase, lesson.slug, files);
       } else {
         const { error } = await supabase.from('lessons').insert(row);
         if (error) throw error;
@@ -173,7 +173,7 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
       return say(t.saveError, true);
     }
     // The lesson is gone either way. Clean up its files too.
-    await removeStaleFiles(supabase, row.slug, []).catch(() => undefined);
+    await removeStaleFiles(supabase, row.slug, {}).catch(() => undefined);
     await removeStoragePaths(supabase, pathsIn(row.files ?? {})).catch(() => undefined);
     setBusy('');
     say(t.deleted(row.title));
@@ -186,7 +186,7 @@ function Lessons({ supabase }: { supabase: SupabaseClient }) {
     try {
       const { data, error } = await supabase.from('lessons').select('*').eq('id', row.id).single();
       if (error || !data) throw error;
-      const zip = await buildKitZip(data as Lesson);
+      const zip = await buildKitZip(data as Lesson, supabase);
       saveBlob(`${row.slug}-kit.zip`, zip as BlobPart, 'application/zip');
       say(t.exportDone);
     } catch {

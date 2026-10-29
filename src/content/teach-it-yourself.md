@@ -2,7 +2,7 @@
 title: Teach it yourself
 ---
 
-Want to teach these lessons in your community? Everything here is free to download, print, and adapt. Read the teacher guide, bring a friend, and tell us how it went. We'd love to hear from you.
+Want to teach these lessons in your community? Everything here is free to download, print, and adapt. Go through the slides, bring a friend, and tell us how it went. We'd love to hear from you.
 
 ## A 45-minute lesson
 

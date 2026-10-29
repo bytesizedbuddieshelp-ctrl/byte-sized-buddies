@@ -243,9 +243,10 @@ Use the copy in `brand/copy-bank.md`. Sections, in order:
 ### 4.5 Lesson library (`/lessons`) and lesson page (`/lesson?slug=`)
 
 - Library: filter chips (All, iPhone, Android, Beginner, Intermediate; each with text, not color only), search box (title and topic), cards sorted by week number. Each card: week badge (sunshine pill), title, summary, device badges, duration. Only `status = 'published'` lessons are visible.
-- Lesson page sections: title and summary; "What you'll be able to do" (objectives); **Downloads** (Teacher guide, Slides, Worksheet, Handout, Answer key if present): big labeled buttons with file type and size; **Preview the slides** (embedded viewer, see 7.1); **Video** (if present, the playlist player, see 7.4); **Teacher guide** rendered inline (sanitized markdown); license line; "Tell us how it went" link to `/for-senior-homes#contact`.
+- Lesson page sections: title and summary; "What you'll be able to do" (objectives); **Downloads** (Slides, Worksheet, Handout, Answer key if present): big labeled buttons with file type and size; **Preview the slides** (embedded viewer, see 7.1); **Video** (if present, the playlist player, see 7.4); license line; "Tell us how it went" link to `/for-senior-homes#contact`.
 - "Download slides as PDF" = the browser's print dialog using a print stylesheet that puts one slide per landscape page (16:9), black text on white, no UI chrome.
 - Missing lesson: friendly not-found state.
+- **Teacher guides are owner only** (decided 2026-10-28): never shown on public pages or in the public zip. Strangers cannot read `teacher_guide_md` (column grant in `schema.sql`), and guide PDFs live in the private `lesson-private` bucket.
 - Lessons are CC BY-SA 4.0 by default (editable per lesson); show it on every lesson page.
 
 ### 4.6 Teach it yourself (`/teach`) and static content pages

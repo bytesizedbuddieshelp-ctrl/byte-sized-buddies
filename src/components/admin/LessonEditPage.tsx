@@ -11,8 +11,8 @@ import { parseYouTubeId } from '../../lib/youtube';
 import { imageFilesIn, MAX_SLIDE_IMAGES, parseDeckText, renameDeckImages, slideImages, type Layout, type Slide, type SlideImage } from '../../lib/slides';
 import { matchPictures, safeFileName } from '../../lib/pictureNames';
 import { FILE_NAME, FILE_SLOTS, inspectFile, SLUG, type FileSlot } from '../../lib/kit';
-import { extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
-import { filesRecord, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
+import { bucketForSlot, extrasFor, fileUrl, formatBytes, imageUrlFor, lessonFolder, PRIVATE_BUCKET, PRIVATE_SLOTS, slugify, type ExtraFile, type Lesson, type LessonFiles, type StoredFile } from '../../lib/lessons';
+import { filesRecord, privateFileUrl, removeStoragePaths, uploadLessonFile } from '../../lib/lessonAdmin';
 
 const t = a.lessonEdit;
 
@@ -258,6 +258,8 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
   const [busy, setBusy] = useState('');
   const [chosen, setChosen] = useState(0);
   const [addLayout, setAddLayout] = useState<Layout>('idea');
+  // Private files (the teacher guide PDF) have no public address, so each gets a signed link that lasts an hour.
+  const [privateLinks, setPrivateLinks] = useState<Partial<Record<FileSlot, string>>>({});
 
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -276,6 +278,13 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
         setState('ready');
       });
   }, []);
+
+  useEffect(() => {
+    const files = lesson?.files ?? {};
+    Promise.all(
+      PRIVATE_SLOTS.map(async (slot) => [slot, files[slot] ? await privateFileUrl(supabase, files[slot]!.path).catch(() => '') : ''] as const),
+    ).then((pairs) => setPrivateLinks(Object.fromEntries(pairs.filter(([, url]) => url))));
+  }, [lesson]);
 
   const deck = useMemo(() => parseDeckText(form.deckText), [form.deckText]);
   const guideHtml = useMemo(() => renderMarkdown(form.guide, { allowImages: true, demoteHeadings: true }), [form.guide]);
@@ -437,7 +446,7 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
       const uploadedImages: { name: string; path: string; bytes: number }[] = [];
       for (const [i, item] of uploads.entries()) {
         setBusy(t.uploading(i + 1, total));
-        const stored = await uploadLessonFile(supabase, form.slug, item.file);
+        const stored = await uploadLessonFile(supabase, form.slug, item.file, item.slot);
         if (item.slot) slots[item.slot] = stored;
         else uploadedImages.push({ name: item.file.name, ...stored });
       }
@@ -710,13 +719,14 @@ function Editor({ supabase }: { supabase: SupabaseClient }) {
         <div class="files-grid">
         {FILE_SLOTS.map((slot) => {
           const old = lesson?.files[slot];
+          const oldUrl = old && (bucketForSlot(slot) === PRIVATE_BUCKET ? privateLinks[slot] : fileUrl(old.path));
           return (
             <div class="field" key={slot}>
               <label class="field-label" for={`slot-${slot}`}>{t.slots[slot]}</label>
               <p class="field-helper">
                 {old ? (
                   <span>
-                    {t.currentFile}: <a href={fileUrl(old.path)} target="_blank" rel="noopener noreferrer">{old.path.split('/').pop()}</a> ({formatBytes(old.bytes)})
+                    {t.currentFile}: {oldUrl ? <a href={oldUrl} target="_blank" rel="noopener noreferrer">{old.path.split('/').pop()}</a> : old.path.split('/').pop()} ({formatBytes(old.bytes)})
                   </span>
                 ) : (
                   t.noFile

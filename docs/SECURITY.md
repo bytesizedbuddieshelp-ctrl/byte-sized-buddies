@@ -11,7 +11,7 @@ The website is only files. All the protection lives in the database. Every table
 
 | A signed-out visitor can | A signed-out visitor cannot |
 |---|---|
-| Read **published** lessons | Read draft lessons |
+| Read **published** lessons | Read draft lessons, or any teacher guide (text or PDF) |
 | Read **public** settings (site address, opener and closer videos) | Read private settings |
 | Send a question (`submit_ticket`) | Read, list, or change any ticket |
 | Send a visit request (`submit_contact_request`) | Read or change any visit request |
@@ -56,6 +56,7 @@ If the **sign-ups** line fails, the script created a stray user. Delete it in Su
 | YouTube videos | `src/lib/youtube.ts` accepts only an 11-character ID and builds a `youtube-nocookie.com` address. The playlist player (`src/components/video/PlaylistPlayer.tsx`) skips any ID that doesn't pass, and loads nothing from YouTube until the visitor presses Play |
 | Studio recordings | Recordings stay in the owner's browser until downloaded. They are never uploaded to Supabase. Only YouTube IDs are saved (`videos`, `lessons.video_ids`, `tickets.answer_video_youtube_id`, and the public `opener_video` and `closer_video` settings) |
 | Private tokens | Made in the browser with `crypto.getRandomValues` (64 hex characters). The answer page is `noindex` |
+| Teacher guides are owner only | `supabase/schema.sql` lets strangers read every lesson column except `teacher_guide_md`, and guide PDFs live in the private `lesson-private` bucket. The owner opens them with a link that lasts one hour. Checked by `npm run check:rls` |
 | Drafts stay private (lessons) | The database only lets strangers read lessons with `status = 'published'`. Unpublish a lesson and it disappears for everyone but you |
 | Uploaded files | Only the owner may upload. `src/lib/kit.ts` checks the first bytes of every file, so a renamed file is refused. SVG pictures with scripts, event handlers, or links to other websites are refused. The bucket also limits file types and size (10 MB) |
 | Pictures in teacher guides | `src/lib/markdown.ts` keeps a picture only if it comes from our own `lesson-files` storage. Other websites cannot load anything through a guide |

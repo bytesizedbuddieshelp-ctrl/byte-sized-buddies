@@ -62,7 +62,7 @@ Our [Stay safe online](/stay-safe) page has three calm steps: hang up, call the 
 
 ### Can I teach these lessons myself?
 
-Yes. Every lesson has a teacher guide, a slideshow, a worksheet, and a handout. Start with [Teach it yourself](/teach), then pick a lesson from the [library](/lessons). A [visit-day checklist](/visit-checklist) is there to print.
+Yes. Every lesson has a slideshow, a worksheet, and a handout. Start with [Teach it yourself](/teach), then pick a lesson from the [library](/lessons). A [visit-day checklist](/visit-checklist) is there to print.
 
 ### Can I change the lessons?
 

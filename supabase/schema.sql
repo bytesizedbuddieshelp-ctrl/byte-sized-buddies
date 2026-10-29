@@ -190,7 +190,12 @@ revoke all on function public.bridge_ok(text) from public, anon, authenticated;
 -- Supabase gives its API roles access to new tables by default, so we take it back.
 -- ---------------------------------------------------------------------------
 revoke all on all tables in schema public from anon;
-grant select on public.lessons, public.settings to anon;
+grant select on public.settings to anon;
+-- Strangers may read every lesson column EXCEPT teacher_guide_md (the guide is for the owner only).
+-- If you add a lesson column that strangers should see, add it to this list too.
+grant select (id, slug, week_number, title, summary, topic, devices, level, duration_minutes, objectives,
+              slides, video_script_md, files, video_ids, license, status, published_at, created_at, updated_at)
+  on public.lessons to anon;
 revoke all on public.owners, public.bridge_secret from authenticated;
 
 -- ---------------------------------------------------------------------------
@@ -468,6 +473,28 @@ create policy "lesson-files owner delete" on storage.objects for delete to authe
 drop policy if exists "lesson-files owner list" on storage.objects;
 create policy "lesson-files owner list" on storage.objects for select to authenticated
   using (bucket_id = 'lesson-files' and public.is_owner());
+
+-- A private bucket for teacher guide PDFs. Nobody can open a file here by its web address;
+-- only the signed-in owner can read, add, change, or delete files.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('lesson-private', 'lesson-private', false, 10485760, array['application/pdf'])
+on conflict (id) do update
+   set public = excluded.public, file_size_limit = excluded.file_size_limit,
+       allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "lesson-private owner read" on storage.objects;
+create policy "lesson-private owner read" on storage.objects for select to authenticated
+  using (bucket_id = 'lesson-private' and public.is_owner());
+drop policy if exists "lesson-private owner insert" on storage.objects;
+create policy "lesson-private owner insert" on storage.objects for insert to authenticated
+  with check (bucket_id = 'lesson-private' and public.is_owner());
+drop policy if exists "lesson-private owner update" on storage.objects;
+create policy "lesson-private owner update" on storage.objects for update to authenticated
+  using (bucket_id = 'lesson-private' and public.is_owner())
+  with check (bucket_id = 'lesson-private' and public.is_owner());
+drop policy if exists "lesson-private owner delete" on storage.objects;
+create policy "lesson-private owner delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'lesson-private' and public.is_owner());
 
 -- ---------------------------------------------------------------------------
 -- Phone remote: only the owner may use the private "remote:" channels (Phase 4).

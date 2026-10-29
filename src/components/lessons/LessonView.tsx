@@ -3,10 +3,8 @@ import { Icon } from '../forms/Icon';
 import { SlideViewer, PrintSlides, printSlides } from '../slides/SlideViewer';
 import { copy } from '../../content/copy';
 import { deviceWords, downloadsFor, extrasFor, fileUrl, formatBytes, imageUrlFor, levelWords, type Lesson } from '../../lib/lessons';
-import { renderMarkdown } from '../../lib/markdown';
 import { lessonPlan } from '../../lib/lessonFilters';
 import { PlaylistPlayer } from '../video/PlaylistPlayer';
-import ReadAloud from '../reading/ReadAloud';
 
 const t = copy.lesson;
 
@@ -35,7 +33,6 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
   // Inside the admin shell the page already has an h1, so the lesson title becomes an h2.
   const Title = embedded ? 'h2' : 'h1';
   const downloads = downloadsFor(lesson.files);
-  const guideHtml = useMemo(() => (lesson.teacher_guide_md ? renderMarkdown(lesson.teacher_guide_md, { allowImages: true, demoteHeadings: true }) : ''), [lesson.teacher_guide_md]);
   const imageUrl = (file: string) => imageUrlFor(lesson, file);
   const slides = lesson.slides?.slides ?? [];
   const videos = lesson.video_ids ?? [];
@@ -210,12 +207,6 @@ export function LessonView({ lesson, draftNote = false, embedded = false }: { le
             <PlaylistPlayer segments={videos} title={lesson.title} />
           </section>
         )}
-
-        <section aria-labelledby="guide-title">
-          <h2 id="guide-title">{t.guideHeading}</h2>
-          {guideHtml && <ReadAloud target="#guide-body" />}
-          {guideHtml ? <div id="guide-body" class="prose guide" dangerouslySetInnerHTML={{ __html: guideHtml }} /> : <p>{t.noGuide}</p>}
-        </section>
 
         <section aria-labelledby="license-title">
           <h2 id="license-title">{t.license}</h2>
